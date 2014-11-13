@@ -1,6 +1,6 @@
 {
   "name": "express-client",
-  "description": "Express framework for use in browser clients",
+  "description": "An express.js framework for browser clients",
   "version": "1.0.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
