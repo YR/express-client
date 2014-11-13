@@ -499,7 +499,7 @@ require.register('lib/router', function(module, exports, require) {
   		}
   
   		// Exit
-  		if (!lyr) {
+  		if (!lyr || res.finished) {
   			return done(err);
   		}
   
@@ -997,8 +997,8 @@ require.register('lib/request', function(module, exports, require) {
   	}
   
   	url = url
-  			? urlUtils.encode(url)
-  			: urlUtils.getCurrent();
+  		? urlUtils.encode(url)
+  		: urlUtils.getCurrent();
   
   	var path = url.split('?')
   		, qs = path[1] || '';
@@ -4361,7 +4361,7 @@ require.register('lib/application', function(module, exports, require) {
   
   /**
    * Add one or more 'fn' to middleware pipeline at optional 'path'
-   * @param {Function} fn
+   * @param {Function} fn(req, res, next)
    */
   Application.prototype.use = function (/* path, */ fn /* ...fn */) {
   	var offset = 0
