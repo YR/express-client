@@ -169,6 +169,7 @@ app.use(function (req, res, next) {
   res.on('finish', cleanUp);
   next();
 });
+```
 
 #### abort()
 Abort response. Emits a `close` event.
