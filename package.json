@@ -1,7 +1,7 @@
 {
   "name": "express-client",
   "description": "An express.js framework for browser clients",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "component-emitter": "1.1.3",
