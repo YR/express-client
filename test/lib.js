@@ -499,7 +499,7 @@ require.register('lib/router', function(module, exports, require) {
   		}
   
   		// Exit
-  		if (!lyr || res.finished) {
+  		if (!lyr) {
   			return done(err);
   		}
   
@@ -2136,6 +2136,7 @@ require.register('lib/history', function(module, exports, require) {
   	this.onPopstate = bind(this.onPopstate, this);
   	this.navigateTo = bind(this.navigateTo, this);
   	this.redirectTo = bind(this.redirectTo, this);
+  	this.getCurrentContext = bind(this.getCurrentContext, this);
   }
   
   /**
@@ -2149,7 +2150,7 @@ require.register('lib/history', function(module, exports, require) {
   
   	if (!this.running && ctx) {
   		// Test History API availability
-  		if (!!(window.history && window.history.pushState)) {
+  		if (hasHistory()) {
   			var self = this;
   			// Delay to prevent premature trigger when navigating back from nothing
   			setTimeout(function () {
@@ -2322,6 +2323,26 @@ require.register('lib/history', function(module, exports, require) {
   	// TODO: what about title?
   	this.navigateTo(path);
   };
+  
+  /**
+   * Test for history API (Modernizr)
+   * @returns {Boolean}
+   */
+  function hasHistory () {
+  	var ua = navigator.userAgent;
+  
+  	// Stock android browser 2.2 & 2.3 & 4.0.x are buggy, ignore
+  	if ((ua.indexOf('Android 2.') !== -1
+  		|| (ua.indexOf('Android 4.0') !== -1))
+  		// Chrome identifies itself as 'Mobile Safari'
+  		&& ua.indexOf('Mobile Safari') !== -1
+  		&& ua.indexOf('Chrome') === -1) {
+  			return false;
+  	}
+  
+  	// Usual test
+  	return (window.history && 'pushState' in window.history);
+  }
   
   /**
    * Check if 'url' is from same origin
@@ -4330,6 +4351,7 @@ require.register('lib/application', function(module, exports, require) {
   	this.finalhandler = bind(this.finalhandler, this);
   	this.navigateTo = bind(this.navigateTo, this);
   	this.redirectTo = bind(this.redirectTo, this);
+  	this.getCurrentContext = bind(this.getCurrentContext, this);
   
   	// Create request/response factories
   	var app = this
