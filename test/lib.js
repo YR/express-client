@@ -264,7 +264,7 @@ require.register('lib/layer', function(module, exports, require) {
    */
   
   var matcher = require('path-to-regexp@1.0.1')
-  	, urlUtils = require('url-utils@1.2.1');
+  	, urlUtils = require('url-utils@1.2.2');
   
   module.exports = Layer;
   
@@ -373,7 +373,7 @@ require.register('lib/router', function(module, exports, require) {
   	, layer = require('lib/layer')
   	, merge = require('lodash-node/compat/objects/merge@2.4.1')
   	, objKeys = require('lodash-node/compat/objects/keys@2.4.1')
-  	, urlUtils = require('url-utils@1.2.1')
+  	, urlUtils = require('url-utils@1.2.2')
   
   	, METHODS = ['get', 'post', 'all']
   	, DEFAULTS = {
@@ -982,7 +982,7 @@ require.register('lib/request', function(module, exports, require) {
    */
   
   var qsParse = require('query-string@1.0.0').parse
-  	, urlUtils = require('url-utils@1.2.1');
+  	, urlUtils = require('url-utils@1.2.2');
   
   module.exports = Request;
   
@@ -1972,7 +1972,7 @@ require.register('lodash-node/compat/collections/map@2.4.1', function(module, ex
   module.exports = map;
   
 });
-require.register('url-utils@1.2.1', function(module, exports, require) {
+require.register('url-utils@1.2.2', function(module, exports, require) {
   var map = require('lodash-node/compat/collections/map@2.4.1')
   	, forEach = require('lodash-node/compat/collections/foreach@2.4.1')
   	, isArray = require('lodash-node/compat/objects/isarray@2.4.1')
@@ -2044,7 +2044,7 @@ require.register('url-utils@1.2.1', function(module, exports, require) {
   		url += seperator;
   		//Add queries
   		forEach(sorted, add);
-  		return url;
+  		return exports.encode(url);
   	}
   
   	return '';
@@ -2110,7 +2110,7 @@ require.register('lib/history', function(module, exports, require) {
   
   var bind = require('lodash-node/compat/functions/bind@2.4.1')
   	, debug = require('debug@2.0.0')('express:history')
-  	, urlUtils = require('url-utils@1.2.1')
+  	, urlUtils = require('url-utils@1.2.2')
   	, bootstrap = true;
   
   module.exports = History;
