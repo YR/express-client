@@ -6,7 +6,7 @@ node_modules/mocha/*
 node_modules/.bin
 node_modules/buddy
 node_modules/lodash-node
-node_modules/component-emitter
+node_modules/eventemitter3
 node_modules/debug
 node_modules/mocha-phantomjs
 node_modules/phantomjs
