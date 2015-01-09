@@ -321,13 +321,14 @@ describe('express-client', function () {
 
 	describe('History', function () {
 		describe('handle()', function () {
-			before(function (done) {
+			beforeEach(function (done) {
 			  historyApp = Application();
 				historyApp.history.running = true;
 				done();
 			});
-			after(function () {
+			afterEach(function (done) {
 				historyApp.history.destroy();
+				done();
 			});
 			it('should handle encoded urls', function () {
 				var url = '/nb/s%C3%B8k?q=Oslo';
