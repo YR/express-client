@@ -601,6 +601,25 @@ require.register('lib/router', function(module, exports, require) {
   	};
   }
 });
+require.register('lib/safeMerge', function(module, exports, require) {
+  /**
+   * Safely merge object 'b' into 'a',
+   * making sure not to overwrite existing properties in 'a'
+   *
+   * @param {Object} a
+   * @param {Object} b
+   * @returns {Object}
+   */
+  module.exports = function safeMerge (a, b) {
+  	if (a && b) {
+  		for (var key in b) {
+  			if (a[key] == null) a[key] = b[key];
+  		}
+  	}
+  
+  	return a;
+  };
+});
 require.register('eventemitter3@0.1.6', function(module, exports, require) {
   'use strict';
   
@@ -839,6 +858,7 @@ require.register('lib/response', function(module, exports, require) {
    */
   
   var emitter = require('eventemitter3@0.1.6')
+  	, merge = require('lib/safeMerge')
   	, PRIVATE_PROPS = {
   			statusCode: true,
   			finished: true,
@@ -864,7 +884,7 @@ require.register('lib/response', function(module, exports, require) {
   	this.app;
   	this.req;
   
-  	emitter(this);
+  	merge(this, emitter.prototype);
   };
   
   /**
