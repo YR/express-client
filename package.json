@@ -1,11 +1,11 @@
 {
   "name": "express-client",
   "description": "An express.js framework for browser clients",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "eventemitter3": "0.1.6",
-    "debug": "2.0.0",
+    "debug": "2.1.1",
     "lodash-compat": "3.1.0",
     "path-to-regexp": "1.0.3",
     "query-string": "1.0.0",
