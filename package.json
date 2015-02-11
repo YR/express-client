@@ -9,7 +9,7 @@
     "lodash-compat": "3.1.0",
     "path-to-regexp": "1.0.3",
     "query-string": "1.0.0",
-    "url-utils": "git+https://aa5f2bb713ef8a8323fc4a621fc2965d76c06698:x-oauth-basic@github.com/yr/url-utils.git#1.3.1"
+    "url-utils": "git+https://aa5f2bb713ef8a8323fc4a621fc2965d76c06698:x-oauth-basic@github.com/yr/url-utils.git#1.4.0"
   },
   "devDependencies": {
     "buddy": "popeindustries/buddy",
