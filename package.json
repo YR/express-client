@@ -1,15 +1,15 @@
 {
   "name": "express-client",
   "description": "An express.js framework for browser clients",
-  "version": "1.2.2",
+  "version": "1.3.1",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "eventemitter3": "0.1.6",
-    "debug": "2.1.1",
-    "lodash-compat": "3.1.0",
+    "debug": "2.1.2",
+    "lodash-compat": "3.5.0",
     "path-to-regexp": "1.0.3",
     "query-string": "1.0.0",
-    "url-utils": "git+https://aa5f2bb713ef8a8323fc4a621fc2965d76c06698:x-oauth-basic@github.com/yr/url-utils.git#1.3.1"
+    "url-utils": "git+https://aa5f2bb713ef8a8323fc4a621fc2965d76c06698:x-oauth-basic@github.com/yr/url-utils.git#1.5.0"
   },
   "devDependencies": {
     "buddy": "popeindustries/buddy",
