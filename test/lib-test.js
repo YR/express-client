@@ -346,4 +346,34 @@ describe('express-client', function () {
 			});
 		});
 	});
+	describe('Response', function () {
+		describe('cookie()', function () {
+			it('should set single cookie', function () {
+				var response = Response();
+				response.cookie('foo', 'bar', {maxAge: 1000});
+				expect(document.cookie).to.eql('foo=bar');
+			});
+			it('should set multiple cookies', function () {
+				var response = Response();
+				response.cookie('foo', 'bar', {maxAge: 1000});
+				response.cookie('boo', 'bat');
+				expect(document.cookie).to.eql('foo=bar; boo=bat');
+			});
+		});
+	});
+	describe('Request', function () {
+		describe('cookies()', function () {
+			beforeEach(function (done) {
+				var response = Response();
+				response.cookie('foo', 'bar');
+				response.cookie('boo', 'bat');
+				done();
+			});
+			it('should get cookies', function () {
+				var request = Request();
+				expect(request.cookies).to.have.property('foo', 'bar');
+				expect(request.cookies).to.have.property('boo', 'bat');
+			});
+		});
+	})
 });
