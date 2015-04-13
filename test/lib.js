@@ -695,10 +695,11 @@ require.register('lib/response', function(module, exports, require) {
   
   /**
    * Redirect to 'url'
+   * @param {Number} statusCode
    * @param {String} url
    */
-  Response.prototype.redirect = function (url) {
-  	this.app.redirectTo(url);
+  Response.prototype.redirect = function (statusCode, url) {
+  	this.app.redirectTo(url || statusCode);
   };
   
   /**
