@@ -305,7 +305,7 @@ require.register('lib/layer', function(module, exports, require) {
    */
   
   var matcher = require('path-to-regexp@1.0.3')
-  	, urlUtils = require('url-utils@1.5.0');
+  	, urlUtils = require('url-utils@1.7.1');
   
   module.exports = Layer;
   
@@ -414,7 +414,7 @@ require.register('lib/router', function(module, exports, require) {
   	, layer = require('lib/layer')
   	, merge = require('lodash-compat/object/merge@3.5.0')
   	, objKeys = require('lodash-compat/object/keys@3.5.0')
-  	, urlUtils = require('url-utils@1.5.0')
+  	, urlUtils = require('url-utils@1.7.1')
   
   	, METHODS = ['get', 'post', 'all']
   	, DEFAULTS = {
@@ -689,6 +689,10 @@ require.register('lib/response', function(module, exports, require) {
   	// Reset for first request
   	// Prevents return to unhandled pages not triggering redirect
   	this.req.bootstrap = false;
+  	// Resetting request state
+  	this.req.params = null;
+  	this.req.path = this.req.originalUrl;
+  	this.req.baseUrl = '';
   	this.finished = true;
   	this.emit('finish');
   };
@@ -1164,7 +1168,7 @@ require.register('lib/request', function(module, exports, require) {
   	, emitter = require('eventemitter3@0.1.6')
   	, merge = require('lib/safeMerge')
   	, qsParse = require('query-string@1.0.0').parse
-  	, urlUtils = require('url-utils@1.5.0');
+  	, urlUtils = require('url-utils@1.7.1');
   
   module.exports = Request;
   
@@ -2465,12 +2469,16 @@ require.register('lodash-compat/collection/map@3.5.0', function(module, exports,
   module.exports = map;
   
 });
-require.register('url-utils@1.5.0', function(module, exports, require) {
+require.register('url-utils@1.7.1', function(module, exports, require) {
   var map = require('lodash-compat/collection/map@3.5.0')
   	, forEach = require('lodash-compat/collection/forEach@3.5.0')
   	, isArray = require('lodash-compat/lang/isArray@3.5.0')
   	, keys = require('lodash-compat/object/keys@3.5.0')
-  	, isServer = require('runtime@0.1.0').isServer;
+  	, isServer = require('runtime@0.1.0').isServer
+  
+  	, RE_TEMPLATE = /\{([0-9a-zA-Z]+)\}/g
+  	, RE_URL = /([^:])(\/{2,})/g;
+  
   
   /**
    * Join url segments
@@ -2549,17 +2557,18 @@ require.register('url-utils@1.5.0', function(module, exports, require) {
   
   	return '';
   };
+  
   /**
    * Remove trailing '/' from 'url'
    * @param {String} url
    * @returns {String}
    */
   exports.sanitize = function sanitize (url) {
-  	if (url
-  		&& url != '/'
-  		&& url.charAt(url.length - 1) == '/') {
-  			return url.slice(0, -1);
+  	if (url && url != '/') {
+  		url = url.replace(RE_URL, '$1/');
+  		if (url.charAt(url.length - 1) == '/') url = url.slice(0, -1);
   	}
+  
   	return url || '';
   };
   
@@ -2599,7 +2608,25 @@ require.register('url-utils@1.5.0', function(module, exports, require) {
   	return (!isServer)
   		? exports.encode(window.location.pathname + window.location.search)
   		: '';
-  }
+  };
+  
+  /**
+   * Substitute 'data' values in 'str' template
+   * @param {String} str
+   * @param {Object} data
+   * @params {Object} options
+   * @returns {String}
+   */
+  exports.template = function template (str, data, options) {
+  	options = options || {};
+  	var str = String(str).replace(RE_TEMPLATE, function (match, prop, idx) {
+  		return (data && data[prop] != null)
+  			? data[prop]
+  			: (options.loose) ? match : '';
+  	});
+  
+  	return exports.sanitize(str);
+  };
 });
 require.register('lib/history', function(module, exports, require) {
   /**
@@ -2610,7 +2637,7 @@ require.register('lib/history', function(module, exports, require) {
   
   var bind = require('lodash-compat/function/bind@3.5.0')
   	, debug = require('debug@2.1.2')('express:history')
-  	, urlUtils = require('url-utils@1.5.0')
+  	, urlUtils = require('url-utils@1.7.1')
   	, bootstrap = true;
   
   module.exports = History;
@@ -5351,6 +5378,7 @@ require.register('lib/application', function(module, exports, require) {
   	this.navigateTo = bind(this.navigateTo, this);
   	this.redirectTo = bind(this.redirectTo, this);
   	this.getCurrentContext = bind(this.getCurrentContext, this);
+  	this.refresh = bind(this.refresh, this);
   
   	// Create request/response factories
   	var app = this
@@ -5534,6 +5562,16 @@ require.register('lib/application', function(module, exports, require) {
   Application.prototype.getCurrentContext = function () {
   	return this[this.parent ? 'parent' : 'history'].getCurrentContext();
   };
+  
+  /**
+   * Refresh current location
+   * @returns {Object}
+   */
+  Application.prototype.refresh = function () {
+   	var ctx = this.getCurrentContext();
+   	ctx.res.finished = false;
+   	(this.parent || this).handle(ctx.req, ctx.res);
+   };
 });
 require.register('express-client', function(module, exports, require) {
   var application = require('lib/application')
