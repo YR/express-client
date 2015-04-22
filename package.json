@@ -1,7 +1,7 @@
 {
   "name": "express-client",
   "description": "An express.js framework for browser clients",
-  "version": "1.5.0",
+  "version": "1.7.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "cookie": "0.1.2",
@@ -10,7 +10,7 @@
     "lodash-compat": "3.5.0",
     "path-to-regexp": "1.0.3",
     "query-string": "1.0.0",
-    "url-utils": "git+https://aa5f2bb713ef8a8323fc4a621fc2965d76c06698:x-oauth-basic@github.com/yr/url-utils.git#1.5.0"
+    "url-utils": "git+https://aa5f2bb713ef8a8323fc4a621fc2965d76c06698:x-oauth-basic@github.com/yr/url-utils.git#1.7.1"
   },
   "devDependencies": {
     "buddy": "popeindustries/buddy",

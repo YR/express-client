@@ -317,6 +317,51 @@ describe('express-client', function () {
 				});
 			});
 		});
+		describe('refresh()', function () {
+			beforeEach(function (done) {
+				this.app = express();
+				this.app.history.running = true;
+				this.app.cache['dummy'] = {
+					render: function (view,opt,fn) {}
+				};
+				this.app.listen();
+
+				done();
+			});
+			it('should refresh app using current context', function () {
+				this.app.handle(Request('/url'), Response());
+				var oldCtx = this.app.getCurrentContext();
+
+				this.app.refresh();
+				var newCtx = this.app.getCurrentContext();
+				expect(oldCtx).to.be.equal(newCtx);
+			});
+			it('should refresh app and reset request state', function () {
+				var request = Request('/bar')
+					, response = Response()
+					, count = 0;
+
+				this.app.param('foo', function (req, res, next, foo) {
+					res.foo = foo;
+					next();
+				});
+				var self = this;
+				this.app.use('/:foo', function (req, res, next) {
+					count++;
+					res.app = self.app;
+					res.req = req;
+					res.send();
+					next();
+				});
+
+				this.app.handle(request, response);
+				this.app.refresh();
+
+				expect(response.statusCode).to.be(200);
+				expect(response.req.params).to.equal(undefined);
+				expect(count).to.be(2);
+			});
+		});
 	});
 
 	describe('History', function () {

@@ -305,7 +305,7 @@ require.register('lib/layer', function(module, exports, require) {
    */
   
   var matcher = require('path-to-regexp@1.0.3')
-  	, urlUtils = require('url-utils@1.5.0');
+  	, urlUtils = require('url-utils@1.7.1');
   
   module.exports = Layer;
   
@@ -414,7 +414,7 @@ require.register('lib/router', function(module, exports, require) {
   	, layer = require('lib/layer')
   	, merge = require('lodash-compat/object/merge@3.5.0')
   	, objKeys = require('lodash-compat/object/keys@3.5.0')
-  	, urlUtils = require('url-utils@1.5.0')
+  	, urlUtils = require('url-utils@1.7.1')
   
   	, METHODS = ['get', 'post', 'all']
   	, DEFAULTS = {
@@ -641,6 +641,194 @@ require.register('lib/router', function(module, exports, require) {
   		return fn.apply(this, arguments);
   	};
   }
+});
+require.register('lib/response', function(module, exports, require) {
+  /**
+   * Browser response object
+   */
+  
+  var cookie = require('cookie@0.1.2')
+  	, emitter = require('eventemitter3@0.1.6')
+  	, merge = require('lib/safeMerge');
+  
+  module.exports = Response;
+  
+  /**
+   * Constructor
+   */
+  function Response () {
+  	if (!(this instanceof Response)) {
+  		return new Response();
+  	}
+  
+  	this.locals = {};
+  	this.statusCode = 404;
+  	this.finished = false;
+  	this.cached = false;
+  	this.app;
+  	this.req;
+  
+  	merge(this, emitter.prototype);
+  };
+  
+  /**
+   * Set status 'code'
+   * @param {Number} code
+   * @returns {Response}
+   */
+  Response.prototype.status = function (code) {
+  	this.statusCode = code;
+  	return this;
+  };
+  
+  /**
+   * Send response (last method called in pipeline)
+   */
+  Response.prototype.send = function () {
+  	this.status(200);
+  	// Reset for first request
+  	// Prevents return to unhandled pages not triggering redirect
+  	this.req.bootstrap = false;
+  	// Resetting request state
+  	this.req.params = null;
+  	this.req.path = this.req.originalUrl;
+  	this.req.baseUrl = '';
+  	this.finished = true;
+  	this.emit('finish');
+  };
+  
+  /**
+   * Redirect to 'url'
+   * @param {Number} statusCode
+   * @param {String} url
+   */
+  Response.prototype.redirect = function (statusCode, url) {
+  	this.app.redirectTo(url || statusCode);
+  };
+  
+  /**
+   * Render 'view' with the given 'options' and optional callback 'fn'
+   * @param {String} view
+   * @param {Object} [options]
+   * @param {Function} [fn(err)]
+   */
+  Response.prototype.render = function (view, options, fn) {
+  	options = options || {};
+  
+  	var self = this
+  		, app = this.app
+  		, req = this.req;
+  
+  	if ('function' == typeof options) {
+  		fn = options;
+  		options = {};
+  	}
+  
+  	// Store locals so that app can merge
+  	options._locals = this.locals;
+  
+  	// Default callback
+  	fn = fn || function (err) {
+  		if (err) return req.next(err);
+  		self.send();
+  	};
+  
+  	app.render(view, options, fn);
+  };
+  
+  /**
+   * Set cookie
+   * @param {String} name
+   * @param {String|Object} val
+   * @param {Object} options
+   * @returns {Response}
+   */
+  Response.prototype.cookie = function (name, val, options) {
+    options = merge({}, options);
+  
+    if ('number' == typeof val) val = val.toString();
+    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
+  
+    if ('maxAge' in options) {
+      options.expires = new Date(Date.now() + options.maxAge);
+      options.maxAge /= 1000;
+    }
+  
+    if (null == options.path) options.path = '/';
+    var headerVal = cookie.serialize(name, String(val), options);
+  
+    document.cookie = headerVal;
+    return this;
+  };
+});
+require.register('query-string@1.0.0', function(module, exports, require) {
+  /*!
+  	query-string
+  	Parse and stringify URL query strings
+  	https://github.com/sindresorhus/query-string
+  	by Sindre Sorhus
+  	MIT License
+  */
+  (function () {
+  	'use strict';
+  	var queryString = {};
+  
+  	queryString.parse = function (str) {
+  		if (typeof str !== 'string') {
+  			return {};
+  		}
+  
+  		str = str.trim().replace(/^(\?|#)/, '');
+  
+  		if (!str) {
+  			return {};
+  		}
+  
+  		return str.trim().split('&').reduce(function (ret, param) {
+  			var parts = param.replace(/\+/g, ' ').split('=');
+  			var key = parts[0];
+  			var val = parts[1];
+  
+  			key = decodeURIComponent(key);
+  			// missing `=` should be `null`:
+  			// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
+  			val = val === undefined ? null : decodeURIComponent(val);
+  
+  			if (!ret.hasOwnProperty(key)) {
+  				ret[key] = val;
+  			} else if (Array.isArray(ret[key])) {
+  				ret[key].push(val);
+  			} else {
+  				ret[key] = [ret[key], val];
+  			}
+  
+  			return ret;
+  		}, {});
+  	};
+  
+  	queryString.stringify = function (obj) {
+  		return obj ? Object.keys(obj).map(function (key) {
+  			var val = obj[key];
+  
+  			if (Array.isArray(val)) {
+  				return val.map(function (val2) {
+  					return encodeURIComponent(key) + '=' + encodeURIComponent(val2);
+  				}).join('&');
+  			}
+  
+  			return encodeURIComponent(key) + '=' + encodeURIComponent(val);
+  		}).join('&') : '';
+  	};
+  
+  	if (typeof define === 'function' && define.amd) {
+  		define(function() { return queryString; });
+  	} else if (typeof module !== 'undefined' && module.exports) {
+  		module.exports = queryString;
+  	} else {
+  		window.queryString = queryString;
+  	}
+  })();
+  
 });
 require.register('lib/safeMerge', function(module, exports, require) {
   /**
@@ -893,205 +1081,6 @@ require.register('eventemitter3@0.1.6', function(module, exports, require) {
   module.exports = EventEmitter;
   
 });
-require.register('lib/response', function(module, exports, require) {
-  /**
-   * Browser response object
-   */
-  
-  var cookie = require('cookie@0.1.2')
-  	, emitter = require('eventemitter3@0.1.6')
-  	, merge = require('lib/safeMerge');
-  
-  module.exports = Response;
-  
-  /**
-   * Constructor
-   */
-  function Response () {
-  	if (!(this instanceof Response)) {
-  		return new Response();
-  	}
-  
-  	this.locals = {};
-  	this.statusCode = 404;
-  	this.finished = false;
-  	this.cached = false;
-  	this.app;
-  	this.req;
-  
-  	merge(this, emitter.prototype);
-  };
-  
-  /**
-   * Set status 'code'
-   * @param {Number} code
-   * @returns {Response}
-   */
-  Response.prototype.status = function (code) {
-  	this.statusCode = code;
-  	return this;
-  };
-  
-  /**
-   * Send response (last method called in pipeline)
-   */
-  Response.prototype.send = function () {
-  	this._finish(200);
-  	this.emit('finish');
-  };
-  
-  /**
-   * Abort response
-   */
-  Response.prototype.abort = function () {
-  	this._finish(499);
-  	this.emit('close');
-  };
-  
-  /**
-   * Redirect to 'url'
-   * @param {String} url
-   */
-  Response.prototype.redirect = function (url) {
-  	this.app.redirectTo(url);
-  };
-  
-  /**
-   * Render 'view' with the given 'options' and optional callback 'fn'
-   * @param {String} view
-   * @param {Object} [options]
-   * @param {Function} [fn(err)]
-   */
-  Response.prototype.render = function (view, options, fn) {
-  	options = options || {};
-  
-  	var self = this
-  		, app = this.app
-  		, req = this.req;
-  
-  	if ('function' == typeof options) {
-  		fn = options;
-  		options = {};
-  	}
-  
-  	// Store locals so that app can merge
-  	options._locals = this.locals;
-  
-  	// Default callback
-  	fn = fn || function (err) {
-  		if (err) return req.next(err);
-  		self.send();
-  	};
-  
-  	app.render(view, options, fn);
-  };
-  
-  /**
-   * Set finish state
-   * @param {Number} code
-   */
-  Response.prototype._finish = function (code) {
-  	this.status(code);
-  	// Reset for first request
-  	// Prevents return to unhandled pages not triggering redirect
-  	this.req.bootstrap = false;
-  	this.finished = true;
-  };
-  
-  /**
-   * Set cookie
-   * @param {String} name
-   * @param {String|Object} val
-   * @param {Object} options
-   * @returns {Response}
-   */
-  Response.prototype.cookie = function (name, val, options) {
-    options = merge({}, options);
-  
-    if ('number' == typeof val) val = val.toString();
-    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
-  
-    if ('maxAge' in options) {
-      options.expires = new Date(Date.now() + options.maxAge);
-      options.maxAge /= 1000;
-    }
-  
-    if (null == options.path) options.path = '/';
-    var headerVal = cookie.serialize(name, String(val), options);
-  
-    document.cookie = headerVal;
-    return this;
-  };
-});
-require.register('query-string@1.0.0', function(module, exports, require) {
-  /*!
-  	query-string
-  	Parse and stringify URL query strings
-  	https://github.com/sindresorhus/query-string
-  	by Sindre Sorhus
-  	MIT License
-  */
-  (function () {
-  	'use strict';
-  	var queryString = {};
-  
-  	queryString.parse = function (str) {
-  		if (typeof str !== 'string') {
-  			return {};
-  		}
-  
-  		str = str.trim().replace(/^(\?|#)/, '');
-  
-  		if (!str) {
-  			return {};
-  		}
-  
-  		return str.trim().split('&').reduce(function (ret, param) {
-  			var parts = param.replace(/\+/g, ' ').split('=');
-  			var key = parts[0];
-  			var val = parts[1];
-  
-  			key = decodeURIComponent(key);
-  			// missing `=` should be `null`:
-  			// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
-  			val = val === undefined ? null : decodeURIComponent(val);
-  
-  			if (!ret.hasOwnProperty(key)) {
-  				ret[key] = val;
-  			} else if (Array.isArray(ret[key])) {
-  				ret[key].push(val);
-  			} else {
-  				ret[key] = [ret[key], val];
-  			}
-  
-  			return ret;
-  		}, {});
-  	};
-  
-  	queryString.stringify = function (obj) {
-  		return obj ? Object.keys(obj).map(function (key) {
-  			var val = obj[key];
-  
-  			if (Array.isArray(val)) {
-  				return val.map(function (val2) {
-  					return encodeURIComponent(key) + '=' + encodeURIComponent(val2);
-  				}).join('&');
-  			}
-  
-  			return encodeURIComponent(key) + '=' + encodeURIComponent(val);
-  		}).join('&') : '';
-  	};
-  
-  	if (typeof define === 'function' && define.amd) {
-  		define(function() { return queryString; });
-  	} else if (typeof module !== 'undefined' && module.exports) {
-  		module.exports = queryString;
-  	} else {
-  		window.queryString = queryString;
-  	}
-  })();
-  
-});
 require.register('cookie@0.1.2', function(module, exports, require) {
   
   /// Serialize the a name value pair into a cookie string suitable for
@@ -1176,8 +1165,10 @@ require.register('lib/request', function(module, exports, require) {
    */
   
   var cookie = require('cookie@0.1.2')
+  	, emitter = require('eventemitter3@0.1.6')
+  	, merge = require('lib/safeMerge')
   	, qsParse = require('query-string@1.0.0').parse
-  	, urlUtils = require('url-utils@1.5.0');
+  	, urlUtils = require('url-utils@1.7.1');
   
   module.exports = Request;
   
@@ -1207,7 +1198,17 @@ require.register('lib/request', function(module, exports, require) {
   	this.cached = false;
   	this.app;
   	this.cookies = cookie.parse(document.cookie);
+  
+  	merge(this, emitter.prototype);
   }
+  
+  /**
+   * Abort response
+   */
+  Request.prototype.abort = function () {
+  	this.emit('close');
+  };
+  
 });
 require.register('lodash-compat/internal/isIterateeCall@3.5.0', function(module, exports, require) {
   var isIndex = require('lodash-compat/internal/isIndex@3.5.0'),
@@ -2468,12 +2469,16 @@ require.register('lodash-compat/collection/map@3.5.0', function(module, exports,
   module.exports = map;
   
 });
-require.register('url-utils@1.5.0', function(module, exports, require) {
+require.register('url-utils@1.7.1', function(module, exports, require) {
   var map = require('lodash-compat/collection/map@3.5.0')
   	, forEach = require('lodash-compat/collection/forEach@3.5.0')
   	, isArray = require('lodash-compat/lang/isArray@3.5.0')
   	, keys = require('lodash-compat/object/keys@3.5.0')
-  	, isServer = require('runtime@0.1.0').isServer;
+  	, isServer = require('runtime@0.1.0').isServer
+  
+  	, RE_TEMPLATE = /\{([0-9a-zA-Z]+)\}/g
+  	, RE_URL = /([^:])(\/{2,})/g;
+  
   
   /**
    * Join url segments
@@ -2552,17 +2557,18 @@ require.register('url-utils@1.5.0', function(module, exports, require) {
   
   	return '';
   };
+  
   /**
    * Remove trailing '/' from 'url'
    * @param {String} url
    * @returns {String}
    */
   exports.sanitize = function sanitize (url) {
-  	if (url
-  		&& url != '/'
-  		&& url.charAt(url.length - 1) == '/') {
-  			return url.slice(0, -1);
+  	if (url && url != '/') {
+  		url = url.replace(RE_URL, '$1/');
+  		if (url.charAt(url.length - 1) == '/') url = url.slice(0, -1);
   	}
+  
   	return url || '';
   };
   
@@ -2602,7 +2608,25 @@ require.register('url-utils@1.5.0', function(module, exports, require) {
   	return (!isServer)
   		? exports.encode(window.location.pathname + window.location.search)
   		: '';
-  }
+  };
+  
+  /**
+   * Substitute 'data' values in 'str' template
+   * @param {String} str
+   * @param {Object} data
+   * @params {Object} options
+   * @returns {String}
+   */
+  exports.template = function template (str, data, options) {
+  	options = options || {};
+  	var str = String(str).replace(RE_TEMPLATE, function (match, prop, idx) {
+  		return (data && data[prop] != null)
+  			? data[prop]
+  			: (options.loose) ? match : '';
+  	});
+  
+  	return exports.sanitize(str);
+  };
 });
 require.register('lib/history', function(module, exports, require) {
   /**
@@ -2613,7 +2637,7 @@ require.register('lib/history', function(module, exports, require) {
   
   var bind = require('lodash-compat/function/bind@3.5.0')
   	, debug = require('debug@2.1.2')('express:history')
-  	, urlUtils = require('url-utils@1.5.0')
+  	, urlUtils = require('url-utils@1.7.1')
   	, bootstrap = true;
   
   module.exports = History;
@@ -2767,9 +2791,9 @@ require.register('lib/history', function(module, exports, require) {
   	// Make sure only first request flagged as bootstrap
   	bootstrap = false;
   
-  	// Abort if current response is not finished
+  	// Abort if current request/response is not finished
   	if (this.current && !this.cache[this.current].res.finished) {
-  		this.cache[this.current].res.abort();
+  		this.cache[this.current].req.abort();
   	}
   
   	// Store reference to current
@@ -5354,6 +5378,7 @@ require.register('lib/application', function(module, exports, require) {
   	this.navigateTo = bind(this.navigateTo, this);
   	this.redirectTo = bind(this.redirectTo, this);
   	this.getCurrentContext = bind(this.getCurrentContext, this);
+  	this.refresh = bind(this.refresh, this);
   
   	// Create request/response factories
   	var app = this
@@ -5537,6 +5562,16 @@ require.register('lib/application', function(module, exports, require) {
   Application.prototype.getCurrentContext = function () {
   	return this[this.parent ? 'parent' : 'history'].getCurrentContext();
   };
+  
+  /**
+   * Refresh current location
+   * @returns {Object}
+   */
+  Application.prototype.refresh = function () {
+   	var ctx = this.getCurrentContext();
+   	ctx.res.finished = false;
+   	(this.parent || this).handle(ctx.req, ctx.res);
+   };
 });
 require.register('express-client', function(module, exports, require) {
   var application = require('lib/application')
