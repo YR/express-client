@@ -1,9 +1,9 @@
-var express = require('express-client')
-	, Application = require('lib/application')
-	, Request = require('lib/request')
-	, Response = require('lib/response')
-	, Router = require('lib/router')
-	, History = require('lib/history')
+var express = require('express-client/index.js')
+	, Application = require('lib/application.js')
+	, Request = require('lib/request.js')
+	, Response = require('lib/response.js')
+	, Router = require('lib/router.js')
+	, History = require('lib/history.js')
 	, expect = window.expect
 	, historyApp;
 
