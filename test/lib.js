@@ -88,14 +88,14 @@
 	// Expose
 	root.require = require;
 })((typeof window !== 'undefined') ? window : global);
-require.register('isarray@0.0.1', function(module, exports, require) {
+require.register('isarray#0.0.1', function(module, exports, require) {
   module.exports = Array.isArray || function (arr) {
     return Object.prototype.toString.call(arr) == '[object Array]';
   };
   
 });
-require.register('path-to-regexp@1.0.3', function(module, exports, require) {
-  var isArray = require('isarray@0.0.1');
+require.register('path-to-regexp#1.0.3', function(module, exports, require) {
+  var isArray = require('isarray#0.0.1');
   
   /**
    * Expose `pathToRegexp`.
@@ -299,13 +299,13 @@ require.register('path-to-regexp@1.0.3', function(module, exports, require) {
   }
   
 });
-require.register('lib/layer', function(module, exports, require) {
+require.register('lib/layer.js', function(module, exports, require) {
   /**
    * Router layer object
    */
   
-  var matcher = require('path-to-regexp@1.0.3')
-  	, urlUtils = require('url-utils@1.7.1');
+  var matcher = require('path-to-regexp#1.0.3')
+  	, urlUtils = require('url-utils#1.8.0');
   
   module.exports = Layer;
   
@@ -402,19 +402,19 @@ require.register('lib/layer', function(module, exports, require) {
   		: path;
   };
 });
-require.register('lib/router', function(module, exports, require) {
+require.register('lib/router.js', function(module, exports, require) {
   /**
    * Router for handling middleware pipeline.
    * Can be isolated under a specific mount path.
    */
   
-  var bind = require('lodash-compat/function/bind@3.5.0')
-  	, debug = require('debug@2.1.2')('express:router')
-  	, forEach = require('lodash-compat/collection/forEach@3.5.0')
-  	, layer = require('lib/layer')
-  	, merge = require('lodash-compat/object/merge@3.5.0')
-  	, objKeys = require('lodash-compat/object/keys@3.5.0')
-  	, urlUtils = require('url-utils@1.7.1')
+  var bind = require('lodash-compat/function/bind.js#3.7.0')
+  	, debug = require('debug#2.1.2')('express:router')
+  	, forEach = require('lodash-compat/collection/forEach.js#3.7.0')
+  	, layer = require('lib/layer.js')
+  	, merge = require('lodash-compat/object/merge.js#3.7.0')
+  	, objKeys = require('lodash-compat/object/keys.js#3.7.0')
+  	, urlUtils = require('url-utils#1.8.0')
   
   	, METHODS = ['get', 'post', 'all']
   	, DEFAULTS = {
@@ -642,14 +642,14 @@ require.register('lib/router', function(module, exports, require) {
   	};
   }
 });
-require.register('lib/response', function(module, exports, require) {
+require.register('lib/response.js', function(module, exports, require) {
   /**
    * Browser response object
    */
   
-  var cookie = require('cookie@0.1.2')
-  	, emitter = require('eventemitter3@0.1.6')
-  	, merge = require('lib/safeMerge');
+  var cookie = require('cookie#0.1.2')
+  	, emitter = require('eventemitter3#0.1.6')
+  	, merge = require('lib/safeMerge.js');
   
   module.exports = Response;
   
@@ -761,7 +761,7 @@ require.register('lib/response', function(module, exports, require) {
     return this;
   };
 });
-require.register('query-string@1.0.0', function(module, exports, require) {
+require.register('query-string#1.0.0', function(module, exports, require) {
   /*!
   	query-string
   	Parse and stringify URL query strings
@@ -830,7 +830,7 @@ require.register('query-string@1.0.0', function(module, exports, require) {
   })();
   
 });
-require.register('lib/safeMerge', function(module, exports, require) {
+require.register('lib/safeMerge.js', function(module, exports, require) {
   /**
    * Safely merge object 'b' into 'a',
    * making sure not to overwrite existing properties in 'a'
@@ -849,7 +849,7 @@ require.register('lib/safeMerge', function(module, exports, require) {
   	return a;
   };
 });
-require.register('eventemitter3@0.1.6', function(module, exports, require) {
+require.register('eventemitter3#0.1.6', function(module, exports, require) {
   'use strict';
   
   /**
@@ -1081,7 +1081,7 @@ require.register('eventemitter3@0.1.6', function(module, exports, require) {
   module.exports = EventEmitter;
   
 });
-require.register('cookie@0.1.2', function(module, exports, require) {
+require.register('cookie#0.1.2', function(module, exports, require) {
   
   /// Serialize the a name value pair into a cookie string suitable for
   /// http headers. An optional options object specified cookie parameters
@@ -1159,16 +1159,16 @@ require.register('cookie@0.1.2', function(module, exports, require) {
   module.exports.parse = parse;
   
 });
-require.register('lib/request', function(module, exports, require) {
+require.register('lib/request.js', function(module, exports, require) {
   /**
    * Browser request object
    */
   
-  var cookie = require('cookie@0.1.2')
-  	, emitter = require('eventemitter3@0.1.6')
-  	, merge = require('lib/safeMerge')
-  	, qsParse = require('query-string@1.0.0').parse
-  	, urlUtils = require('url-utils@1.7.1');
+  var cookie = require('cookie#0.1.2')
+  	, emitter = require('eventemitter3#0.1.6')
+  	, merge = require('lib/safeMerge.js')
+  	, qsParse = require('query-string#1.0.0').parse
+  	, urlUtils = require('url-utils#1.8.0');
   
   module.exports = Request;
   
@@ -1210,10 +1210,11 @@ require.register('lib/request', function(module, exports, require) {
   };
   
 });
-require.register('lodash-compat/internal/isIterateeCall@3.5.0', function(module, exports, require) {
-  var isIndex = require('lodash-compat/internal/isIndex@3.5.0'),
-      isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isObject = require('lodash-compat/lang/isObject@3.5.0');
+require.register('lodash-compat/internal/isIterateeCall.js#3.7.0', function(module, exports, require) {
+  var getLength = require('lodash-compat/internal/getLength.js#3.7.0'),
+      isIndex = require('lodash-compat/internal/isIndex.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isObject = require('lodash-compat/lang/isObject.js#3.7.0');
   
   /**
    * Checks if the provided arguments are from an iteratee call.
@@ -1230,7 +1231,7 @@ require.register('lodash-compat/internal/isIterateeCall@3.5.0', function(module,
     }
     var type = typeof index;
     if (type == 'number') {
-      var length = object.length,
+      var length = getLength(object),
           prereq = isLength(length) && isIndex(index, length);
     } else {
       prereq = type == 'string' && index in object;
@@ -1245,71 +1246,88 @@ require.register('lodash-compat/internal/isIterateeCall@3.5.0', function(module,
   module.exports = isIterateeCall;
   
 });
-require.register('lodash-compat/internal/createAssigner@3.5.0', function(module, exports, require) {
-  var bindCallback = require('lodash-compat/internal/bindCallback@3.5.0'),
-      isIterateeCall = require('lodash-compat/internal/isIterateeCall@3.5.0');
+require.register('lodash-compat/internal/createAssigner.js#3.7.0', function(module, exports, require) {
+  var bindCallback = require('lodash-compat/internal/bindCallback.js#3.7.0'),
+      isIterateeCall = require('lodash-compat/internal/isIterateeCall.js#3.7.0'),
+      restParam = require('lodash-compat/function/restParam.js#3.7.0');
   
   /**
    * Creates a function that assigns properties of source object(s) to a given
    * destination object.
+   *
+   * **Note:** This function is used to create `_.assign`, `_.defaults`, and `_.merge`.
    *
    * @private
    * @param {Function} assigner The function to assign values.
    * @returns {Function} Returns the new assigner function.
    */
   function createAssigner(assigner) {
-    return function() {
-      var args = arguments,
-          length = args.length,
-          object = args[0];
+    return restParam(function(object, sources) {
+      var index = -1,
+          length = object == null ? 0 : sources.length,
+          customizer = length > 2 && sources[length - 2],
+          guard = length > 2 && sources[2],
+          thisArg = length > 1 && sources[length - 1];
   
-      if (length < 2 || object == null) {
-        return object;
-      }
-      var customizer = args[length - 2],
-          thisArg = args[length - 1],
-          guard = args[3];
-  
-      if (length > 3 && typeof customizer == 'function') {
+      if (typeof customizer == 'function') {
         customizer = bindCallback(customizer, thisArg, 5);
         length -= 2;
       } else {
-        customizer = (length > 2 && typeof thisArg == 'function') ? thisArg : null;
+        customizer = typeof thisArg == 'function' ? thisArg : null;
         length -= (customizer ? 1 : 0);
       }
-      if (guard && isIterateeCall(args[1], args[2], guard)) {
-        customizer = length == 3 ? null : customizer;
-        length = 2;
+      if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+        customizer = length < 3 ? null : customizer;
+        length = 1;
       }
-      var index = 0;
       while (++index < length) {
-        var source = args[index];
+        var source = sources[index];
         if (source) {
           assigner(object, source, customizer);
         }
       }
       return object;
-    };
+    });
   }
   
   module.exports = createAssigner;
   
 });
-require.register('lodash-compat/internal/baseCopy@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/getSymbols.js#3.7.0', function(module, exports, require) {
+  var constant = require('lodash-compat/utility/constant.js#3.7.0'),
+      isNative = require('lodash-compat/lang/isNative.js#3.7.0'),
+      toObject = require('lodash-compat/internal/toObject.js#3.7.0');
+  
+  /** Native method references. */
+  var getOwnPropertySymbols = isNative(getOwnPropertySymbols = Object.getOwnPropertySymbols) && getOwnPropertySymbols;
+  
   /**
-   * Copies the properties of `source` to `object`.
+   * Creates an array of the own symbols of `object`.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @returns {Array} Returns the array of symbols.
+   */
+  var getSymbols = !getOwnPropertySymbols ? constant([]) : function(object) {
+    return getOwnPropertySymbols(toObject(object));
+  };
+  
+  module.exports = getSymbols;
+  
+});
+require.register('lodash-compat/internal/baseCopy.js#3.7.0', function(module, exports, require) {
+  /**
+   * Copies properties of `source` to `object`.
    *
    * @private
    * @param {Object} source The object to copy properties from.
-   * @param {Object} [object={}] The object to copy properties to.
    * @param {Array} props The property names to copy.
+   * @param {Object} [object={}] The object to copy properties to.
    * @returns {Object} Returns `object`.
    */
-  function baseCopy(source, object, props) {
-    if (!props) {
-      props = object;
-      object = {};
-    }
+  function baseCopy(source, props, object) {
+    object || (object = {});
+  
     var index = -1,
         length = props.length;
   
@@ -1323,9 +1341,9 @@ require.register('lodash-compat/internal/baseCopy@3.5.0', function(module, expor
   module.exports = baseCopy;
   
 });
-require.register('lodash-compat/lang/toPlainObject@3.5.0', function(module, exports, require) {
-  var baseCopy = require('lodash-compat/internal/baseCopy@3.5.0'),
-      keysIn = require('lodash-compat/object/keysIn@3.5.0');
+require.register('lodash-compat/lang/toPlainObject.js#3.7.0', function(module, exports, require) {
+  var baseCopy = require('lodash-compat/internal/baseCopy.js#3.7.0'),
+      keysIn = require('lodash-compat/object/keysIn.js#3.7.0');
   
   /**
    * Converts `value` to a plain object flattening inherited enumerable
@@ -1357,9 +1375,9 @@ require.register('lodash-compat/lang/toPlainObject@3.5.0', function(module, expo
   module.exports = toPlainObject;
   
 });
-require.register('lodash-compat/internal/baseForIn@3.5.0', function(module, exports, require) {
-  var baseFor = require('lodash-compat/internal/baseFor@3.5.0'),
-      keysIn = require('lodash-compat/object/keysIn@3.5.0');
+require.register('lodash-compat/internal/baseForIn.js#3.7.0', function(module, exports, require) {
+  var baseFor = require('lodash-compat/internal/baseFor.js#3.7.0'),
+      keysIn = require('lodash-compat/object/keysIn.js#3.7.0');
   
   /**
    * The base implementation of `_.forIn` without support for callback
@@ -1377,12 +1395,12 @@ require.register('lodash-compat/internal/baseForIn@3.5.0', function(module, expo
   module.exports = baseForIn;
   
 });
-require.register('lodash-compat/internal/shimIsPlainObject@3.5.0', function(module, exports, require) {
-  var baseForIn = require('lodash-compat/internal/baseForIn@3.5.0'),
-      isArguments = require('lodash-compat/lang/isArguments@3.5.0'),
-      isHostObject = require('lodash-compat/internal/isHostObject@3.5.0'),
-      isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
+require.register('lodash-compat/internal/shimIsPlainObject.js#3.7.0', function(module, exports, require) {
+  var baseForIn = require('lodash-compat/internal/baseForIn.js#3.7.0'),
+      isArguments = require('lodash-compat/lang/isArguments.js#3.7.0'),
+      isHostObject = require('lodash-compat/internal/isHostObject.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
   
   /** `Object#toString` result references. */
   var objectTag = '[object Object]';
@@ -1394,9 +1412,8 @@ require.register('lodash-compat/internal/shimIsPlainObject@3.5.0', function(modu
   var hasOwnProperty = objectProto.hasOwnProperty;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -1436,17 +1453,17 @@ require.register('lodash-compat/internal/shimIsPlainObject@3.5.0', function(modu
     baseForIn(value, function(subValue, key) {
       result = key;
     });
-    return typeof result == 'undefined' || hasOwnProperty.call(value, result);
+    return result === undefined || hasOwnProperty.call(value, result);
   }
   
   module.exports = shimIsPlainObject;
   
 });
-require.register('lodash-compat/lang/isPlainObject@3.5.0', function(module, exports, require) {
-  var isArguments = require('lodash-compat/lang/isArguments@3.5.0'),
-      isNative = require('lodash-compat/lang/isNative@3.5.0'),
-      shimIsPlainObject = require('lodash-compat/internal/shimIsPlainObject@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
+require.register('lodash-compat/lang/isPlainObject.js#3.7.0', function(module, exports, require) {
+  var isArguments = require('lodash-compat/lang/isArguments.js#3.7.0'),
+      isNative = require('lodash-compat/lang/isNative.js#3.7.0'),
+      shimIsPlainObject = require('lodash-compat/internal/shimIsPlainObject.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
   
   /** `Object#toString` result references. */
   var objectTag = '[object Object]';
@@ -1455,9 +1472,8 @@ require.register('lodash-compat/lang/isPlainObject@3.5.0', function(module, expo
   var objectProto = Object.prototype;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -1509,14 +1525,15 @@ require.register('lodash-compat/lang/isPlainObject@3.5.0', function(module, expo
   module.exports = isPlainObject;
   
 });
-require.register('lodash-compat/internal/baseMergeDeep@3.5.0', function(module, exports, require) {
-  var arrayCopy = require('lodash-compat/internal/arrayCopy@3.5.0'),
-      isArguments = require('lodash-compat/lang/isArguments@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0'),
-      isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isPlainObject = require('lodash-compat/lang/isPlainObject@3.5.0'),
-      isTypedArray = require('lodash-compat/lang/isTypedArray@3.5.0'),
-      toPlainObject = require('lodash-compat/lang/toPlainObject@3.5.0');
+require.register('lodash-compat/internal/baseMergeDeep.js#3.7.0', function(module, exports, require) {
+  var arrayCopy = require('lodash-compat/internal/arrayCopy.js#3.7.0'),
+      getLength = require('lodash-compat/internal/getLength.js#3.7.0'),
+      isArguments = require('lodash-compat/lang/isArguments.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isPlainObject = require('lodash-compat/lang/isPlainObject.js#3.7.0'),
+      isTypedArray = require('lodash-compat/lang/isTypedArray.js#3.7.0'),
+      toPlainObject = require('lodash-compat/lang/toPlainObject.js#3.7.0');
   
   /**
    * A specialized version of `baseMerge` for arrays and objects which performs
@@ -1545,14 +1562,14 @@ require.register('lodash-compat/internal/baseMergeDeep@3.5.0', function(module, 
     }
     var value = object[key],
         result = customizer ? customizer(value, srcValue, key, object, source) : undefined,
-        isCommon = typeof result == 'undefined';
+        isCommon = result === undefined;
   
     if (isCommon) {
       result = srcValue;
       if (isLength(srcValue.length) && (isArray(srcValue) || isTypedArray(srcValue))) {
         result = isArray(value)
           ? value
-          : (value ? arrayCopy(value) : []);
+          : (getLength(value) ? arrayCopy(value) : []);
       }
       else if (isPlainObject(srcValue) || isArguments(srcValue)) {
         result = isArguments(value)
@@ -1579,15 +1596,22 @@ require.register('lodash-compat/internal/baseMergeDeep@3.5.0', function(module, 
   module.exports = baseMergeDeep;
   
 });
-require.register('lodash-compat/internal/baseMerge@3.5.0', function(module, exports, require) {
-  var arrayEach = require('lodash-compat/internal/arrayEach@3.5.0'),
-      baseForOwn = require('lodash-compat/internal/baseForOwn@3.5.0'),
-      baseMergeDeep = require('lodash-compat/internal/baseMergeDeep@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0'),
-      isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isObject = require('lodash-compat/lang/isObject@3.5.0'),
-      isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0'),
-      isTypedArray = require('lodash-compat/lang/isTypedArray@3.5.0');
+require.register('lodash-compat/internal/baseMerge.js#3.7.0', function(module, exports, require) {
+  var arrayEach = require('lodash-compat/internal/arrayEach.js#3.7.0'),
+      baseMergeDeep = require('lodash-compat/internal/baseMergeDeep.js#3.7.0'),
+      getSymbols = require('lodash-compat/internal/getSymbols.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isObject = require('lodash-compat/lang/isObject.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0'),
+      isTypedArray = require('lodash-compat/lang/isTypedArray.js#3.7.0'),
+      keys = require('lodash-compat/object/keys.js#3.7.0');
+  
+  /** Used for native method references. */
+  var arrayProto = Array.prototype;
+  
+  /** Native method references. */
+  var push = arrayProto.push;
   
   /**
    * The base implementation of `_.merge` without support for argument juggling,
@@ -1599,29 +1623,39 @@ require.register('lodash-compat/internal/baseMerge@3.5.0', function(module, expo
    * @param {Function} [customizer] The function to customize merging properties.
    * @param {Array} [stackA=[]] Tracks traversed source objects.
    * @param {Array} [stackB=[]] Associates values with source counterparts.
-   * @returns {Object} Returns the destination object.
+   * @returns {Object} Returns `object`.
    */
   function baseMerge(object, source, customizer, stackA, stackB) {
     if (!isObject(object)) {
       return object;
     }
     var isSrcArr = isLength(source.length) && (isArray(source) || isTypedArray(source));
-    (isSrcArr ? arrayEach : baseForOwn)(source, function(srcValue, key, source) {
+    if (!isSrcArr) {
+      var props = keys(source);
+      push.apply(props, getSymbols(source));
+    }
+    arrayEach(props || source, function(srcValue, key) {
+      if (props) {
+        key = srcValue;
+        srcValue = source[key];
+      }
       if (isObjectLike(srcValue)) {
         stackA || (stackA = []);
         stackB || (stackB = []);
-        return baseMergeDeep(object, source, key, baseMerge, customizer, stackA, stackB);
+        baseMergeDeep(object, source, key, baseMerge, customizer, stackA, stackB);
       }
-      var value = object[key],
-          result = customizer ? customizer(value, srcValue, key, object, source) : undefined,
-          isCommon = typeof result == 'undefined';
+      else {
+        var value = object[key],
+            result = customizer ? customizer(value, srcValue, key, object, source) : undefined,
+            isCommon = result === undefined;
   
-      if (isCommon) {
-        result = srcValue;
-      }
-      if ((isSrcArr || typeof result != 'undefined') &&
-          (isCommon || (result === result ? (result !== value) : (value === value)))) {
-        object[key] = result;
+        if (isCommon) {
+          result = srcValue;
+        }
+        if ((isSrcArr || result !== undefined) &&
+            (isCommon || (result === result ? (result !== value) : (value === value)))) {
+          object[key] = result;
+        }
       }
     });
     return object;
@@ -1630,9 +1664,9 @@ require.register('lodash-compat/internal/baseMerge@3.5.0', function(module, expo
   module.exports = baseMerge;
   
 });
-require.register('lodash-compat/object/merge@3.5.0', function(module, exports, require) {
-  var baseMerge = require('lodash-compat/internal/baseMerge@3.5.0'),
-      createAssigner = require('lodash-compat/internal/createAssigner@3.5.0');
+require.register('lodash-compat/object/merge.js#3.7.0', function(module, exports, require) {
+  var baseMerge = require('lodash-compat/internal/baseMerge.js#3.7.0'),
+      createAssigner = require('lodash-compat/internal/createAssigner.js#3.7.0');
   
   /**
    * Recursively merges own enumerable properties of the source object(s), that
@@ -1641,14 +1675,14 @@ require.register('lodash-compat/object/merge@3.5.0', function(module, exports, r
    * provided it is invoked to produce the merged values of the destination and
    * source properties. If `customizer` returns `undefined` merging is handled
    * by the method instead. The `customizer` is bound to `thisArg` and invoked
-   * with five arguments; (objectValue, sourceValue, key, object, source).
+   * with five arguments: (objectValue, sourceValue, key, object, source).
    *
    * @static
    * @memberOf _
    * @category Object
    * @param {Object} object The destination object.
    * @param {...Object} [sources] The source objects.
-   * @param {Function} [customizer] The function to customize merging properties.
+   * @param {Function} [customizer] The function to customize assigned values.
    * @param {*} [thisArg] The `this` binding of `customizer`.
    * @returns {Object} Returns `object`.
    * @example
@@ -1687,19 +1721,21 @@ require.register('lodash-compat/object/merge@3.5.0', function(module, exports, r
   module.exports = merge;
   
 });
-require.register('runtime@0.1.0', function(module, exports, require) {
+require.register('runtime#0.1.0', function(module, exports, require) {
   var isNode = (typeof process !== 'undefined'
   	&& {}.toString.call(process) === '[object process]');
   
   exports.isServer = isNode;
   exports.isBrowser = !isNode;
 });
-require.register('lodash-compat/internal/baseMap@3.5.0', function(module, exports, require) {
-  var baseEach = require('lodash-compat/internal/baseEach@3.5.0');
+require.register('lodash-compat/internal/baseMap.js#3.7.0', function(module, exports, require) {
+  var baseEach = require('lodash-compat/internal/baseEach.js#3.7.0'),
+      getLength = require('lodash-compat/internal/getLength.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0');
   
   /**
    * The base implementation of `_.map` without support for callback shorthands
-   * or `this` binding.
+   * and `this` binding.
    *
    * @private
    * @param {Array|Object|string} collection The collection to iterate over.
@@ -1707,9 +1743,12 @@ require.register('lodash-compat/internal/baseMap@3.5.0', function(module, export
    * @returns {Array} Returns the new mapped array.
    */
   function baseMap(collection, iteratee) {
-    var result = [];
+    var index = -1,
+        length = getLength(collection),
+        result = isLength(length) ? Array(length) : [];
+  
     baseEach(collection, function(value, key, collection) {
-      result.push(iteratee(value, key, collection));
+      result[++index] = iteratee(value, key, collection);
     });
     return result;
   }
@@ -1717,93 +1756,265 @@ require.register('lodash-compat/internal/baseMap@3.5.0', function(module, export
   module.exports = baseMap;
   
 });
-require.register('lodash-compat/internal/isBindable@3.5.0', function(module, exports, require) {
-  var baseSetData = require('lodash-compat/internal/baseSetData@3.5.0'),
-      isNative = require('lodash-compat/lang/isNative@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
-  
-  /** Used to detect named functions. */
-  var reFuncName = /^\s*function[ \n\r\t]+\w/;
-  
-  /** Used to detect functions containing a `this` reference. */
-  var reThis = /\bthis\b/;
-  
-  /** Used to resolve the decompiled source of functions. */
-  var fnToString = Function.prototype.toString;
+require.register('lodash-compat/internal/basePropertyDeep.js#3.7.0', function(module, exports, require) {
+  var baseGet = require('lodash-compat/internal/baseGet.js#3.7.0'),
+      toPath = require('lodash-compat/internal/toPath.js#3.7.0');
   
   /**
-   * Checks if `func` is eligible for `this` binding.
+   * A specialized version of `baseProperty` which supports deep paths.
    *
    * @private
-   * @param {Function} func The function to check.
-   * @returns {boolean} Returns `true` if `func` is eligible, else `false`.
+   * @param {Array|string} path The path of the property to get.
+   * @returns {Function} Returns the new function.
    */
-  function isBindable(func) {
-    var result = !(support.funcNames ? func.name : support.funcDecomp);
+  function basePropertyDeep(path) {
+    var pathKey = (path + '');
+    path = toPath(path);
+    return function(object) {
+      return baseGet(object, path, pathKey);
+    };
+  }
   
-    if (!result) {
-      var source = fnToString.call(func);
-      if (!support.funcNames) {
-        result = !reFuncName.test(source);
-      }
-      if (!result) {
-        // Check if `func` references the `this` keyword and store the result.
-        result = reThis.test(source) || isNative(func);
-        baseSetData(func, result);
-      }
+  module.exports = basePropertyDeep;
+  
+});
+require.register('lodash-compat/utility/property.js#3.7.0', function(module, exports, require) {
+  var baseProperty = require('lodash-compat/internal/baseProperty.js#3.7.0'),
+      basePropertyDeep = require('lodash-compat/internal/basePropertyDeep.js#3.7.0'),
+      isKey = require('lodash-compat/internal/isKey.js#3.7.0');
+  
+  /**
+   * Creates a function which returns the property value at `path` on a
+   * given object.
+   *
+   * @static
+   * @memberOf _
+   * @category Utility
+   * @param {Array|string} path The path of the property to get.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var objects = [
+   *   { 'a': { 'b': { 'c': 2 } } },
+   *   { 'a': { 'b': { 'c': 1 } } }
+   * ];
+   *
+   * _.map(objects, _.property('a.b.c'));
+   * // => [2, 1]
+   *
+   * _.pluck(_.sortBy(objects, _.property(['a', 'b', 'c'])), 'a.b.c');
+   * // => [1, 2]
+   */
+  function property(path) {
+    return isKey(path) ? baseProperty(path) : basePropertyDeep(path);
+  }
+  
+  module.exports = property;
+  
+});
+require.register('lodash-compat/internal/toPath.js#3.7.0', function(module, exports, require) {
+  var baseToString = require('lodash-compat/internal/baseToString.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0');
+  
+  /** Used to match property names within property paths. */
+  var rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
+  
+  /** Used to match backslashes in property paths. */
+  var reEscapeChar = /\\(\\)?/g;
+  
+  /**
+   * Converts `value` to property path array if it is not one.
+   *
+   * @private
+   * @param {*} value The value to process.
+   * @returns {Array} Returns the property path array.
+   */
+  function toPath(value) {
+    if (isArray(value)) {
+      return value;
+    }
+    var result = [];
+    baseToString(value).replace(rePropName, function(match, number, quote, string) {
+      result.push(quote ? string.replace(reEscapeChar, '$1') : (number || match));
+    });
+    return result;
+  }
+  
+  module.exports = toPath;
+  
+});
+require.register('lodash-compat/array/last.js#3.7.0', function(module, exports, require) {
+  /**
+   * Gets the last element of `array`.
+   *
+   * @static
+   * @memberOf _
+   * @category Array
+   * @param {Array} array The array to query.
+   * @returns {*} Returns the last element of `array`.
+   * @example
+   *
+   * _.last([1, 2, 3]);
+   * // => 3
+   */
+  function last(array) {
+    var length = array ? array.length : 0;
+    return length ? array[length - 1] : undefined;
+  }
+  
+  module.exports = last;
+  
+});
+require.register('lodash-compat/internal/isKey.js#3.7.0', function(module, exports, require) {
+  var isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      toObject = require('lodash-compat/internal/toObject.js#3.7.0');
+  
+  /** Used to match property names within property paths. */
+  var reIsDeepProp = /\.|\[(?:[^[\]]+|(["'])(?:(?!\1)[^\n\\]|\\.)*?)\1\]/,
+      reIsPlainProp = /^\w*$/;
+  
+  /**
+   * Checks if `value` is a property name and not a property path.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @param {Object} [object] The object to query keys on.
+   * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+   */
+  function isKey(value, object) {
+    var type = typeof value;
+    if ((type == 'string' && reIsPlainProp.test(value)) || type == 'number') {
+      return true;
+    }
+    if (isArray(value)) {
+      return false;
+    }
+    var result = !reIsDeepProp.test(value);
+    return result || (object != null && value in toObject(object));
+  }
+  
+  module.exports = isKey;
+  
+});
+require.register('lodash-compat/internal/baseSlice.js#3.7.0', function(module, exports, require) {
+  /**
+   * The base implementation of `_.slice` without an iteratee call guard.
+   *
+   * @private
+   * @param {Array} array The array to slice.
+   * @param {number} [start=0] The start position.
+   * @param {number} [end=array.length] The end position.
+   * @returns {Array} Returns the slice of `array`.
+   */
+  function baseSlice(array, start, end) {
+    var index = -1,
+        length = array.length;
+  
+    start = start == null ? 0 : (+start || 0);
+    if (start < 0) {
+      start = -start > length ? 0 : (length + start);
+    }
+    end = (end === undefined || end > length) ? length : (+end || 0);
+    if (end < 0) {
+      end += length;
+    }
+    length = start > end ? 0 : ((end - start) >>> 0);
+    start >>>= 0;
+  
+    var result = Array(length);
+    while (++index < length) {
+      result[index] = array[index + start];
     }
     return result;
   }
   
-  module.exports = isBindable;
+  module.exports = baseSlice;
   
 });
-require.register('lodash-compat/internal/baseProperty@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/baseGet.js#3.7.0', function(module, exports, require) {
+  var toObject = require('lodash-compat/internal/toObject.js#3.7.0');
+  
   /**
-   * The base implementation of `_.property` which does not coerce `key` to a string.
+   * The base implementation of `get` without support for string paths
+   * and default values.
    *
    * @private
-   * @param {string} key The key of the property to get.
-   * @returns {Function} Returns the new function.
+   * @param {Object} object The object to query.
+   * @param {Array} path The path of the property to get.
+   * @param {string} [pathKey] The key representation of path.
+   * @returns {*} Returns the resolved value.
    */
-  function baseProperty(key) {
-    return function(object) {
-      return object == null ? undefined : object[key];
-    };
+  function baseGet(object, path, pathKey) {
+    if (object == null) {
+      return;
+    }
+    object = toObject(object);
+    if (pathKey !== undefined && pathKey in object) {
+      path = [pathKey];
+    }
+    var index = -1,
+        length = path.length;
+  
+    while (object != null && ++index < length) {
+      var result = object = toObject(object)[path[index]];
+    }
+    return result;
   }
   
-  module.exports = baseProperty;
+  module.exports = baseGet;
   
 });
-require.register('lodash-compat/internal/baseMatchesProperty@3.5.0', function(module, exports, require) {
-  var baseIsEqual = require('lodash-compat/internal/baseIsEqual@3.5.0'),
-      isStrictComparable = require('lodash-compat/internal/isStrictComparable@3.5.0');
+require.register('lodash-compat/internal/baseMatchesProperty.js#3.7.0', function(module, exports, require) {
+  var baseGet = require('lodash-compat/internal/baseGet.js#3.7.0'),
+      baseIsEqual = require('lodash-compat/internal/baseIsEqual.js#3.7.0'),
+      baseSlice = require('lodash-compat/internal/baseSlice.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isKey = require('lodash-compat/internal/isKey.js#3.7.0'),
+      isStrictComparable = require('lodash-compat/internal/isStrictComparable.js#3.7.0'),
+      last = require('lodash-compat/array/last.js#3.7.0'),
+      toObject = require('lodash-compat/internal/toObject.js#3.7.0'),
+      toPath = require('lodash-compat/internal/toPath.js#3.7.0');
   
   /**
-   * The base implementation of `_.matchesProperty` which does not coerce `key`
-   * to a string.
+   * The base implementation of `_.matchesProperty` which does not which does
+   * not clone `value`.
    *
    * @private
-   * @param {string} key The key of the property to get.
+   * @param {string} path The path of the property to get.
    * @param {*} value The value to compare.
    * @returns {Function} Returns the new function.
    */
-  function baseMatchesProperty(key, value) {
-    if (isStrictComparable(value)) {
-      return function(object) {
-        return object != null && object[key] === value;
-      };
-    }
+  function baseMatchesProperty(path, value) {
+    var isArr = isArray(path),
+        isCommon = isKey(path) && isStrictComparable(value),
+        pathKey = (path + '');
+  
+    path = toPath(path);
     return function(object) {
-      return object != null && baseIsEqual(value, object[key], null, true);
+      if (object == null) {
+        return false;
+      }
+      var key = pathKey;
+      object = toObject(object);
+      if ((isArr || !isCommon) && !(key in object)) {
+        object = path.length == 1 ? object : baseGet(object, baseSlice(path, 0, -1));
+        if (object == null) {
+          return false;
+        }
+        key = last(path);
+        object = toObject(object);
+      }
+      return object[key] === value
+        ? (value !== undefined || (key in object))
+        : baseIsEqual(value, object[key], null, true);
     };
   }
   
   module.exports = baseMatchesProperty;
   
 });
-require.register('lodash-compat/internal/isStrictComparable@3.5.0', function(module, exports, require) {
-  var isObject = require('lodash-compat/lang/isObject@3.5.0');
+require.register('lodash-compat/internal/isStrictComparable.js#3.7.0', function(module, exports, require) {
+  var isObject = require('lodash-compat/lang/isObject.js#3.7.0');
   
   /**
    * Checks if `value` is suitable for strict equality comparisons, i.e. `===`.
@@ -1820,9 +2031,9 @@ require.register('lodash-compat/internal/isStrictComparable@3.5.0', function(mod
   module.exports = isStrictComparable;
   
 });
-require.register('lodash-compat/lang/isTypedArray@3.5.0', function(module, exports, require) {
-  var isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0');
+require.register('lodash-compat/lang/isTypedArray.js#3.7.0', function(module, exports, require) {
+  var isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0');
   
   /** `Object#toString` result references. */
   var argsTag = '[object Arguments]',
@@ -1869,9 +2080,8 @@ require.register('lodash-compat/lang/isTypedArray@3.5.0', function(module, expor
   var objectProto = Object.prototype;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -1892,14 +2102,14 @@ require.register('lodash-compat/lang/isTypedArray@3.5.0', function(module, expor
    * // => false
    */
   function isTypedArray(value) {
-    return (isObjectLike(value) && isLength(value.length) && typedArrayTags[objToString.call(value)]) || false;
+    return isObjectLike(value) && isLength(value.length) && !!typedArrayTags[objToString.call(value)];
   }
   
   module.exports = isTypedArray;
   
 });
-require.register('lodash-compat/internal/equalObjects@3.5.0', function(module, exports, require) {
-  var keys = require('lodash-compat/object/keys@3.5.0');
+require.register('lodash-compat/internal/equalObjects.js#3.7.0', function(module, exports, require) {
+  var keys = require('lodash-compat/object/keys.js#3.7.0');
   
   /** Used for native method references. */
   var objectProto = Object.prototype;
@@ -1916,26 +2126,26 @@ require.register('lodash-compat/internal/equalObjects@3.5.0', function(module, e
    * @param {Object} other The other object to compare.
    * @param {Function} equalFunc The function to determine equivalents of values.
    * @param {Function} [customizer] The function to customize comparing values.
-   * @param {boolean} [isWhere] Specify performing partial comparisons.
+   * @param {boolean} [isLoose] Specify performing partial comparisons.
    * @param {Array} [stackA] Tracks traversed `value` objects.
    * @param {Array} [stackB] Tracks traversed `other` objects.
    * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
    */
-  function equalObjects(object, other, equalFunc, customizer, isWhere, stackA, stackB) {
+  function equalObjects(object, other, equalFunc, customizer, isLoose, stackA, stackB) {
     var objProps = keys(object),
         objLength = objProps.length,
         othProps = keys(other),
         othLength = othProps.length;
   
-    if (objLength != othLength && !isWhere) {
+    if (objLength != othLength && !isLoose) {
       return false;
     }
-    var hasCtor,
+    var skipCtor = isLoose,
         index = -1;
   
     while (++index < objLength) {
       var key = objProps[index],
-          result = hasOwnProperty.call(other, key);
+          result = isLoose ? key in other : hasOwnProperty.call(other, key);
   
       if (result) {
         var objValue = object[key],
@@ -1943,21 +2153,21 @@ require.register('lodash-compat/internal/equalObjects@3.5.0', function(module, e
   
         result = undefined;
         if (customizer) {
-          result = isWhere
+          result = isLoose
             ? customizer(othValue, objValue, key)
             : customizer(objValue, othValue, key);
         }
-        if (typeof result == 'undefined') {
+        if (result === undefined) {
           // Recursively compare objects (susceptible to call stack limits).
-          result = (objValue && objValue === othValue) || equalFunc(objValue, othValue, customizer, isWhere, stackA, stackB);
+          result = (objValue && objValue === othValue) || equalFunc(objValue, othValue, customizer, isLoose, stackA, stackB);
         }
       }
       if (!result) {
         return false;
       }
-      hasCtor || (hasCtor = key == 'constructor');
+      skipCtor || (skipCtor = key == 'constructor');
     }
-    if (!hasCtor) {
+    if (!skipCtor) {
       var objCtor = object.constructor,
           othCtor = other.constructor;
   
@@ -1975,7 +2185,7 @@ require.register('lodash-compat/internal/equalObjects@3.5.0', function(module, e
   module.exports = equalObjects;
   
 });
-require.register('lodash-compat/internal/equalByTag@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/equalByTag.js#3.7.0', function(module, exports, require) {
   /** `Object#toString` result references. */
   var boolTag = '[object Boolean]',
       dateTag = '[object Date]',
@@ -2027,7 +2237,7 @@ require.register('lodash-compat/internal/equalByTag@3.5.0', function(module, exp
   module.exports = equalByTag;
   
 });
-require.register('lodash-compat/internal/equalArrays@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/equalArrays.js#3.7.0', function(module, exports, require) {
   /**
    * A specialized version of `baseIsEqualDeep` for arrays with support for
    * partial deep comparisons.
@@ -2037,18 +2247,18 @@ require.register('lodash-compat/internal/equalArrays@3.5.0', function(module, ex
    * @param {Array} other The other array to compare.
    * @param {Function} equalFunc The function to determine equivalents of values.
    * @param {Function} [customizer] The function to customize comparing arrays.
-   * @param {boolean} [isWhere] Specify performing partial comparisons.
+   * @param {boolean} [isLoose] Specify performing partial comparisons.
    * @param {Array} [stackA] Tracks traversed `value` objects.
    * @param {Array} [stackB] Tracks traversed `other` objects.
    * @returns {boolean} Returns `true` if the arrays are equivalent, else `false`.
    */
-  function equalArrays(array, other, equalFunc, customizer, isWhere, stackA, stackB) {
+  function equalArrays(array, other, equalFunc, customizer, isLoose, stackA, stackB) {
     var index = -1,
         arrLength = array.length,
         othLength = other.length,
         result = true;
   
-    if (arrLength != othLength && !(isWhere && othLength > arrLength)) {
+    if (arrLength != othLength && !(isLoose && othLength > arrLength)) {
       return false;
     }
     // Deep compare the contents, ignoring non-numeric properties.
@@ -2058,23 +2268,23 @@ require.register('lodash-compat/internal/equalArrays@3.5.0', function(module, ex
   
       result = undefined;
       if (customizer) {
-        result = isWhere
+        result = isLoose
           ? customizer(othValue, arrValue, index)
           : customizer(arrValue, othValue, index);
       }
-      if (typeof result == 'undefined') {
+      if (result === undefined) {
         // Recursively compare arrays (susceptible to call stack limits).
-        if (isWhere) {
+        if (isLoose) {
           var othIndex = othLength;
           while (othIndex--) {
             othValue = other[othIndex];
-            result = (arrValue && arrValue === othValue) || equalFunc(arrValue, othValue, customizer, isWhere, stackA, stackB);
+            result = (arrValue && arrValue === othValue) || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB);
             if (result) {
               break;
             }
           }
         } else {
-          result = (arrValue && arrValue === othValue) || equalFunc(arrValue, othValue, customizer, isWhere, stackA, stackB);
+          result = (arrValue && arrValue === othValue) || equalFunc(arrValue, othValue, customizer, isLoose, stackA, stackB);
         }
       }
     }
@@ -2084,13 +2294,13 @@ require.register('lodash-compat/internal/equalArrays@3.5.0', function(module, ex
   module.exports = equalArrays;
   
 });
-require.register('lodash-compat/internal/baseIsEqualDeep@3.5.0', function(module, exports, require) {
-  var equalArrays = require('lodash-compat/internal/equalArrays@3.5.0'),
-      equalByTag = require('lodash-compat/internal/equalByTag@3.5.0'),
-      equalObjects = require('lodash-compat/internal/equalObjects@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0'),
-      isHostObject = require('lodash-compat/internal/isHostObject@3.5.0'),
-      isTypedArray = require('lodash-compat/lang/isTypedArray@3.5.0');
+require.register('lodash-compat/internal/baseIsEqualDeep.js#3.7.0', function(module, exports, require) {
+  var equalArrays = require('lodash-compat/internal/equalArrays.js#3.7.0'),
+      equalByTag = require('lodash-compat/internal/equalByTag.js#3.7.0'),
+      equalObjects = require('lodash-compat/internal/equalObjects.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isHostObject = require('lodash-compat/internal/isHostObject.js#3.7.0'),
+      isTypedArray = require('lodash-compat/lang/isTypedArray.js#3.7.0');
   
   /** `Object#toString` result references. */
   var argsTag = '[object Arguments]',
@@ -2104,9 +2314,8 @@ require.register('lodash-compat/internal/baseIsEqualDeep@3.5.0', function(module
   var hasOwnProperty = objectProto.hasOwnProperty;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -2120,12 +2329,12 @@ require.register('lodash-compat/internal/baseIsEqualDeep@3.5.0', function(module
    * @param {Object} other The other object to compare.
    * @param {Function} equalFunc The function to determine equivalents of values.
    * @param {Function} [customizer] The function to customize comparing objects.
-   * @param {boolean} [isWhere] Specify performing partial comparisons.
+   * @param {boolean} [isLoose] Specify performing partial comparisons.
    * @param {Array} [stackA=[]] Tracks traversed `value` objects.
    * @param {Array} [stackB=[]] Tracks traversed `other` objects.
    * @returns {boolean} Returns `true` if the objects are equivalent, else `false`.
    */
-  function baseIsEqualDeep(object, other, equalFunc, customizer, isWhere, stackA, stackB) {
+  function baseIsEqualDeep(object, other, equalFunc, customizer, isLoose, stackA, stackB) {
     var objIsArr = isArray(object),
         othIsArr = isArray(other),
         objTag = arrayTag,
@@ -2154,11 +2363,13 @@ require.register('lodash-compat/internal/baseIsEqualDeep@3.5.0', function(module
     if (isSameTag && !(objIsArr || objIsObj)) {
       return equalByTag(object, other, objTag);
     }
-    var valWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
-        othWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
+    if (!isLoose) {
+      var valWrapped = objIsObj && hasOwnProperty.call(object, '__wrapped__'),
+          othWrapped = othIsObj && hasOwnProperty.call(other, '__wrapped__');
   
-    if (valWrapped || othWrapped) {
-      return equalFunc(valWrapped ? object.value() : object, othWrapped ? other.value() : other, customizer, isWhere, stackA, stackB);
+      if (valWrapped || othWrapped) {
+        return equalFunc(valWrapped ? object.value() : object, othWrapped ? other.value() : other, customizer, isLoose, stackA, stackB);
+      }
     }
     if (!isSameTag) {
       return false;
@@ -2178,7 +2389,7 @@ require.register('lodash-compat/internal/baseIsEqualDeep@3.5.0', function(module
     stackA.push(object);
     stackB.push(other);
   
-    var result = (objIsArr ? equalArrays : equalObjects)(object, other, equalFunc, customizer, isWhere, stackA, stackB);
+    var result = (objIsArr ? equalArrays : equalObjects)(object, other, equalFunc, customizer, isLoose, stackA, stackB);
   
     stackA.pop();
     stackB.pop();
@@ -2189,8 +2400,8 @@ require.register('lodash-compat/internal/baseIsEqualDeep@3.5.0', function(module
   module.exports = baseIsEqualDeep;
   
 });
-require.register('lodash-compat/internal/baseIsEqual@3.5.0', function(module, exports, require) {
-  var baseIsEqualDeep = require('lodash-compat/internal/baseIsEqualDeep@3.5.0');
+require.register('lodash-compat/internal/baseIsEqual.js#3.7.0', function(module, exports, require) {
+  var baseIsEqualDeep = require('lodash-compat/internal/baseIsEqualDeep.js#3.7.0');
   
   /**
    * The base implementation of `_.isEqual` without support for `this` binding
@@ -2200,12 +2411,12 @@ require.register('lodash-compat/internal/baseIsEqual@3.5.0', function(module, ex
    * @param {*} value The value to compare.
    * @param {*} other The other value to compare.
    * @param {Function} [customizer] The function to customize comparing values.
-   * @param {boolean} [isWhere] Specify performing partial comparisons.
+   * @param {boolean} [isLoose] Specify performing partial comparisons.
    * @param {Array} [stackA] Tracks traversed `value` objects.
    * @param {Array} [stackB] Tracks traversed `other` objects.
    * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
    */
-  function baseIsEqual(value, other, customizer, isWhere, stackA, stackB) {
+  function baseIsEqual(value, other, customizer, isLoose, stackA, stackB) {
     // Exit early for identical values.
     if (value === other) {
       // Treat `+0` vs. `-0` as not equal.
@@ -2220,24 +2431,18 @@ require.register('lodash-compat/internal/baseIsEqual@3.5.0', function(module, ex
       // Return `false` unless both values are `NaN`.
       return value !== value && other !== other;
     }
-    return baseIsEqualDeep(value, other, baseIsEqual, customizer, isWhere, stackA, stackB);
+    return baseIsEqualDeep(value, other, baseIsEqual, customizer, isLoose, stackA, stackB);
   }
   
   module.exports = baseIsEqual;
   
 });
-require.register('lodash-compat/internal/baseIsMatch@3.5.0', function(module, exports, require) {
-  var baseIsEqual = require('lodash-compat/internal/baseIsEqual@3.5.0');
-  
-  /** Used for native method references. */
-  var objectProto = Object.prototype;
-  
-  /** Used to check objects for own properties. */
-  var hasOwnProperty = objectProto.hasOwnProperty;
+require.register('lodash-compat/internal/baseIsMatch.js#3.7.0', function(module, exports, require) {
+  var baseIsEqual = require('lodash-compat/internal/baseIsEqual.js#3.7.0');
   
   /**
    * The base implementation of `_.isMatch` without support for callback
-   * shorthands or `this` binding.
+   * shorthands and `this` binding.
    *
    * @private
    * @param {Object} object The object to inspect.
@@ -2248,32 +2453,29 @@ require.register('lodash-compat/internal/baseIsMatch@3.5.0', function(module, ex
    * @returns {boolean} Returns `true` if `object` is a match, else `false`.
    */
   function baseIsMatch(object, props, values, strictCompareFlags, customizer) {
-    var length = props.length;
-    if (object == null) {
-      return !length;
-    }
     var index = -1,
+        length = props.length,
         noCustomizer = !customizer;
   
     while (++index < length) {
       if ((noCustomizer && strictCompareFlags[index])
             ? values[index] !== object[props[index]]
-            : !hasOwnProperty.call(object, props[index])
+            : !(props[index] in object)
           ) {
         return false;
       }
     }
     index = -1;
     while (++index < length) {
-      var key = props[index];
-      if (noCustomizer && strictCompareFlags[index]) {
-        var result = hasOwnProperty.call(object, key);
-      } else {
-        var objValue = object[key],
-            srcValue = values[index];
+      var key = props[index],
+          objValue = object[key],
+          srcValue = values[index];
   
+      if (noCustomizer && strictCompareFlags[index]) {
+        var result = objValue !== undefined || (key in object);
+      } else {
         result = customizer ? customizer(objValue, srcValue, key) : undefined;
-        if (typeof result == 'undefined') {
+        if (result === undefined) {
           result = baseIsEqual(srcValue, objValue, customizer, true);
         }
       }
@@ -2287,16 +2489,12 @@ require.register('lodash-compat/internal/baseIsMatch@3.5.0', function(module, ex
   module.exports = baseIsMatch;
   
 });
-require.register('lodash-compat/internal/baseMatches@3.5.0', function(module, exports, require) {
-  var baseIsMatch = require('lodash-compat/internal/baseIsMatch@3.5.0'),
-      isStrictComparable = require('lodash-compat/internal/isStrictComparable@3.5.0'),
-      keys = require('lodash-compat/object/keys@3.5.0');
-  
-  /** Used for native method references. */
-  var objectProto = Object.prototype;
-  
-  /** Used to check objects for own properties. */
-  var hasOwnProperty = objectProto.hasOwnProperty;
+require.register('lodash-compat/internal/baseMatches.js#3.7.0', function(module, exports, require) {
+  var baseIsMatch = require('lodash-compat/internal/baseIsMatch.js#3.7.0'),
+      constant = require('lodash-compat/utility/constant.js#3.7.0'),
+      isStrictComparable = require('lodash-compat/internal/isStrictComparable.js#3.7.0'),
+      keys = require('lodash-compat/object/keys.js#3.7.0'),
+      toObject = require('lodash-compat/internal/toObject.js#3.7.0');
   
   /**
    * The base implementation of `_.matches` which does not clone `source`.
@@ -2309,13 +2507,20 @@ require.register('lodash-compat/internal/baseMatches@3.5.0', function(module, ex
     var props = keys(source),
         length = props.length;
   
+    if (!length) {
+      return constant(true);
+    }
     if (length == 1) {
       var key = props[0],
           value = source[key];
   
       if (isStrictComparable(value)) {
         return function(object) {
-          return object != null && object[key] === value && hasOwnProperty.call(object, key);
+          if (object == null) {
+            return false;
+          }
+          object = toObject(object);
+          return object[key] === value && (value !== undefined || (key in object));
         };
       }
     }
@@ -2328,20 +2533,19 @@ require.register('lodash-compat/internal/baseMatches@3.5.0', function(module, ex
       strictCompareFlags[length] = isStrictComparable(value);
     }
     return function(object) {
-      return baseIsMatch(object, props, values, strictCompareFlags);
+      return object != null && baseIsMatch(toObject(object), props, values, strictCompareFlags);
     };
   }
   
   module.exports = baseMatches;
   
 });
-require.register('lodash-compat/internal/baseCallback@3.5.0', function(module, exports, require) {
-  var baseMatches = require('lodash-compat/internal/baseMatches@3.5.0'),
-      baseMatchesProperty = require('lodash-compat/internal/baseMatchesProperty@3.5.0'),
-      baseProperty = require('lodash-compat/internal/baseProperty@3.5.0'),
-      bindCallback = require('lodash-compat/internal/bindCallback@3.5.0'),
-      identity = require('lodash-compat/utility/identity@3.5.0'),
-      isBindable = require('lodash-compat/internal/isBindable@3.5.0');
+require.register('lodash-compat/internal/baseCallback.js#3.7.0', function(module, exports, require) {
+  var baseMatches = require('lodash-compat/internal/baseMatches.js#3.7.0'),
+      baseMatchesProperty = require('lodash-compat/internal/baseMatchesProperty.js#3.7.0'),
+      bindCallback = require('lodash-compat/internal/bindCallback.js#3.7.0'),
+      identity = require('lodash-compat/utility/identity.js#3.7.0'),
+      property = require('lodash-compat/utility/property.js#3.7.0');
   
   /**
    * The base implementation of `_.callback` which supports specifying the
@@ -2356,9 +2560,9 @@ require.register('lodash-compat/internal/baseCallback@3.5.0', function(module, e
   function baseCallback(func, thisArg, argCount) {
     var type = typeof func;
     if (type == 'function') {
-      return (typeof thisArg != 'undefined' && isBindable(func))
-        ? bindCallback(func, thisArg, argCount)
-        : func;
+      return thisArg === undefined
+        ? func
+        : bindCallback(func, thisArg, argCount);
     }
     if (func == null) {
       return identity;
@@ -2366,18 +2570,18 @@ require.register('lodash-compat/internal/baseCallback@3.5.0', function(module, e
     if (type == 'object') {
       return baseMatches(func);
     }
-    return typeof thisArg == 'undefined'
-      ? baseProperty(func + '')
-      : baseMatchesProperty(func + '', thisArg);
+    return thisArg === undefined
+      ? property(func)
+      : baseMatchesProperty(func, thisArg);
   }
   
   module.exports = baseCallback;
   
 });
-require.register('lodash-compat/internal/arrayMap@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/arrayMap.js#3.7.0', function(module, exports, require) {
   /**
    * A specialized version of `_.map` for arrays without support for callback
-   * shorthands or `this` binding.
+   * shorthands and `this` binding.
    *
    * @private
    * @param {Array} array The array to iterate over.
@@ -2398,25 +2602,25 @@ require.register('lodash-compat/internal/arrayMap@3.5.0', function(module, expor
   module.exports = arrayMap;
   
 });
-require.register('lodash-compat/collection/map@3.5.0', function(module, exports, require) {
-  var arrayMap = require('lodash-compat/internal/arrayMap@3.5.0'),
-      baseCallback = require('lodash-compat/internal/baseCallback@3.5.0'),
-      baseMap = require('lodash-compat/internal/baseMap@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0');
+require.register('lodash-compat/collection/map.js#3.7.0', function(module, exports, require) {
+  var arrayMap = require('lodash-compat/internal/arrayMap.js#3.7.0'),
+      baseCallback = require('lodash-compat/internal/baseCallback.js#3.7.0'),
+      baseMap = require('lodash-compat/internal/baseMap.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0');
   
   /**
    * Creates an array of values by running each element in `collection` through
    * `iteratee`. The `iteratee` is bound to `thisArg` and invoked with three
-   * arguments; (value, index|key, collection).
+   * arguments: (value, index|key, collection).
    *
-   * If a property name is provided for `predicate` the created `_.property`
+   * If a property name is provided for `iteratee` the created `_.property`
    * style callback returns the property value of the given element.
    *
    * If a value is also provided for `thisArg` the created `_.matchesProperty`
    * style callback returns `true` for elements that have a matching property
    * value, else `false`.
    *
-   * If an object is provided for `predicate` the created `_.matches` style
+   * If an object is provided for `iteratee` the created `_.matches` style
    * callback returns `true` for elements that have the properties of the given
    * object, else `false`.
    *
@@ -2425,9 +2629,9 @@ require.register('lodash-compat/collection/map@3.5.0', function(module, exports,
    *
    * The guarded methods are:
    * `ary`, `callback`, `chunk`, `clone`, `create`, `curry`, `curryRight`, `drop`,
-   * `dropRight`, `fill`, `flatten`, `invert`, `max`, `min`, `parseInt`, `slice`,
-   * `sortBy`, `take`, `takeRight`, `template`, `trim`, `trimLeft`, `trimRight`,
-   * `trunc`, `random`, `range`, `sample`, `uniq`, and `words`
+   * `dropRight`, `every`, `fill`, `flatten`, `invert`, `max`, `min`, `parseInt`,
+   * `slice`, `sortBy`, `take`, `takeRight`, `template`, `trim`, `trimLeft`,
+   * `trimRight`, `trunc`, `random`, `range`, `sample`, `some`, `uniq`, and `words`
    *
    * @static
    * @memberOf _
@@ -2436,7 +2640,6 @@ require.register('lodash-compat/collection/map@3.5.0', function(module, exports,
    * @param {Array|Object|string} collection The collection to iterate over.
    * @param {Function|Object|string} [iteratee=_.identity] The function invoked
    *  per iteration.
-   *  create a `_.property` or `_.matches` style callback respectively.
    * @param {*} [thisArg] The `this` binding of `iteratee`.
    * @returns {Array} Returns the new mapped array.
    * @example
@@ -2469,12 +2672,12 @@ require.register('lodash-compat/collection/map@3.5.0', function(module, exports,
   module.exports = map;
   
 });
-require.register('url-utils@1.7.1', function(module, exports, require) {
-  var map = require('lodash-compat/collection/map@3.5.0')
-  	, forEach = require('lodash-compat/collection/forEach@3.5.0')
-  	, isArray = require('lodash-compat/lang/isArray@3.5.0')
-  	, keys = require('lodash-compat/object/keys@3.5.0')
-  	, isServer = require('runtime@0.1.0').isServer
+require.register('url-utils#1.8.0', function(module, exports, require) {
+  var map = require('lodash-compat/collection/map.js#3.7.0')
+  	, forEach = require('lodash-compat/collection/forEach.js#3.7.0')
+  	, isArray = require('lodash-compat/lang/isArray.js#3.7.0')
+  	, keys = require('lodash-compat/object/keys.js#3.7.0')
+  	, isServer = require('runtime#0.1.0').isServer
   
   	, RE_TEMPLATE = /\{([0-9a-zA-Z]+)\}/g
   	, RE_URL = /([^:])(\/{2,})/g;
@@ -2628,16 +2831,16 @@ require.register('url-utils@1.7.1', function(module, exports, require) {
   	return exports.sanitize(str);
   };
 });
-require.register('lib/history', function(module, exports, require) {
+require.register('lib/history.js', function(module, exports, require) {
   /**
    * Manager for browser history.
    * Generates/stores request/response context for current url,
    * and responds to changes to state via History API.
    */
   
-  var bind = require('lodash-compat/function/bind@3.5.0')
-  	, debug = require('debug@2.1.2')('express:history')
-  	, urlUtils = require('url-utils@1.7.1')
+  var bind = require('lodash-compat/function/bind.js#3.7.0')
+  	, debug = require('debug#2.1.2')('express:history')
+  	, urlUtils = require('url-utils#1.8.0')
   	, bootstrap = true;
   
   module.exports = History;
@@ -2884,8 +3087,8 @@ require.register('lib/history', function(module, exports, require) {
   	return (url && (url.indexOf(origin) == 0));
   }
 });
-require.register('lodash-compat/internal/bindCallback@3.5.0', function(module, exports, require) {
-  var identity = require('lodash-compat/utility/identity@3.5.0');
+require.register('lodash-compat/internal/bindCallback.js#3.7.0', function(module, exports, require) {
+  var identity = require('lodash-compat/utility/identity.js#3.7.0');
   
   /**
    * A specialized version of `baseCallback` which only supports `this` binding
@@ -2901,7 +3104,7 @@ require.register('lodash-compat/internal/bindCallback@3.5.0', function(module, e
     if (typeof func != 'function') {
       return identity;
     }
-    if (typeof thisArg == 'undefined') {
+    if (thisArg === undefined) {
       return func;
     }
     switch (argCount) {
@@ -2926,7 +3129,82 @@ require.register('lodash-compat/internal/bindCallback@3.5.0', function(module, e
   module.exports = bindCallback;
   
 });
-require.register('lodash-compat/internal/baseIsFunction@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/createForEach.js#3.7.0', function(module, exports, require) {
+  var bindCallback = require('lodash-compat/internal/bindCallback.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0');
+  
+  /**
+   * Creates a function for `_.forEach` or `_.forEachRight`.
+   *
+   * @private
+   * @param {Function} arrayFunc The function to iterate over an array.
+   * @param {Function} eachFunc The function to iterate over a collection.
+   * @returns {Function} Returns the new each function.
+   */
+  function createForEach(arrayFunc, eachFunc) {
+    return function(collection, iteratee, thisArg) {
+      return (typeof iteratee == 'function' && thisArg === undefined && isArray(collection))
+        ? arrayFunc(collection, iteratee)
+        : eachFunc(collection, bindCallback(iteratee, thisArg, 3));
+    };
+  }
+  
+  module.exports = createForEach;
+  
+});
+require.register('lodash-compat/internal/getLength.js#3.7.0', function(module, exports, require) {
+  var baseProperty = require('lodash-compat/internal/baseProperty.js#3.7.0');
+  
+  /**
+   * Gets the "length" property value of `object`.
+   *
+   * **Note:** This function is used to avoid a [JIT bug](https://bugs.webkit.org/show_bug.cgi?id=142792)
+   * in Safari on iOS 8.1 ARM64.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @returns {*} Returns the "length" value.
+   */
+  var getLength = baseProperty('length');
+  
+  module.exports = getLength;
+  
+});
+require.register('lodash-compat/internal/createBaseEach.js#3.7.0', function(module, exports, require) {
+  var getLength = require('lodash-compat/internal/getLength.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      toObject = require('lodash-compat/internal/toObject.js#3.7.0');
+  
+  /**
+   * Creates a `baseEach` or `baseEachRight` function.
+   *
+   * @private
+   * @param {Function} eachFunc The function to iterate over a collection.
+   * @param {boolean} [fromRight] Specify iterating from right to left.
+   * @returns {Function} Returns the new base function.
+   */
+  function createBaseEach(eachFunc, fromRight) {
+    return function(collection, iteratee) {
+      var length = collection ? getLength(collection) : 0;
+      if (!isLength(length)) {
+        return eachFunc(collection, iteratee);
+      }
+      var index = fromRight ? length : -1,
+          iterable = toObject(collection);
+  
+      while ((fromRight ? index-- : ++index < length)) {
+        if (iteratee(iterable[index], index, iterable) === false) {
+          break;
+        }
+      }
+      return collection;
+    };
+  }
+  
+  module.exports = createBaseEach;
+  
+});
+require.register('lodash-compat/internal/baseIsFunction.js#3.7.0', function(module, exports, require) {
   /**
    * The base implementation of `_.isFunction` without support for environments
    * with incorrect `typeof` results.
@@ -2944,9 +3222,9 @@ require.register('lodash-compat/internal/baseIsFunction@3.5.0', function(module,
   module.exports = baseIsFunction;
   
 });
-require.register('lodash-compat/lang/isFunction@3.5.0', function(module, exports, require) {
-  var baseIsFunction = require('lodash-compat/internal/baseIsFunction@3.5.0'),
-      isNative = require('lodash-compat/lang/isNative@3.5.0');
+require.register('lodash-compat/lang/isFunction.js#3.7.0', function(module, exports, require) {
+  var baseIsFunction = require('lodash-compat/internal/baseIsFunction.js#3.7.0'),
+      isNative = require('lodash-compat/lang/isNative.js#3.7.0');
   
   /** `Object#toString` result references. */
   var funcTag = '[object Function]';
@@ -2955,9 +3233,8 @@ require.register('lodash-compat/lang/isFunction@3.5.0', function(module, exports
   var objectProto = Object.prototype;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -2990,16 +3267,16 @@ require.register('lodash-compat/lang/isFunction@3.5.0', function(module, exports
   module.exports = isFunction;
   
 });
-require.register('lodash-compat/object/keysIn@3.5.0', function(module, exports, require) {
-  var arrayEach = require('lodash-compat/internal/arrayEach@3.5.0'),
-      isArguments = require('lodash-compat/lang/isArguments@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0'),
-      isFunction = require('lodash-compat/lang/isFunction@3.5.0'),
-      isIndex = require('lodash-compat/internal/isIndex@3.5.0'),
-      isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isObject = require('lodash-compat/lang/isObject@3.5.0'),
-      isString = require('lodash-compat/lang/isString@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
+require.register('lodash-compat/object/keysIn.js#3.7.0', function(module, exports, require) {
+  var arrayEach = require('lodash-compat/internal/arrayEach.js#3.7.0'),
+      isArguments = require('lodash-compat/lang/isArguments.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isFunction = require('lodash-compat/lang/isFunction.js#3.7.0'),
+      isIndex = require('lodash-compat/internal/isIndex.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isObject = require('lodash-compat/lang/isObject.js#3.7.0'),
+      isString = require('lodash-compat/lang/isString.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
   
   /** `Object#toString` result references. */
   var arrayTag = '[object Array]',
@@ -3027,9 +3304,8 @@ require.register('lodash-compat/object/keysIn@3.5.0', function(module, exports, 
   var hasOwnProperty = objectProto.hasOwnProperty;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -3057,7 +3333,7 @@ require.register('lodash-compat/object/keysIn@3.5.0', function(module, exports, 
    * @static
    * @memberOf _
    * @category Object
-   * @param {Object} object The object to inspect.
+   * @param {Object} object The object to query.
    * @returns {Array} Returns the array of property names.
    * @example
    *
@@ -3131,54 +3407,10 @@ require.register('lodash-compat/object/keysIn@3.5.0', function(module, exports, 
   module.exports = keysIn;
   
 });
-require.register('lodash-compat/lang/isArray@3.5.0', function(module, exports, require) {
-  var isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isNative = require('lodash-compat/lang/isNative@3.5.0'),
-      isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0');
-  
-  /** `Object#toString` result references. */
-  var arrayTag = '[object Array]';
-  
-  /** Used for native method references. */
-  var objectProto = Object.prototype;
-  
-  /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
-   */
-  var objToString = objectProto.toString;
-  
-  /* Native method references for those with the same name as other `lodash` methods. */
-  var nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray;
-  
-  /**
-   * Checks if `value` is classified as an `Array` object.
-   *
-   * @static
-   * @memberOf _
-   * @category Lang
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
-   * @example
-   *
-   * _.isArray([1, 2, 3]);
-   * // => true
-   *
-   * _.isArray(function() { return arguments; }());
-   * // => false
-   */
-  var isArray = nativeIsArray || function(value) {
-    return (isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag) || false;
-  };
-  
-  module.exports = isArray;
-  
-});
-require.register('lodash-compat/lang/isArguments@3.5.0', function(module, exports, require) {
-  var isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
+require.register('lodash-compat/lang/isArguments.js#3.7.0', function(module, exports, require) {
+  var isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
   
   /** `Object#toString` result references. */
   var argsTag = '[object Arguments]';
@@ -3190,9 +3422,8 @@ require.register('lodash-compat/lang/isArguments@3.5.0', function(module, export
   var hasOwnProperty = objectProto.hasOwnProperty;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
@@ -3217,28 +3448,28 @@ require.register('lodash-compat/lang/isArguments@3.5.0', function(module, export
    */
   function isArguments(value) {
     var length = isObjectLike(value) ? value.length : undefined;
-    return (isLength(length) && objToString.call(value) == argsTag) || false;
+    return isLength(length) && objToString.call(value) == argsTag;
   }
   // Fallback for environments without a `toStringTag` for `arguments` objects.
   if (!support.argsTag) {
     isArguments = function(value) {
       var length = isObjectLike(value) ? value.length : undefined;
-      return (isLength(length) && hasOwnProperty.call(value, 'callee') &&
-        !propertyIsEnumerable.call(value, 'callee')) || false;
+      return isLength(length) && hasOwnProperty.call(value, 'callee') &&
+        !propertyIsEnumerable.call(value, 'callee');
     };
   }
   
   module.exports = isArguments;
   
 });
-require.register('lodash-compat/internal/shimKeys@3.5.0', function(module, exports, require) {
-  var isArguments = require('lodash-compat/lang/isArguments@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0'),
-      isIndex = require('lodash-compat/internal/isIndex@3.5.0'),
-      isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isString = require('lodash-compat/lang/isString@3.5.0'),
-      keysIn = require('lodash-compat/object/keysIn@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
+require.register('lodash-compat/internal/shimKeys.js#3.7.0', function(module, exports, require) {
+  var isArguments = require('lodash-compat/lang/isArguments.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isIndex = require('lodash-compat/internal/isIndex.js#3.7.0'),
+      isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isString = require('lodash-compat/lang/isString.js#3.7.0'),
+      keysIn = require('lodash-compat/object/keysIn.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
   
   /** Used for native method references. */
   var objectProto = Object.prototype;
@@ -3251,7 +3482,7 @@ require.register('lodash-compat/internal/shimKeys@3.5.0', function(module, expor
    * own enumerable property names of `object`.
    *
    * @private
-   * @param {Object} object The object to inspect.
+   * @param {Object} object The object to query.
    * @returns {Array} Returns the array of property names.
    */
   function shimKeys(object) {
@@ -3278,38 +3509,12 @@ require.register('lodash-compat/internal/shimKeys@3.5.0', function(module, expor
   module.exports = shimKeys;
   
 });
-require.register('lodash-compat/internal/isLength@3.5.0', function(module, exports, require) {
-  /**
-   * Used as the maximum length of an array-like value.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
-   * for more details.
-   */
-  var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
-  
-  /**
-   * Checks if `value` is a valid array-like length.
-   *
-   * **Note:** This function is based on ES `ToLength`. See the
-   * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength)
-   * for more details.
-   *
-   * @private
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
-   */
-  function isLength(value) {
-    return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
-  }
-  
-  module.exports = isLength;
-  
-});
-require.register('lodash-compat/object/keys@3.5.0', function(module, exports, require) {
-  var isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      isNative = require('lodash-compat/lang/isNative@3.5.0'),
-      isObject = require('lodash-compat/lang/isObject@3.5.0'),
-      shimKeys = require('lodash-compat/internal/shimKeys@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
+require.register('lodash-compat/object/keys.js#3.7.0', function(module, exports, require) {
+  var isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isNative = require('lodash-compat/lang/isNative.js#3.7.0'),
+      isObject = require('lodash-compat/lang/isObject.js#3.7.0'),
+      shimKeys = require('lodash-compat/internal/shimKeys.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
   
   /* Native method references for those with the same name as other `lodash` methods. */
   var nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys;
@@ -3324,7 +3529,7 @@ require.register('lodash-compat/object/keys@3.5.0', function(module, exports, re
    * @static
    * @memberOf _
    * @category Object
-   * @param {Object} object The object to inspect.
+   * @param {Object} object The object to query.
    * @returns {Array} Returns the array of property names.
    * @example
    *
@@ -3347,7 +3552,7 @@ require.register('lodash-compat/object/keys@3.5.0', function(module, exports, re
           length = object.length;
     }
     if ((typeof Ctor == 'function' && Ctor.prototype === object) ||
-        (typeof object == 'function' ? support.enumPrototypes : (length && isLength(length)))) {
+        (typeof object == 'function' ? support.enumPrototypes : isLength(length))) {
       return shimKeys(object);
     }
     return isObject(object) ? nativeKeys(object) : [];
@@ -3356,274 +3561,43 @@ require.register('lodash-compat/object/keys@3.5.0', function(module, exports, re
   module.exports = keys;
   
 });
-require.register('lodash-compat/support@3.5.0', function(module, exports, require) {
-  var isNative = require('lodash-compat/lang/isNative@3.5.0');
-  
-  /** `Object#toString` result references. */
-  var argsTag = '[object Arguments]',
-      objectTag = '[object Object]';
-  
-  /** Used to detect functions containing a `this` reference. */
-  var reThis = /\bthis\b/;
-  
-  /** Used for native method references. */
-  var arrayProto = Array.prototype,
-      errorProto = Error.prototype,
-      objectProto = Object.prototype;
-  
-  /** Used to detect DOM support. */
-  var document = (document = global.window) && document.document;
+require.register('lodash-compat/internal/createBaseFor.js#3.7.0', function(module, exports, require) {
+  var toObject = require('lodash-compat/internal/toObject.js#3.7.0');
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
-   */
-  var objToString = objectProto.toString;
-  
-  /** Native method references. */
-  var propertyIsEnumerable = objectProto.propertyIsEnumerable,
-      splice = arrayProto.splice;
-  
-  /**
-   * An object environment feature flags.
-   *
-   * @static
-   * @memberOf _
-   * @type Object
-   */
-  var support = {};
-  
-  (function(x) {
-    var Ctor = function() { this.x = 1; },
-        object = { '0': 1, 'length': 1 },
-        props = [];
-  
-    Ctor.prototype = { 'valueOf': 1, 'y': 1 };
-    for (var key in new Ctor) { props.push(key); }
-  
-    /**
-     * Detect if the `toStringTag` of `arguments` objects is resolvable
-     * (all but Firefox < 4, IE < 9).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.argsTag = objToString.call(arguments) == argsTag;
-  
-    /**
-     * Detect if `name` or `message` properties of `Error.prototype` are
-     * enumerable by default (IE < 9, Safari < 5.1).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') ||
-      propertyIsEnumerable.call(errorProto, 'name');
-  
-    /**
-     * Detect if `prototype` properties are enumerable by default.
-     *
-     * Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
-     * (if the prototype or a property on the prototype has been set)
-     * incorrectly set the `[[Enumerable]]` value of a function's `prototype`
-     * property to `true`.
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.enumPrototypes = propertyIsEnumerable.call(Ctor, 'prototype');
-  
-    /**
-     * Detect if functions can be decompiled by `Function#toString`
-     * (all but Firefox OS certified apps, older Opera mobile browsers, and
-     * the PlayStation 3; forced `false` for Windows 8 apps).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.funcDecomp = !isNative(global.WinRTError) && reThis.test(function() { return this; });
-  
-    /**
-     * Detect if `Function#name` is supported (all but IE).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.funcNames = typeof Function.name == 'string';
-  
-    /**
-     * Detect if the `toStringTag` of DOM nodes is resolvable (all but IE < 9).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.nodeTag = objToString.call(document) != objectTag;
-  
-    /**
-     * Detect if string indexes are non-enumerable
-     * (IE < 9, RingoJS, Rhino, Narwhal).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.nonEnumStrings = !propertyIsEnumerable.call('x', 0);
-  
-    /**
-     * Detect if properties shadowing those on `Object.prototype` are
-     * non-enumerable.
-     *
-     * In IE < 9 an object's own properties, shadowing non-enumerable ones,
-     * are made non-enumerable as well (a.k.a the JScript `[[DontEnum]]` bug).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.nonEnumShadows = !/valueOf/.test(props);
-  
-    /**
-     * Detect if own properties are iterated after inherited properties (IE < 9).
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.ownLast = props[0] != 'x';
-  
-    /**
-     * Detect if `Array#shift` and `Array#splice` augment array-like objects
-     * correctly.
-     *
-     * Firefox < 10, compatibility modes of IE 8, and IE < 9 have buggy Array `shift()`
-     * and `splice()` functions that fail to remove the last element, `value[0]`,
-     * of array-like objects even though the `length` property is set to `0`.
-     * The `shift()` method is buggy in compatibility modes of IE 8, while `splice()`
-     * is buggy regardless of mode in IE < 9.
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.spliceObjects = (splice.call(object, 0, 1), !object[0]);
-  
-    /**
-     * Detect lack of support for accessing string characters by index.
-     *
-     * IE < 8 can't access characters by index. IE 8 can only access characters
-     * by index on string literals, not string objects.
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    support.unindexedChars = ('x'[0] + Object('x')[0]) != 'xx';
-  
-    /**
-     * Detect if the DOM is supported.
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    try {
-      support.dom = document.createDocumentFragment().nodeType === 11;
-    } catch(e) {
-      support.dom = false;
-    }
-  
-    /**
-     * Detect if `arguments` object indexes are non-enumerable.
-     *
-     * In Firefox < 4, IE < 9, PhantomJS, and Safari < 5.1 `arguments` object
-     * indexes are non-enumerable. Chrome < 25 and Node.js < 0.11.0 treat
-     * `arguments` object indexes as non-enumerable and fail `hasOwnProperty`
-     * checks for indexes that exceed their function's formal parameters with
-     * associated values of `0`.
-     *
-     * @memberOf _.support
-     * @type boolean
-     */
-    try {
-      support.nonEnumArgs = !propertyIsEnumerable.call(arguments, 1);
-    } catch(e) {
-      support.nonEnumArgs = true;
-    }
-  }(0, 0));
-  
-  module.exports = support;
-  
-});
-require.register('lodash-compat/lang/isString@3.5.0', function(module, exports, require) {
-  var isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0');
-  
-  /** `Object#toString` result references. */
-  var stringTag = '[object String]';
-  
-  /** Used for native method references. */
-  var objectProto = Object.prototype;
-  
-  /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
-   */
-  var objToString = objectProto.toString;
-  
-  /**
-   * Checks if `value` is classified as a `String` primitive or object.
-   *
-   * @static
-   * @memberOf _
-   * @category Lang
-   * @param {*} value The value to check.
-   * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
-   * @example
-   *
-   * _.isString('abc');
-   * // => true
-   *
-   * _.isString(1);
-   * // => false
-   */
-  function isString(value) {
-    return typeof value == 'string' || (isObjectLike(value) && objToString.call(value) == stringTag) || false;
-  }
-  
-  module.exports = isString;
-  
-});
-require.register('lodash-compat/internal/toObject@3.5.0', function(module, exports, require) {
-  var isObject = require('lodash-compat/lang/isObject@3.5.0'),
-      isString = require('lodash-compat/lang/isString@3.5.0'),
-      support = require('lodash-compat/support@3.5.0');
-  
-  /**
-   * Converts `value` to an object if it is not one.
+   * Creates a base function for `_.forIn` or `_.forInRight`.
    *
    * @private
-   * @param {*} value The value to process.
-   * @returns {Object} Returns the object.
+   * @param {boolean} [fromRight] Specify iterating from right to left.
+   * @returns {Function} Returns the new base function.
    */
-  function toObject(value) {
-    if (support.unindexedChars && isString(value)) {
-      var index = -1,
-          length = value.length,
-          result = Object(value);
+  function createBaseFor(fromRight) {
+    return function(object, iteratee, keysFunc) {
+      var iterable = toObject(object),
+          props = keysFunc(object),
+          length = props.length,
+          index = fromRight ? length : -1;
   
-      while (++index < length) {
-        result[index] = value.charAt(index);
+      while ((fromRight ? index-- : ++index < length)) {
+        var key = props[index];
+        if (iteratee(iterable[key], key, iterable) === false) {
+          break;
+        }
       }
-      return result;
-    }
-    return isObject(value) ? value : Object(value);
+      return object;
+    };
   }
   
-  module.exports = toObject;
+  module.exports = createBaseFor;
   
 });
-require.register('lodash-compat/internal/baseFor@3.5.0', function(module, exports, require) {
-  var toObject = require('lodash-compat/internal/toObject@3.5.0');
+require.register('lodash-compat/internal/baseFor.js#3.7.0', function(module, exports, require) {
+  var createBaseFor = require('lodash-compat/internal/createBaseFor.js#3.7.0');
   
   /**
    * The base implementation of `baseForIn` and `baseForOwn` which iterates
    * over `object` properties returned by `keysFunc` invoking `iteratee` for
-   * each property. Iterator functions may exit iteration early by explicitly
+   * each property. Iteratee functions may exit iteration early by explicitly
    * returning `false`.
    *
    * @private
@@ -3632,27 +3606,14 @@ require.register('lodash-compat/internal/baseFor@3.5.0', function(module, export
    * @param {Function} keysFunc The function to get the keys of `object`.
    * @returns {Object} Returns `object`.
    */
-  function baseFor(object, iteratee, keysFunc) {
-    var index = -1,
-        iterable = toObject(object),
-        props = keysFunc(object),
-        length = props.length;
-  
-    while (++index < length) {
-      var key = props[index];
-      if (iteratee(iterable[key], key, iterable) === false) {
-        break;
-      }
-    }
-    return object;
-  }
+  var baseFor = createBaseFor();
   
   module.exports = baseFor;
   
 });
-require.register('lodash-compat/internal/baseForOwn@3.5.0', function(module, exports, require) {
-  var baseFor = require('lodash-compat/internal/baseFor@3.5.0'),
-      keys = require('lodash-compat/object/keys@3.5.0');
+require.register('lodash-compat/internal/baseForOwn.js#3.7.0', function(module, exports, require) {
+  var baseFor = require('lodash-compat/internal/baseFor.js#3.7.0'),
+      keys = require('lodash-compat/object/keys.js#3.7.0');
   
   /**
    * The base implementation of `_.forOwn` without support for callback
@@ -3670,10 +3631,9 @@ require.register('lodash-compat/internal/baseForOwn@3.5.0', function(module, exp
   module.exports = baseForOwn;
   
 });
-require.register('lodash-compat/internal/baseEach@3.5.0', function(module, exports, require) {
-  var baseForOwn = require('lodash-compat/internal/baseForOwn@3.5.0'),
-      isLength = require('lodash-compat/internal/isLength@3.5.0'),
-      toObject = require('lodash-compat/internal/toObject@3.5.0');
+require.register('lodash-compat/internal/baseEach.js#3.7.0', function(module, exports, require) {
+  var baseForOwn = require('lodash-compat/internal/baseForOwn.js#3.7.0'),
+      createBaseEach = require('lodash-compat/internal/createBaseEach.js#3.7.0');
   
   /**
    * The base implementation of `_.forEach` without support for callback
@@ -3684,29 +3644,15 @@ require.register('lodash-compat/internal/baseEach@3.5.0', function(module, expor
    * @param {Function} iteratee The function invoked per iteration.
    * @returns {Array|Object|string} Returns `collection`.
    */
-  function baseEach(collection, iteratee) {
-    var length = collection ? collection.length : 0;
-    if (!isLength(length)) {
-      return baseForOwn(collection, iteratee);
-    }
-    var index = -1,
-        iterable = toObject(collection);
-  
-    while (++index < length) {
-      if (iteratee(iterable[index], index, iterable) === false) {
-        break;
-      }
-    }
-    return collection;
-  }
+  var baseEach = createBaseEach(baseForOwn);
   
   module.exports = baseEach;
   
 });
-require.register('lodash-compat/internal/arrayEach@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/arrayEach.js#3.7.0', function(module, exports, require) {
   /**
    * A specialized version of `_.forEach` for arrays without support for callback
-   * shorthands or `this` binding.
+   * shorthands and `this` binding.
    *
    * @private
    * @param {Array} array The array to iterate over.
@@ -3728,19 +3674,18 @@ require.register('lodash-compat/internal/arrayEach@3.5.0', function(module, expo
   module.exports = arrayEach;
   
 });
-require.register('lodash-compat/collection/forEach@3.5.0', function(module, exports, require) {
-  var arrayEach = require('lodash-compat/internal/arrayEach@3.5.0'),
-      baseEach = require('lodash-compat/internal/baseEach@3.5.0'),
-      bindCallback = require('lodash-compat/internal/bindCallback@3.5.0'),
-      isArray = require('lodash-compat/lang/isArray@3.5.0');
+require.register('lodash-compat/collection/forEach.js#3.7.0', function(module, exports, require) {
+  var arrayEach = require('lodash-compat/internal/arrayEach.js#3.7.0'),
+      baseEach = require('lodash-compat/internal/baseEach.js#3.7.0'),
+      createForEach = require('lodash-compat/internal/createForEach.js#3.7.0');
   
   /**
    * Iterates over elements of `collection` invoking `iteratee` for each element.
-   * The `iteratee` is bound to `thisArg` and invoked with three arguments;
-   * (value, index|key, collection). Iterator functions may exit iteration early
+   * The `iteratee` is bound to `thisArg` and invoked with three arguments:
+   * (value, index|key, collection). Iteratee functions may exit iteration early
    * by explicitly returning `false`.
    *
-   * **Note:** As with other "Collections" methods, objects with a `length` property
+   * **Note:** As with other "Collections" methods, objects with a "length" property
    * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
    * may be used for object iteration.
    *
@@ -3764,16 +3709,12 @@ require.register('lodash-compat/collection/forEach@3.5.0', function(module, expo
    * });
    * // => logs each value-key pair and returns the object (iteration order is not guaranteed)
    */
-  function forEach(collection, iteratee, thisArg) {
-    return (typeof iteratee == 'function' && typeof thisArg == 'undefined' && isArray(collection))
-      ? arrayEach(collection, iteratee)
-      : baseEach(collection, bindCallback(iteratee, thisArg, 3));
-  }
+  var forEach = createForEach(arrayEach, baseEach);
   
   module.exports = forEach;
   
 });
-require.register('ms@0.7.0', function(module, exports, require) {
+require.register('ms#0.7.0', function(module, exports, require) {
   /**
    * Helpers.
    */
@@ -3899,7 +3840,7 @@ require.register('ms@0.7.0', function(module, exports, require) {
   }
   
 });
-require.register('debug/debug@2.1.2', function(module, exports, require) {
+require.register('debug/debug.js#2.1.2', function(module, exports, require) {
   
   /**
    * This is the common logic for both the Node.js and web browser
@@ -3913,7 +3854,7 @@ require.register('debug/debug@2.1.2', function(module, exports, require) {
   exports.disable = disable;
   exports.enable = enable;
   exports.enabled = enabled;
-  exports.humanize = require('ms@0.7.0');
+  exports.humanize = require('ms#0.7.0');
   
   /**
    * The currently active debug mode names, and names to skip.
@@ -4099,7 +4040,7 @@ require.register('debug/debug@2.1.2', function(module, exports, require) {
   }
   
 });
-require.register('debug@2.1.2', function(module, exports, require) {
+require.register('debug#2.1.2', function(module, exports, require) {
   
   /**
    * This is the web browser implementation of `debug()`.
@@ -4107,7 +4048,7 @@ require.register('debug@2.1.2', function(module, exports, require) {
    * Expose `debug()` as the module.
    */
   
-  exports = module.exports = require('debug/debug@2.1.2');
+  exports = module.exports = require('debug/debug.js#2.1.2');
   exports.log = log;
   exports.formatArgs = formatArgs;
   exports.save = save;
@@ -4277,90 +4218,79 @@ require.register('debug@2.1.2', function(module, exports, require) {
   }
   
 });
-require.register('lodash-compat/date/now@3.5.0', function(module, exports, require) {
-  var isNative = require('lodash-compat/lang/isNative@3.5.0');
+require.register('lodash-compat/function/restParam.js#3.7.0', function(module, exports, require) {
+  /** Used as the `TypeError` message for "Functions" methods. */
+  var FUNC_ERROR_TEXT = 'Expected a function';
   
   /* Native method references for those with the same name as other `lodash` methods. */
-  var nativeNow = isNative(nativeNow = Date.now) && nativeNow;
+  var nativeMax = Math.max;
   
   /**
-   * Gets the number of milliseconds that have elapsed since the Unix epoch
-   * (1 January 1970 00:00:00 UTC).
+   * Creates a function that invokes `func` with the `this` binding of the
+   * created function and arguments from `start` and beyond provided as an array.
+   *
+   * **Note:** This method is based on the [rest parameter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters).
    *
    * @static
    * @memberOf _
-   * @category Date
+   * @category Function
+   * @param {Function} func The function to apply a rest parameter to.
+   * @param {number} [start=func.length-1] The start position of the rest parameter.
+   * @returns {Function} Returns the new function.
    * @example
    *
-   * _.defer(function(stamp) {
-   *   console.log(_.now() - stamp);
-   * }, _.now());
-   * // => logs the number of milliseconds it took for the deferred function to be invoked
-   */
-  var now = nativeNow || function() {
-    return new Date().getTime();
-  };
-  
-  module.exports = now;
-  
-});
-require.register('lodash-compat/internal/setData@3.5.0', function(module, exports, require) {
-  var baseSetData = require('lodash-compat/internal/baseSetData@3.5.0'),
-      now = require('lodash-compat/date/now@3.5.0');
-  
-  /** Used to detect when a function becomes hot. */
-  var HOT_COUNT = 150,
-      HOT_SPAN = 16;
-  
-  /**
-   * Sets metadata for `func`.
+   * var say = _.restParam(function(what, names) {
+   *   return what + ' ' + _.initial(names).join(', ') +
+   *     (_.size(names) > 1 ? ', & ' : '') + _.last(names);
+   * });
    *
-   * **Note:** If this function becomes hot, i.e. is invoked a lot in a short
-   * period of time, it will trip its breaker and transition to an identity function
-   * to avoid garbage collection pauses in V8. See [V8 issue 2070](https://code.google.com/p/v8/issues/detail?id=2070)
-   * for more details.
-   *
-   * @private
-   * @param {Function} func The function to associate metadata with.
-   * @param {*} data The metadata.
-   * @returns {Function} Returns `func`.
+   * say('hello', 'fred', 'barney', 'pebbles');
+   * // => 'hello fred, barney, & pebbles'
    */
-  var setData = (function() {
-    var count = 0,
-        lastCalled = 0;
+  function restParam(func, start) {
+    if (typeof func != 'function') {
+      throw new TypeError(FUNC_ERROR_TEXT);
+    }
+    start = nativeMax(start === undefined ? (func.length - 1) : (+start || 0), 0);
+    return function() {
+      var args = arguments,
+          index = -1,
+          length = nativeMax(args.length - start, 0),
+          rest = Array(length);
   
-    return function(key, value) {
-      var stamp = now(),
-          remaining = HOT_SPAN - (stamp - lastCalled);
-  
-      lastCalled = stamp;
-      if (remaining > 0) {
-        if (++count >= HOT_COUNT) {
-          return key;
-        }
-      } else {
-        count = 0;
+      while (++index < length) {
+        rest[index] = args[start + index];
       }
-      return baseSetData(key, value);
+      switch (start) {
+        case 0: return func.call(this, rest);
+        case 1: return func.call(this, args[0], rest);
+        case 2: return func.call(this, args[0], args[1], rest);
+      }
+      var otherArgs = Array(start + 1);
+      index = -1;
+      while (++index < start) {
+        otherArgs[index] = args[index];
+      }
+      otherArgs[start] = rest;
+      return func.apply(this, otherArgs);
     };
-  }());
+  }
   
-  module.exports = setData;
+  module.exports = restParam;
   
 });
-require.register('lodash-compat/internal/mergeData@3.5.0', function(module, exports, require) {
-  var arrayCopy = require('lodash-compat/internal/arrayCopy@3.5.0'),
-      composeArgs = require('lodash-compat/internal/composeArgs@3.5.0'),
-      composeArgsRight = require('lodash-compat/internal/composeArgsRight@3.5.0'),
-      replaceHolders = require('lodash-compat/internal/replaceHolders@3.5.0');
+require.register('lodash-compat/internal/mergeData.js#3.7.0', function(module, exports, require) {
+  var arrayCopy = require('lodash-compat/internal/arrayCopy.js#3.7.0'),
+      composeArgs = require('lodash-compat/internal/composeArgs.js#3.7.0'),
+      composeArgsRight = require('lodash-compat/internal/composeArgsRight.js#3.7.0'),
+      replaceHolders = require('lodash-compat/internal/replaceHolders.js#3.7.0');
   
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
-      BIND_KEY_FLAG = 2,
       CURRY_BOUND_FLAG = 4,
-      CURRY_RIGHT_FLAG = 16,
-      REARG_FLAG = 128,
-      ARY_FLAG = 256;
+      CURRY_FLAG = 8,
+      ARY_FLAG = 128,
+      REARG_FLAG = 256;
   
   /** Used as the internal argument placeholder. */
   var PLACEHOLDER = '__lodash_placeholder__';
@@ -4386,22 +4316,13 @@ require.register('lodash-compat/internal/mergeData@3.5.0', function(module, expo
   function mergeData(data, source) {
     var bitmask = data[1],
         srcBitmask = source[1],
-        newBitmask = bitmask | srcBitmask;
+        newBitmask = bitmask | srcBitmask,
+        isCommon = newBitmask < ARY_FLAG;
   
-    var arityFlags = ARY_FLAG | REARG_FLAG,
-        bindFlags = BIND_FLAG | BIND_KEY_FLAG,
-        comboFlags = arityFlags | bindFlags | CURRY_BOUND_FLAG | CURRY_RIGHT_FLAG;
-  
-    var isAry = bitmask & ARY_FLAG && !(srcBitmask & ARY_FLAG),
-        isRearg = bitmask & REARG_FLAG && !(srcBitmask & REARG_FLAG),
-        argPos = (isRearg ? data : source)[7],
-        ary = (isAry ? data : source)[8];
-  
-    var isCommon = !(bitmask >= REARG_FLAG && srcBitmask > bindFlags) &&
-      !(bitmask > bindFlags && srcBitmask >= REARG_FLAG);
-  
-    var isCombo = (newBitmask >= arityFlags && newBitmask <= comboFlags) &&
-      (bitmask < REARG_FLAG || ((isRearg || isAry) && argPos.length <= ary));
+    var isCombo =
+      (srcBitmask == ARY_FLAG && bitmask == CURRY_FLAG) ||
+      (srcBitmask == ARY_FLAG && bitmask == REARG_FLAG && data[7].length <= source[8]) ||
+      (srcBitmask == (ARY_FLAG | REARG_FLAG) && bitmask == CURRY_FLAG);
   
     // Exit early if metadata can't be merged.
     if (!(isCommon || isCombo)) {
@@ -4450,7 +4371,7 @@ require.register('lodash-compat/internal/mergeData@3.5.0', function(module, expo
   module.exports = mergeData;
   
 });
-require.register('lodash-compat/utility/noop@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/utility/noop.js#3.7.0', function(module, exports, require) {
   /**
    * A no-operation function which returns `undefined` regardless of the
    * arguments it receives.
@@ -4472,9 +4393,9 @@ require.register('lodash-compat/utility/noop@3.5.0', function(module, exports, r
   module.exports = noop;
   
 });
-require.register('lodash-compat/internal/getData@3.5.0', function(module, exports, require) {
-  var metaMap = require('lodash-compat/internal/metaMap@3.5.0'),
-      noop = require('lodash-compat/utility/noop@3.5.0');
+require.register('lodash-compat/internal/getData.js#3.7.0', function(module, exports, require) {
+  var metaMap = require('lodash-compat/internal/metaMap.js#3.7.0'),
+      noop = require('lodash-compat/utility/noop.js#3.7.0');
   
   /**
    * Gets metadata for `func`.
@@ -4490,8 +4411,8 @@ require.register('lodash-compat/internal/getData@3.5.0', function(module, export
   module.exports = getData;
   
 });
-require.register('lodash-compat/internal/createPartialWrapper@3.5.0', function(module, exports, require) {
-  var createCtorWrapper = require('lodash-compat/internal/createCtorWrapper@3.5.0');
+require.register('lodash-compat/internal/createPartialWrapper.js#3.7.0', function(module, exports, require) {
+  var createCtorWrapper = require('lodash-compat/internal/createCtorWrapper.js#3.7.0');
   
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1;
@@ -4536,7 +4457,78 @@ require.register('lodash-compat/internal/createPartialWrapper@3.5.0', function(m
   module.exports = createPartialWrapper;
   
 });
-require.register('lodash-compat/internal/replaceHolders@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/date/now.js#3.7.0', function(module, exports, require) {
+  var isNative = require('lodash-compat/lang/isNative.js#3.7.0');
+  
+  /* Native method references for those with the same name as other `lodash` methods. */
+  var nativeNow = isNative(nativeNow = Date.now) && nativeNow;
+  
+  /**
+   * Gets the number of milliseconds that have elapsed since the Unix epoch
+   * (1 January 1970 00:00:00 UTC).
+   *
+   * @static
+   * @memberOf _
+   * @category Date
+   * @example
+   *
+   * _.defer(function(stamp) {
+   *   console.log(_.now() - stamp);
+   * }, _.now());
+   * // => logs the number of milliseconds it took for the deferred function to be invoked
+   */
+  var now = nativeNow || function() {
+    return new Date().getTime();
+  };
+  
+  module.exports = now;
+  
+});
+require.register('lodash-compat/internal/setData.js#3.7.0', function(module, exports, require) {
+  var baseSetData = require('lodash-compat/internal/baseSetData.js#3.7.0'),
+      now = require('lodash-compat/date/now.js#3.7.0');
+  
+  /** Used to detect when a function becomes hot. */
+  var HOT_COUNT = 150,
+      HOT_SPAN = 16;
+  
+  /**
+   * Sets metadata for `func`.
+   *
+   * **Note:** If this function becomes hot, i.e. is invoked a lot in a short
+   * period of time, it will trip its breaker and transition to an identity function
+   * to avoid garbage collection pauses in V8. See [V8 issue 2070](https://code.google.com/p/v8/issues/detail?id=2070)
+   * for more details.
+   *
+   * @private
+   * @param {Function} func The function to associate metadata with.
+   * @param {*} data The metadata.
+   * @returns {Function} Returns `func`.
+   */
+  var setData = (function() {
+    var count = 0,
+        lastCalled = 0;
+  
+    return function(key, value) {
+      var stamp = now(),
+          remaining = HOT_SPAN - (stamp - lastCalled);
+  
+      lastCalled = stamp;
+      if (remaining > 0) {
+        if (++count >= HOT_COUNT) {
+          return key;
+        }
+      } else {
+        count = 0;
+      }
+      return baseSetData(key, value);
+    };
+  }());
+  
+  module.exports = setData;
+  
+});
+require.register('lodash-compat/internal/replaceHolders.js#3.7.0', function(module, exports, require) {
   /** Used as the internal argument placeholder. */
   var PLACEHOLDER = '__lodash_placeholder__';
   
@@ -4567,11 +4559,10 @@ require.register('lodash-compat/internal/replaceHolders@3.5.0', function(module,
   module.exports = replaceHolders;
   
 });
-require.register('lodash-compat/internal/isIndex@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/isIndex.js#3.7.0', function(module, exports, require) {
   /**
-   * Used as the maximum length of an array-like value.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
-   * for more details.
+   * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+   * of an array-like value.
    */
   var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
   
@@ -4592,9 +4583,9 @@ require.register('lodash-compat/internal/isIndex@3.5.0', function(module, export
   module.exports = isIndex;
   
 });
-require.register('lodash-compat/internal/reorder@3.5.0', function(module, exports, require) {
-  var arrayCopy = require('lodash-compat/internal/arrayCopy@3.5.0'),
-      isIndex = require('lodash-compat/internal/isIndex@3.5.0');
+require.register('lodash-compat/internal/reorder.js#3.7.0', function(module, exports, require) {
+  var arrayCopy = require('lodash-compat/internal/arrayCopy.js#3.7.0'),
+      isIndex = require('lodash-compat/internal/isIndex.js#3.7.0');
   
   /* Native method references for those with the same name as other `lodash` methods. */
   var nativeMin = Math.min;
@@ -4624,7 +4615,650 @@ require.register('lodash-compat/internal/reorder@3.5.0', function(module, export
   module.exports = reorder;
   
 });
-require.register('lodash-compat/internal/composeArgsRight@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/wrapperClone.js#3.7.0', function(module, exports, require) {
+  var LazyWrapper = require('lodash-compat/internal/LazyWrapper.js#3.7.0'),
+      LodashWrapper = require('lodash-compat/internal/LodashWrapper.js#3.7.0'),
+      arrayCopy = require('lodash-compat/internal/arrayCopy.js#3.7.0');
+  
+  /**
+   * Creates a clone of `wrapper`.
+   *
+   * @private
+   * @param {Object} wrapper The wrapper to clone.
+   * @returns {Object} Returns the cloned wrapper.
+   */
+  function wrapperClone(wrapper) {
+    return wrapper instanceof LazyWrapper
+      ? wrapper.clone()
+      : new LodashWrapper(wrapper.__wrapped__, wrapper.__chain__, arrayCopy(wrapper.__actions__));
+  }
+  
+  module.exports = wrapperClone;
+  
+});
+require.register('lodash-compat/internal/isLength.js#3.7.0', function(module, exports, require) {
+  /**
+   * Used as the [maximum length](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
+   * of an array-like value.
+   */
+  var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
+  
+  /**
+   * Checks if `value` is a valid array-like length.
+   *
+   * **Note:** This function is based on [`ToLength`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength).
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+   */
+  function isLength(value) {
+    return typeof value == 'number' && value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+  }
+  
+  module.exports = isLength;
+  
+});
+require.register('lodash-compat/lang/isArray.js#3.7.0', function(module, exports, require) {
+  var isLength = require('lodash-compat/internal/isLength.js#3.7.0'),
+      isNative = require('lodash-compat/lang/isNative.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0');
+  
+  /** `Object#toString` result references. */
+  var arrayTag = '[object Array]';
+  
+  /** Used for native method references. */
+  var objectProto = Object.prototype;
+  
+  /**
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
+   */
+  var objToString = objectProto.toString;
+  
+  /* Native method references for those with the same name as other `lodash` methods. */
+  var nativeIsArray = isNative(nativeIsArray = Array.isArray) && nativeIsArray;
+  
+  /**
+   * Checks if `value` is classified as an `Array` object.
+   *
+   * @static
+   * @memberOf _
+   * @category Lang
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+   * @example
+   *
+   * _.isArray([1, 2, 3]);
+   * // => true
+   *
+   * _.isArray(function() { return arguments; }());
+   * // => false
+   */
+  var isArray = nativeIsArray || function(value) {
+    return isObjectLike(value) && isLength(value.length) && objToString.call(value) == arrayTag;
+  };
+  
+  module.exports = isArray;
+  
+});
+require.register('lodash-compat/internal/LodashWrapper.js#3.7.0', function(module, exports, require) {
+  var baseCreate = require('lodash-compat/internal/baseCreate.js#3.7.0'),
+      baseLodash = require('lodash-compat/internal/baseLodash.js#3.7.0');
+  
+  /**
+   * The base constructor for creating `lodash` wrapper objects.
+   *
+   * @private
+   * @param {*} value The value to wrap.
+   * @param {boolean} [chainAll] Enable chaining for all wrapper methods.
+   * @param {Array} [actions=[]] Actions to peform to resolve the unwrapped value.
+   */
+  function LodashWrapper(value, chainAll, actions) {
+    this.__wrapped__ = value;
+    this.__actions__ = actions || [];
+    this.__chain__ = !!chainAll;
+  }
+  
+  LodashWrapper.prototype = baseCreate(baseLodash.prototype);
+  LodashWrapper.prototype.constructor = LodashWrapper;
+  
+  module.exports = LodashWrapper;
+  
+});
+require.register('lodash-compat/chain/lodash.js#3.7.0', function(module, exports, require) {
+  var LazyWrapper = require('lodash-compat/internal/LazyWrapper.js#3.7.0'),
+      LodashWrapper = require('lodash-compat/internal/LodashWrapper.js#3.7.0'),
+      baseLodash = require('lodash-compat/internal/baseLodash.js#3.7.0'),
+      isArray = require('lodash-compat/lang/isArray.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0'),
+      wrapperClone = require('lodash-compat/internal/wrapperClone.js#3.7.0');
+  
+  /** Used for native method references. */
+  var objectProto = Object.prototype;
+  
+  /** Used to check objects for own properties. */
+  var hasOwnProperty = objectProto.hasOwnProperty;
+  
+  /**
+   * Creates a `lodash` object which wraps `value` to enable implicit chaining.
+   * Methods that operate on and return arrays, collections, and functions can
+   * be chained together. Methods that return a boolean or single value will
+   * automatically end the chain returning the unwrapped value. Explicit chaining
+   * may be enabled using `_.chain`. The execution of chained methods is lazy,
+   * that is, execution is deferred until `_#value` is implicitly or explicitly
+   * called.
+   *
+   * Lazy evaluation allows several methods to support shortcut fusion. Shortcut
+   * fusion is an optimization that merges iteratees to avoid creating intermediate
+   * arrays and reduce the number of iteratee executions.
+   *
+   * Chaining is supported in custom builds as long as the `_#value` method is
+   * directly or indirectly included in the build.
+   *
+   * In addition to lodash methods, wrappers have `Array` and `String` methods.
+   *
+   * The wrapper `Array` methods are:
+   * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`,
+   * `splice`, and `unshift`
+   *
+   * The wrapper `String` methods are:
+   * `replace` and `split`
+   *
+   * The wrapper methods that support shortcut fusion are:
+   * `compact`, `drop`, `dropRight`, `dropRightWhile`, `dropWhile`, `filter`,
+   * `first`, `initial`, `last`, `map`, `pluck`, `reject`, `rest`, `reverse`,
+   * `slice`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `toArray`,
+   * and `where`
+   *
+   * The chainable wrapper methods are:
+   * `after`, `ary`, `assign`, `at`, `before`, `bind`, `bindAll`, `bindKey`,
+   * `callback`, `chain`, `chunk`, `commit`, `compact`, `concat`, `constant`,
+   * `countBy`, `create`, `curry`, `debounce`, `defaults`, `defer`, `delay`,
+   * `difference`, `drop`, `dropRight`, `dropRightWhile`, `dropWhile`, `fill`,
+   * `filter`, `flatten`, `flattenDeep`, `flow`, `flowRight`, `forEach`,
+   * `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `functions`,
+   * `groupBy`, `indexBy`, `initial`, `intersection`, `invert`, `invoke`, `keys`,
+   * `keysIn`, `map`, `mapValues`, `matches`, `matchesProperty`, `memoize`,
+   * `merge`, `mixin`, `negate`, `omit`, `once`, `pairs`, `partial`, `partialRight`,
+   * `partition`, `pick`, `plant`, `pluck`, `property`, `propertyOf`, `pull`,
+   * `pullAt`, `push`, `range`, `rearg`, `reject`, `remove`, `rest`, `reverse`,
+   * `shuffle`, `slice`, `sort`, `sortBy`, `sortByAll`, `sortByOrder`, `splice`,
+   * `spread`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`,
+   * `throttle`, `thru`, `times`, `toArray`, `toPlainObject`, `transform`,
+   * `union`, `uniq`, `unshift`, `unzip`, `values`, `valuesIn`, `where`,
+   * `without`, `wrap`, `xor`, `zip`, and `zipObject`
+   *
+   * The wrapper methods that are **not** chainable by default are:
+   * `add`, `attempt`, `camelCase`, `capitalize`, `clone`, `cloneDeep`, `deburr`,
+   * `endsWith`, `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`,
+   * `findLast`, `findLastIndex`, `findLastKey`, `findWhere`, `first`, `has`,
+   * `identity`, `includes`, `indexOf`, `inRange`, `isArguments`, `isArray`,
+   * `isBoolean`, `isDate`, `isElement`, `isEmpty`, `isEqual`, `isError`, `isFinite`
+   * `isFunction`, `isMatch`, `isNative`, `isNaN`, `isNull`, `isNumber`, `isObject`,
+   * `isPlainObject`, `isRegExp`, `isString`, `isUndefined`, `isTypedArray`,
+   * `join`, `kebabCase`, `last`, `lastIndexOf`, `max`, `min`, `noConflict`,
+   * `noop`, `now`, `pad`, `padLeft`, `padRight`, `parseInt`, `pop`, `random`,
+   * `reduce`, `reduceRight`, `repeat`, `result`, `runInContext`, `shift`, `size`,
+   * `snakeCase`, `some`, `sortedIndex`, `sortedLastIndex`, `startCase`, `startsWith`,
+   * `sum`, `template`, `trim`, `trimLeft`, `trimRight`, `trunc`, `unescape`,
+   * `uniqueId`, `value`, and `words`
+   *
+   * The wrapper method `sample` will return a wrapped value when `n` is provided,
+   * otherwise an unwrapped value is returned.
+   *
+   * @name _
+   * @constructor
+   * @category Chain
+   * @param {*} value The value to wrap in a `lodash` instance.
+   * @returns {Object} Returns the new `lodash` wrapper instance.
+   * @example
+   *
+   * var wrapped = _([1, 2, 3]);
+   *
+   * // returns an unwrapped value
+   * wrapped.reduce(function(total, n) {
+   *   return total + n;
+   * });
+   * // => 6
+   *
+   * // returns a wrapped value
+   * var squares = wrapped.map(function(n) {
+   *   return n * n;
+   * });
+   *
+   * _.isArray(squares);
+   * // => false
+   *
+   * _.isArray(squares.value());
+   * // => true
+   */
+  function lodash(value) {
+    if (isObjectLike(value) && !isArray(value) && !(value instanceof LazyWrapper)) {
+      if (value instanceof LodashWrapper) {
+        return value;
+      }
+      if (hasOwnProperty.call(value, '__chain__') && hasOwnProperty.call(value, '__wrapped__')) {
+        return wrapperClone(value);
+      }
+    }
+    return new LodashWrapper(value);
+  }
+  
+  // Ensure wrappers are instances of `baseLodash`.
+  lodash.prototype = baseLodash.prototype;
+  
+  module.exports = lodash;
+  
+});
+require.register('lodash-compat/internal/realNames.js#3.7.0', function(module, exports, require) {
+  /** Used to lookup unminified function names. */
+  var realNames = {};
+  
+  module.exports = realNames;
+  
+});
+require.register('lodash-compat/utility/constant.js#3.7.0', function(module, exports, require) {
+  /**
+   * Creates a function that returns `value`.
+   *
+   * @static
+   * @memberOf _
+   * @category Utility
+   * @param {*} value The value to return from the new function.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var object = { 'user': 'fred' };
+   * var getter = _.constant(object);
+   *
+   * getter() === object;
+   * // => true
+   */
+  function constant(value) {
+    return function() {
+      return value;
+    };
+  }
+  
+  module.exports = constant;
+  
+});
+require.register('lodash-compat/support.js#3.7.0', function(module, exports, require) {
+  /** `Object#toString` result references. */
+  var argsTag = '[object Arguments]',
+      objectTag = '[object Object]';
+  
+  /** Used for native method references. */
+  var arrayProto = Array.prototype,
+      errorProto = Error.prototype,
+      objectProto = Object.prototype;
+  
+  /** Used to detect DOM support. */
+  var document = (document = global.window) && document.document;
+  
+  /**
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
+   */
+  var objToString = objectProto.toString;
+  
+  /** Native method references. */
+  var propertyIsEnumerable = objectProto.propertyIsEnumerable,
+      splice = arrayProto.splice;
+  
+  /**
+   * An object environment feature flags.
+   *
+   * @static
+   * @memberOf _
+   * @type Object
+   */
+  var support = {};
+  
+  (function(x) {
+    var Ctor = function() { this.x = x; },
+        object = { '0': x, 'length': x },
+        props = [];
+  
+    Ctor.prototype = { 'valueOf': x, 'y': x };
+    for (var key in new Ctor) { props.push(key); }
+  
+    /**
+     * Detect if the `toStringTag` of `arguments` objects is resolvable
+     * (all but Firefox < 4, IE < 9).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.argsTag = objToString.call(arguments) == argsTag;
+  
+    /**
+     * Detect if `name` or `message` properties of `Error.prototype` are
+     * enumerable by default (IE < 9, Safari < 5.1).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.enumErrorProps = propertyIsEnumerable.call(errorProto, 'message') ||
+      propertyIsEnumerable.call(errorProto, 'name');
+  
+    /**
+     * Detect if `prototype` properties are enumerable by default.
+     *
+     * Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
+     * (if the prototype or a property on the prototype has been set)
+     * incorrectly set the `[[Enumerable]]` value of a function's `prototype`
+     * property to `true`.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.enumPrototypes = propertyIsEnumerable.call(Ctor, 'prototype');
+  
+    /**
+     * Detect if functions can be decompiled by `Function#toString`
+     * (all but Firefox OS certified apps, older Opera mobile browsers, and
+     * the PlayStation 3; forced `false` for Windows 8 apps).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.funcDecomp = /\bthis\b/.test(function() { return this; });
+  
+    /**
+     * Detect if `Function#name` is supported (all but IE).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.funcNames = typeof Function.name == 'string';
+  
+    /**
+     * Detect if the `toStringTag` of DOM nodes is resolvable (all but IE < 9).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nodeTag = objToString.call(document) != objectTag;
+  
+    /**
+     * Detect if string indexes are non-enumerable (IE < 9, RingoJS, Rhino, Narwhal).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nonEnumStrings = !propertyIsEnumerable.call('x', 0);
+  
+    /**
+     * Detect if properties shadowing those on `Object.prototype` are non-enumerable.
+     *
+     * In IE < 9 an object's own properties, shadowing non-enumerable ones,
+     * are made non-enumerable as well (a.k.a the JScript `[[DontEnum]]` bug).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.nonEnumShadows = !/valueOf/.test(props);
+  
+    /**
+     * Detect if own properties are iterated after inherited properties (IE < 9).
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.ownLast = props[0] != 'x';
+  
+    /**
+     * Detect if `Array#shift` and `Array#splice` augment array-like objects
+     * correctly.
+     *
+     * Firefox < 10, compatibility modes of IE 8, and IE < 9 have buggy Array
+     * `shift()` and `splice()` functions that fail to remove the last element,
+     * `value[0]`, of array-like objects even though the "length" property is
+     * set to `0`. The `shift()` method is buggy in compatibility modes of IE 8,
+     * while `splice()` is buggy regardless of mode in IE < 9.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.spliceObjects = (splice.call(object, 0, 1), !object[0]);
+  
+    /**
+     * Detect lack of support for accessing string characters by index.
+     *
+     * IE < 8 can't access characters by index. IE 8 can only access characters
+     * by index on string literals, not string objects.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    support.unindexedChars = ('x'[0] + Object('x')[0]) != 'xx';
+  
+    /**
+     * Detect if the DOM is supported.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    try {
+      support.dom = document.createDocumentFragment().nodeType === 11;
+    } catch(e) {
+      support.dom = false;
+    }
+  
+    /**
+     * Detect if `arguments` object indexes are non-enumerable.
+     *
+     * In Firefox < 4, IE < 9, PhantomJS, and Safari < 5.1 `arguments` object
+     * indexes are non-enumerable. Chrome < 25 and Node.js < 0.11.0 treat
+     * `arguments` object indexes as non-enumerable and fail `hasOwnProperty`
+     * checks for indexes that exceed the number of function parameters and
+     * whose associated argument values are `0`.
+     *
+     * @memberOf _.support
+     * @type boolean
+     */
+    try {
+      support.nonEnumArgs = !propertyIsEnumerable.call(arguments, 1);
+    } catch(e) {
+      support.nonEnumArgs = true;
+    }
+  }(1, 0));
+  
+  module.exports = support;
+  
+});
+require.register('lodash-compat/lang/isString.js#3.7.0', function(module, exports, require) {
+  var isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0');
+  
+  /** `Object#toString` result references. */
+  var stringTag = '[object String]';
+  
+  /** Used for native method references. */
+  var objectProto = Object.prototype;
+  
+  /**
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
+   */
+  var objToString = objectProto.toString;
+  
+  /**
+   * Checks if `value` is classified as a `String` primitive or object.
+   *
+   * @static
+   * @memberOf _
+   * @category Lang
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+   * @example
+   *
+   * _.isString('abc');
+   * // => true
+   *
+   * _.isString(1);
+   * // => false
+   */
+  function isString(value) {
+    return typeof value == 'string' || (isObjectLike(value) && objToString.call(value) == stringTag);
+  }
+  
+  module.exports = isString;
+  
+});
+require.register('lodash-compat/internal/toObject.js#3.7.0', function(module, exports, require) {
+  var isObject = require('lodash-compat/lang/isObject.js#3.7.0'),
+      isString = require('lodash-compat/lang/isString.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
+  
+  /**
+   * Converts `value` to an object if it is not one.
+   *
+   * @private
+   * @param {*} value The value to process.
+   * @returns {Object} Returns the object.
+   */
+  function toObject(value) {
+    if (support.unindexedChars && isString(value)) {
+      var index = -1,
+          length = value.length,
+          result = Object(value);
+  
+      while (++index < length) {
+        result[index] = value.charAt(index);
+      }
+      return result;
+    }
+    return isObject(value) ? value : Object(value);
+  }
+  
+  module.exports = toObject;
+  
+});
+require.register('lodash-compat/internal/baseProperty.js#3.7.0', function(module, exports, require) {
+  var toObject = require('lodash-compat/internal/toObject.js#3.7.0');
+  
+  /**
+   * The base implementation of `_.property` without support for deep paths.
+   *
+   * @private
+   * @param {string} key The key of the property to get.
+   * @returns {Function} Returns the new function.
+   */
+  function baseProperty(key) {
+    return function(object) {
+      return object == null ? undefined : toObject(object)[key];
+    };
+  }
+  
+  module.exports = baseProperty;
+  
+});
+require.register('lodash-compat/internal/getFuncName.js#3.7.0', function(module, exports, require) {
+  var baseProperty = require('lodash-compat/internal/baseProperty.js#3.7.0'),
+      constant = require('lodash-compat/utility/constant.js#3.7.0'),
+      realNames = require('lodash-compat/internal/realNames.js#3.7.0'),
+      support = require('lodash-compat/support.js#3.7.0');
+  
+  /**
+   * Gets the name of `func`.
+   *
+   * @private
+   * @param {Function} func The function to query.
+   * @returns {string} Returns the function name.
+   */
+  var getFuncName = (function() {
+    if (!support.funcNames) {
+      return constant('');
+    }
+    if (constant.name == 'constant') {
+      return baseProperty('name');
+    }
+    return function(func) {
+      var result = func.name,
+          array = realNames[result],
+          length = array ? array.length : 0;
+  
+      while (length--) {
+        var data = array[length],
+            otherFunc = data.func;
+  
+        if (otherFunc == null || otherFunc == func) {
+          return data.name;
+        }
+      }
+      return result;
+    };
+  }());
+  
+  module.exports = getFuncName;
+  
+});
+require.register('lodash-compat/internal/baseLodash.js#3.7.0', function(module, exports, require) {
+  /**
+   * The function whose prototype all chaining wrappers inherit from.
+   *
+   * @private
+   */
+  function baseLodash() {
+    // No operation performed.
+  }
+  
+  module.exports = baseLodash;
+  
+});
+require.register('lodash-compat/internal/LazyWrapper.js#3.7.0', function(module, exports, require) {
+  var baseCreate = require('lodash-compat/internal/baseCreate.js#3.7.0'),
+      baseLodash = require('lodash-compat/internal/baseLodash.js#3.7.0');
+  
+  /** Used as references for `-Infinity` and `Infinity`. */
+  var POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+  
+  /**
+   * Creates a lazy wrapper object which wraps `value` to enable lazy evaluation.
+   *
+   * @private
+   * @param {*} value The value to wrap.
+   */
+  function LazyWrapper(value) {
+    this.__wrapped__ = value;
+    this.__actions__ = null;
+    this.__dir__ = 1;
+    this.__dropCount__ = 0;
+    this.__filtered__ = false;
+    this.__iteratees__ = null;
+    this.__takeCount__ = POSITIVE_INFINITY;
+    this.__views__ = null;
+  }
+  
+  LazyWrapper.prototype = baseCreate(baseLodash.prototype);
+  LazyWrapper.prototype.constructor = LazyWrapper;
+  
+  module.exports = LazyWrapper;
+  
+});
+require.register('lodash-compat/internal/isLaziable.js#3.7.0', function(module, exports, require) {
+  var LazyWrapper = require('lodash-compat/internal/LazyWrapper.js#3.7.0'),
+      getFuncName = require('lodash-compat/internal/getFuncName.js#3.7.0'),
+      lodash = require('lodash-compat/chain/lodash.js#3.7.0');
+  
+  /**
+   * Checks if `func` has a lazy counterpart.
+   *
+   * @private
+   * @param {Function} func The function to check.
+   * @returns {boolean} Returns `true` if `func` has a lazy counterpart, else `false`.
+   */
+  function isLaziable(func) {
+    var funcName = getFuncName(func);
+    return !!funcName && func === lodash[funcName] && funcName in LazyWrapper.prototype;
+  }
+  
+  module.exports = isLaziable;
+  
+});
+require.register('lodash-compat/internal/composeArgsRight.js#3.7.0', function(module, exports, require) {
   /* Native method references for those with the same name as other `lodash` methods. */
   var nativeMax = Math.max;
   
@@ -4663,7 +5297,7 @@ require.register('lodash-compat/internal/composeArgsRight@3.5.0', function(modul
   module.exports = composeArgsRight;
   
 });
-require.register('lodash-compat/internal/composeArgs@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/composeArgs.js#3.7.0', function(module, exports, require) {
   /* Native method references for those with the same name as other `lodash` methods. */
   var nativeMax = Math.max;
   
@@ -4700,7 +5334,7 @@ require.register('lodash-compat/internal/composeArgs@3.5.0', function(module, ex
   module.exports = composeArgs;
   
 });
-require.register('lodash-compat/internal/arrayCopy@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/arrayCopy.js#3.7.0', function(module, exports, require) {
   /**
    * Copies the values of `source` to `array`.
    *
@@ -4723,13 +5357,15 @@ require.register('lodash-compat/internal/arrayCopy@3.5.0', function(module, expo
   module.exports = arrayCopy;
   
 });
-require.register('lodash-compat/internal/createHybridWrapper@3.5.0', function(module, exports, require) {
-  var arrayCopy = require('lodash-compat/internal/arrayCopy@3.5.0'),
-      composeArgs = require('lodash-compat/internal/composeArgs@3.5.0'),
-      composeArgsRight = require('lodash-compat/internal/composeArgsRight@3.5.0'),
-      createCtorWrapper = require('lodash-compat/internal/createCtorWrapper@3.5.0'),
-      reorder = require('lodash-compat/internal/reorder@3.5.0'),
-      replaceHolders = require('lodash-compat/internal/replaceHolders@3.5.0');
+require.register('lodash-compat/internal/createHybridWrapper.js#3.7.0', function(module, exports, require) {
+  var arrayCopy = require('lodash-compat/internal/arrayCopy.js#3.7.0'),
+      composeArgs = require('lodash-compat/internal/composeArgs.js#3.7.0'),
+      composeArgsRight = require('lodash-compat/internal/composeArgsRight.js#3.7.0'),
+      createCtorWrapper = require('lodash-compat/internal/createCtorWrapper.js#3.7.0'),
+      isLaziable = require('lodash-compat/internal/isLaziable.js#3.7.0'),
+      reorder = require('lodash-compat/internal/reorder.js#3.7.0'),
+      replaceHolders = require('lodash-compat/internal/replaceHolders.js#3.7.0'),
+      setData = require('lodash-compat/internal/setData.js#3.7.0');
   
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -4739,7 +5375,7 @@ require.register('lodash-compat/internal/createHybridWrapper@3.5.0', function(mo
       CURRY_RIGHT_FLAG = 16,
       PARTIAL_FLAG = 32,
       PARTIAL_RIGHT_FLAG = 64,
-      ARY_FLAG = 256;
+      ARY_FLAG = 128;
   
   /* Native method references for those with the same name as other `lodash` methods. */
   var nativeMax = Math.max;
@@ -4807,7 +5443,12 @@ require.register('lodash-compat/internal/createHybridWrapper@3.5.0', function(mo
           if (!isCurryBound) {
             bitmask &= ~(BIND_FLAG | BIND_KEY_FLAG);
           }
-          var result = createHybridWrapper(func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight, newHoldersRight, newArgPos, ary, newArity);
+          var newData = [func, bitmask, thisArg, newPartials, newsHolders, newPartialsRight, newHoldersRight, newArgPos, ary, newArity],
+              result = createHybridWrapper.apply(undefined, newData);
+  
+          if (isLaziable(func)) {
+            setData(result, newData);
+          }
           result.placeholder = placeholder;
           return result;
         }
@@ -4831,12 +5472,10 @@ require.register('lodash-compat/internal/createHybridWrapper@3.5.0', function(mo
   module.exports = createHybridWrapper;
   
 });
-require.register('lodash-compat/lang/isObject@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/lang/isObject.js#3.7.0', function(module, exports, require) {
   /**
-   * Checks if `value` is the language type of `Object`.
+   * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
    * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-   *
-   * **Note:** See the [ES5 spec](https://es5.github.io/#x8) for more details.
    *
    * @static
    * @memberOf _
@@ -4858,14 +5497,14 @@ require.register('lodash-compat/lang/isObject@3.5.0', function(module, exports, 
     // Avoid a V8 JIT bug in Chrome 19-20.
     // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
     var type = typeof value;
-    return type == 'function' || (value && type == 'object') || false;
+    return type == 'function' || (!!value && type == 'object');
   }
   
   module.exports = isObject;
   
 });
-require.register('lodash-compat/internal/baseCreate@3.5.0', function(module, exports, require) {
-  var isObject = require('lodash-compat/lang/isObject@3.5.0');
+require.register('lodash-compat/internal/baseCreate.js#3.7.0', function(module, exports, require) {
+  var isObject = require('lodash-compat/lang/isObject.js#3.7.0');
   
   /**
    * The base implementation of `_.create` without support for assigning
@@ -4890,9 +5529,9 @@ require.register('lodash-compat/internal/baseCreate@3.5.0', function(module, exp
   module.exports = baseCreate;
   
 });
-require.register('lodash-compat/internal/createCtorWrapper@3.5.0', function(module, exports, require) {
-  var baseCreate = require('lodash-compat/internal/baseCreate@3.5.0'),
-      isObject = require('lodash-compat/lang/isObject@3.5.0');
+require.register('lodash-compat/internal/createCtorWrapper.js#3.7.0', function(module, exports, require) {
+  var baseCreate = require('lodash-compat/internal/baseCreate.js#3.7.0'),
+      isObject = require('lodash-compat/lang/isObject.js#3.7.0');
   
   /**
    * Creates a function that produces an instance of `Ctor` regardless of
@@ -4916,8 +5555,8 @@ require.register('lodash-compat/internal/createCtorWrapper@3.5.0', function(modu
   module.exports = createCtorWrapper;
   
 });
-require.register('lodash-compat/internal/createBindWrapper@3.5.0', function(module, exports, require) {
-  var createCtorWrapper = require('lodash-compat/internal/createCtorWrapper@3.5.0');
+require.register('lodash-compat/internal/createBindWrapper.js#3.7.0', function(module, exports, require) {
+  var createCtorWrapper = require('lodash-compat/internal/createCtorWrapper.js#3.7.0');
   
   /**
    * Creates a function that wraps `func` and invokes it with the `this`
@@ -4941,7 +5580,7 @@ require.register('lodash-compat/internal/createBindWrapper@3.5.0', function(modu
   module.exports = createBindWrapper;
   
 });
-require.register('lodash-compat/internal/isObjectLike@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/isObjectLike.js#3.7.0', function(module, exports, require) {
   /**
    * Checks if `value` is object-like.
    *
@@ -4950,13 +5589,13 @@ require.register('lodash-compat/internal/isObjectLike@3.5.0', function(module, e
    * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
    */
   function isObjectLike(value) {
-    return (value && typeof value == 'object') || false;
+    return !!value && typeof value == 'object';
   }
   
   module.exports = isObjectLike;
   
 });
-require.register('lodash-compat/internal/isHostObject@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/isHostObject.js#3.7.0', function(module, exports, require) {
   /**
    * Checks if `value` is a host object in IE < 9.
    *
@@ -4980,7 +5619,7 @@ require.register('lodash-compat/internal/isHostObject@3.5.0', function(module, e
   module.exports = isHostObject;
   
 });
-require.register('lodash-compat/internal/baseToString@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/internal/baseToString.js#3.7.0', function(module, exports, require) {
   /**
    * Converts `value` to a string if it is not one. An empty string is returned
    * for `null` or `undefined` values.
@@ -4999,20 +5638,20 @@ require.register('lodash-compat/internal/baseToString@3.5.0', function(module, e
   module.exports = baseToString;
   
 });
-require.register('lodash-compat/string/escapeRegExp@3.5.0', function(module, exports, require) {
-  var baseToString = require('lodash-compat/internal/baseToString@3.5.0');
+require.register('lodash-compat/string/escapeRegExp.js#3.7.0', function(module, exports, require) {
+  var baseToString = require('lodash-compat/internal/baseToString.js#3.7.0');
   
   /**
-   * Used to match `RegExp` special characters.
-   * See this [article on `RegExp` characters](http://www.regular-expressions.info/characters.html#special)
-   * for more details.
+   * Used to match `RegExp` [special characters](http://www.regular-expressions.info/characters.html#special).
+   * In addition to special characters the forward slash is escaped to allow for
+   * easier `eval` use and `Function` compilation.
    */
   var reRegExpChars = /[.*+?^${}()|[\]\/\\]/g,
       reHasRegExpChars = RegExp(reRegExpChars.source);
   
   /**
-   * Escapes the `RegExp` special characters "\", "^", "$", ".", "|", "?", "*",
-   * "+", "(", ")", "[", "]", "{" and "}" in `string`.
+   * Escapes the `RegExp` special characters "\", "/", "^", "$", ".", "|", "?",
+   * "*", "+", "(", ")", "[", "]", "{" and "}" in `string`.
    *
    * @static
    * @memberOf _
@@ -5022,7 +5661,7 @@ require.register('lodash-compat/string/escapeRegExp@3.5.0', function(module, exp
    * @example
    *
    * _.escapeRegExp('[lodash](https://lodash.com/)');
-   * // => '\[lodash\]\(https://lodash\.com/\)'
+   * // => '\[lodash\]\(https:\/\/lodash\.com\/\)'
    */
   function escapeRegExp(string) {
     string = baseToString(string);
@@ -5034,16 +5673,16 @@ require.register('lodash-compat/string/escapeRegExp@3.5.0', function(module, exp
   module.exports = escapeRegExp;
   
 });
-require.register('lodash-compat/lang/isNative@3.5.0', function(module, exports, require) {
-  var escapeRegExp = require('lodash-compat/string/escapeRegExp@3.5.0'),
-      isHostObject = require('lodash-compat/internal/isHostObject@3.5.0'),
-      isObjectLike = require('lodash-compat/internal/isObjectLike@3.5.0');
+require.register('lodash-compat/lang/isNative.js#3.7.0', function(module, exports, require) {
+  var escapeRegExp = require('lodash-compat/string/escapeRegExp.js#3.7.0'),
+      isHostObject = require('lodash-compat/internal/isHostObject.js#3.7.0'),
+      isObjectLike = require('lodash-compat/internal/isObjectLike.js#3.7.0');
   
   /** `Object#toString` result references. */
   var funcTag = '[object Function]';
   
   /** Used to detect host constructors (Safari > 5). */
-  var reHostCtor = /^\[object .+?Constructor\]$/;
+  var reIsHostCtor = /^\[object .+?Constructor\]$/;
   
   /** Used for native method references. */
   var objectProto = Object.prototype;
@@ -5052,14 +5691,13 @@ require.register('lodash-compat/lang/isNative@3.5.0', function(module, exports, 
   var fnToString = Function.prototype.toString;
   
   /**
-   * Used to resolve the `toStringTag` of values.
-   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
-   * for more details.
+   * Used to resolve the [`toStringTag`](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+   * of values.
    */
   var objToString = objectProto.toString;
   
   /** Used to detect if a method is native. */
-  var reNative = RegExp('^' +
+  var reIsNative = RegExp('^' +
     escapeRegExp(objToString)
     .replace(/toString|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
   );
@@ -5085,17 +5723,16 @@ require.register('lodash-compat/lang/isNative@3.5.0', function(module, exports, 
       return false;
     }
     if (objToString.call(value) == funcTag) {
-      return reNative.test(fnToString.call(value));
+      return reIsNative.test(fnToString.call(value));
     }
-    return (isObjectLike(value) &&
-      (isHostObject(value) ? reNative : reHostCtor).test(value)) || false;
+    return isObjectLike(value) && (isHostObject(value) ? reIsNative : reIsHostCtor).test(value);
   }
   
   module.exports = isNative;
   
 });
-require.register('lodash-compat/internal/metaMap@3.5.0', function(module, exports, require) {
-  var isNative = require('lodash-compat/lang/isNative@3.5.0');
+require.register('lodash-compat/internal/metaMap.js#3.7.0', function(module, exports, require) {
+  var isNative = require('lodash-compat/lang/isNative.js#3.7.0');
   
   /** Native method references. */
   var WeakMap = isNative(WeakMap = global.WeakMap) && WeakMap;
@@ -5106,7 +5743,7 @@ require.register('lodash-compat/internal/metaMap@3.5.0', function(module, export
   module.exports = metaMap;
   
 });
-require.register('lodash-compat/utility/identity@3.5.0', function(module, exports, require) {
+require.register('lodash-compat/utility/identity.js#3.7.0', function(module, exports, require) {
   /**
    * This method returns the first argument provided to it.
    *
@@ -5129,9 +5766,9 @@ require.register('lodash-compat/utility/identity@3.5.0', function(module, export
   module.exports = identity;
   
 });
-require.register('lodash-compat/internal/baseSetData@3.5.0', function(module, exports, require) {
-  var identity = require('lodash-compat/utility/identity@3.5.0'),
-      metaMap = require('lodash-compat/internal/metaMap@3.5.0');
+require.register('lodash-compat/internal/baseSetData.js#3.7.0', function(module, exports, require) {
+  var identity = require('lodash-compat/utility/identity.js#3.7.0'),
+      metaMap = require('lodash-compat/internal/metaMap.js#3.7.0');
   
   /**
    * The base implementation of `setData` without support for hot loop detection.
@@ -5149,14 +5786,14 @@ require.register('lodash-compat/internal/baseSetData@3.5.0', function(module, ex
   module.exports = baseSetData;
   
 });
-require.register('lodash-compat/internal/createWrapper@3.5.0', function(module, exports, require) {
-  var baseSetData = require('lodash-compat/internal/baseSetData@3.5.0'),
-      createBindWrapper = require('lodash-compat/internal/createBindWrapper@3.5.0'),
-      createHybridWrapper = require('lodash-compat/internal/createHybridWrapper@3.5.0'),
-      createPartialWrapper = require('lodash-compat/internal/createPartialWrapper@3.5.0'),
-      getData = require('lodash-compat/internal/getData@3.5.0'),
-      mergeData = require('lodash-compat/internal/mergeData@3.5.0'),
-      setData = require('lodash-compat/internal/setData@3.5.0');
+require.register('lodash-compat/internal/createWrapper.js#3.7.0', function(module, exports, require) {
+  var baseSetData = require('lodash-compat/internal/baseSetData.js#3.7.0'),
+      createBindWrapper = require('lodash-compat/internal/createBindWrapper.js#3.7.0'),
+      createHybridWrapper = require('lodash-compat/internal/createHybridWrapper.js#3.7.0'),
+      createPartialWrapper = require('lodash-compat/internal/createPartialWrapper.js#3.7.0'),
+      getData = require('lodash-compat/internal/getData.js#3.7.0'),
+      mergeData = require('lodash-compat/internal/mergeData.js#3.7.0'),
+      setData = require('lodash-compat/internal/setData.js#3.7.0');
   
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -5212,10 +5849,10 @@ require.register('lodash-compat/internal/createWrapper@3.5.0', function(module, 
   
       partials = holders = null;
     }
-    var data = !isBindKey && getData(func),
+    var data = isBindKey ? null : getData(func),
         newData = [func, bitmask, thisArg, partials, holders, partialsRight, holdersRight, argPos, ary, arity];
   
-    if (data && data !== true) {
+    if (data) {
       mergeData(newData, data);
       bitmask = newData[1];
       arity = newData[9];
@@ -5238,45 +5875,10 @@ require.register('lodash-compat/internal/createWrapper@3.5.0', function(module, 
   module.exports = createWrapper;
   
 });
-require.register('lodash-compat/internal/baseSlice@3.5.0', function(module, exports, require) {
-  /**
-   * The base implementation of `_.slice` without an iteratee call guard.
-   *
-   * @private
-   * @param {Array} array The array to slice.
-   * @param {number} [start=0] The start position.
-   * @param {number} [end=array.length] The end position.
-   * @returns {Array} Returns the slice of `array`.
-   */
-  function baseSlice(array, start, end) {
-    var index = -1,
-        length = array.length;
-  
-    start = start == null ? 0 : (+start || 0);
-    if (start < 0) {
-      start = -start > length ? 0 : (length + start);
-    }
-    end = (typeof end == 'undefined' || end > length) ? length : (+end || 0);
-    if (end < 0) {
-      end += length;
-    }
-    length = start > end ? 0 : ((end - start) >>> 0);
-    start >>>= 0;
-  
-    var result = Array(length);
-    while (++index < length) {
-      result[index] = array[index + start];
-    }
-    return result;
-  }
-  
-  module.exports = baseSlice;
-  
-});
-require.register('lodash-compat/function/bind@3.5.0', function(module, exports, require) {
-  var baseSlice = require('lodash-compat/internal/baseSlice@3.5.0'),
-      createWrapper = require('lodash-compat/internal/createWrapper@3.5.0'),
-      replaceHolders = require('lodash-compat/internal/replaceHolders@3.5.0');
+require.register('lodash-compat/function/bind.js#3.7.0', function(module, exports, require) {
+  var createWrapper = require('lodash-compat/internal/createWrapper.js#3.7.0'),
+      replaceHolders = require('lodash-compat/internal/replaceHolders.js#3.7.0'),
+      restParam = require('lodash-compat/function/restParam.js#3.7.0');
   
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -5290,7 +5892,7 @@ require.register('lodash-compat/function/bind@3.5.0', function(module, exports, 
    * The `_.bind.placeholder` value, which defaults to `_` in monolithic builds,
    * may be used as a placeholder for partially applied arguments.
    *
-   * **Note:** Unlike native `Function#bind` this method does not set the `length`
+   * **Note:** Unlike native `Function#bind` this method does not set the "length"
    * property of bound functions.
    *
    * @static
@@ -5298,7 +5900,7 @@ require.register('lodash-compat/function/bind@3.5.0', function(module, exports, 
    * @category Function
    * @param {Function} func The function to bind.
    * @param {*} thisArg The `this` binding of `func`.
-   * @param {...*} [args] The arguments to be partially applied.
+   * @param {...*} [partials] The arguments to be partially applied.
    * @returns {Function} Returns the new bound function.
    * @example
    *
@@ -5317,16 +5919,14 @@ require.register('lodash-compat/function/bind@3.5.0', function(module, exports, 
    * bound('hi');
    * // => 'hi fred!'
    */
-  function bind(func, thisArg) {
+  var bind = restParam(function(func, thisArg, partials) {
     var bitmask = BIND_FLAG;
-    if (arguments.length > 2) {
-      var partials = baseSlice(arguments, 2),
-          holders = replaceHolders(partials, bind.placeholder);
-  
+    if (partials.length) {
+      var holders = replaceHolders(partials, bind.placeholder);
       bitmask |= PARTIAL_FLAG;
     }
     return createWrapper(func, bitmask, thisArg, partials, holders);
-  }
+  });
   
   // Assign default placeholders.
   bind.placeholder = {};
@@ -5334,19 +5934,19 @@ require.register('lodash-compat/function/bind@3.5.0', function(module, exports, 
   module.exports = bind;
   
 });
-require.register('lib/application', function(module, exports, require) {
+require.register('lib/application.js', function(module, exports, require) {
   /**
    * Browser application
    */
   
-  var bind = require('lodash-compat/function/bind@3.5.0')
-  	, debug = require('debug@2.1.2')('express:application')
-  	, forEach = require('lodash-compat/collection/forEach@3.5.0')
-  	, history = require('lib/history')
-  	, merge = require('lodash-compat/object/merge@3.5.0')
-  	, request = require('lib/request')
-  	, response = require('lib/response')
-  	, router = require('lib/router')
+  var bind = require('lodash-compat/function/bind.js#3.7.0')
+  	, debug = require('debug#2.1.2')('express:application')
+  	, forEach = require('lodash-compat/collection/forEach.js#3.7.0')
+  	, history = require('lib/history.js')
+  	, merge = require('lodash-compat/object/merge.js#3.7.0')
+  	, request = require('lib/request.js')
+  	, response = require('lib/response.js')
+  	, router = require('lib/router.js')
   
   	, METHODS = ['get', 'post', 'all'];
   
@@ -5573,9 +6173,9 @@ require.register('lib/application', function(module, exports, require) {
    	(this.parent || this).handle(ctx.req, ctx.res);
    };
 });
-require.register('express-client', function(module, exports, require) {
-  var application = require('lib/application')
-  	, Router = require('lib/router');
+require.register('express-client/index.js', function(module, exports, require) {
+  var application = require('lib/application.js')
+  	, Router = require('lib/router.js');
   
   module.exports = createApplication;
   
@@ -5591,9 +6191,9 @@ require.register('express-client', function(module, exports, require) {
    */
   module.exports.Router = Router;
 });
-require.register('lib', function(module, exports, require) {
+require.register('lib.js', function(module, exports, require) {
   // lodash
   window.global = window;
-  require('express-client');
+  require('express-client/index.js');
 });
-require('lib');
+require('lib.js');
