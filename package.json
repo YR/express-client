@@ -1,5 +1,5 @@
 {
-  "name": "express-client",
+  "name": "@yr/express-client",
   "description": "An express.js framework for browser clients",
   "version": "1.8.0",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
