@@ -12,6 +12,6 @@ node_modules/mocha-phantomjs
 node_modules/phantomjs
 node_modules/path-to-regexp
 node_modules/query-string
-node_modules/url-utils
+node_modules/@yr/url-utils
 node_modules/cookie
 .buddy-filelog
