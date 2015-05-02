@@ -1,7 +1,7 @@
 {
   "name": "@yr/express-client",
   "description": "An express.js framework for browser clients",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "cookie": "0.1.2",
