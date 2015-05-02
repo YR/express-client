@@ -16,7 +16,7 @@
 			// Handle versioned modules when called without version number
 			var p, p2, idx;
 			for (var p in require.modules) {
-				if ((idx = p.indexOf('@')) != -1) {
+				if ((idx = p.indexOf('#')) != -1) {
 					p2 = p.slice(0, idx);
 					if (path == p2) {
 						m = require.modules[p];
@@ -648,7 +648,7 @@ require.register('lib/response.js', function(module, exports, require) {
    */
   
   var cookie = require('cookie#0.1.2')
-  	, emitter = require('eventemitter3#0.1.6')
+  	, emitter = require('eventemitter3#1.0.1')
   	, merge = require('lib/safeMerge.js');
   
   module.exports = Response;
@@ -849,7 +849,7 @@ require.register('lib/safeMerge.js', function(module, exports, require) {
   	return a;
   };
 });
-require.register('eventemitter3#0.1.6', function(module, exports, require) {
+require.register('eventemitter3#1.0.1', function(module, exports, require) {
   'use strict';
   
   /**
@@ -887,15 +887,20 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
    * Return a list of assigned event listeners.
    *
    * @param {String} event The events that should be listed.
-   * @returns {Array}
+   * @param {Boolean} exists We only need to know if there are listeners.
+   * @returns {Array|Boolean}
    * @api public
    */
-  EventEmitter.prototype.listeners = function listeners(event) {
-    if (!this._events || !this._events[event]) return [];
-    if (this._events[event].fn) return [this._events[event].fn];
+  EventEmitter.prototype.listeners = function listeners(event, exists) {
+    var prefix = '~'+ event
+      , available = this._events && this._events[prefix];
   
-    for (var i = 0, l = this._events[event].length, ee = new Array(l); i < l; i++) {
-      ee[i] = this._events[event][i].fn;
+    if (exists) return !!available;
+    if (!available) return [];
+    if (this._events[prefix].fn) return [this._events[prefix].fn];
+  
+    for (var i = 0, l = this._events[prefix].length, ee = new Array(l); i < l; i++) {
+      ee[i] = this._events[prefix][i].fn;
     }
   
     return ee;
@@ -909,15 +914,17 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
    * @api public
    */
   EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-    if (!this._events || !this._events[event]) return false;
+    var prefix = '~'+ event;
   
-    var listeners = this._events[event]
+    if (!this._events || !this._events[prefix]) return false;
+  
+    var listeners = this._events[prefix]
       , len = arguments.length
       , args
       , i;
   
     if ('function' === typeof listeners.fn) {
-      if (listeners.once) this.removeListener(event, listeners.fn, true);
+      if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
   
       switch (len) {
         case 1: return listeners.fn.call(listeners.context), true;
@@ -938,7 +945,7 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
         , j;
   
       for (i = 0; i < length; i++) {
-        if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
+        if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
   
         switch (len) {
           case 1: listeners[i].fn.call(listeners[i].context); break;
@@ -966,14 +973,15 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
    * @api public
    */
   EventEmitter.prototype.on = function on(event, fn, context) {
-    var listener = new EE(fn, context || this);
+    var listener = new EE(fn, context || this)
+      , prefix = '~'+ event;
   
     if (!this._events) this._events = {};
-    if (!this._events[event]) this._events[event] = listener;
+    if (!this._events[prefix]) this._events[prefix] = listener;
     else {
-      if (!this._events[event].fn) this._events[event].push(listener);
-      else this._events[event] = [
-        this._events[event], listener
+      if (!this._events[prefix].fn) this._events[prefix].push(listener);
+      else this._events[prefix] = [
+        this._events[prefix], listener
       ];
     }
   
@@ -989,14 +997,15 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
    * @api public
    */
   EventEmitter.prototype.once = function once(event, fn, context) {
-    var listener = new EE(fn, context || this, true);
+    var listener = new EE(fn, context || this, true)
+      , prefix = '~'+ event;
   
     if (!this._events) this._events = {};
-    if (!this._events[event]) this._events[event] = listener;
+    if (!this._events[prefix]) this._events[prefix] = listener;
     else {
-      if (!this._events[event].fn) this._events[event].push(listener);
-      else this._events[event] = [
-        this._events[event], listener
+      if (!this._events[prefix].fn) this._events[prefix].push(listener);
+      else this._events[prefix] = [
+        this._events[prefix], listener
       ];
     }
   
@@ -1008,22 +1017,36 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
    *
    * @param {String} event The event we want to remove.
    * @param {Function} fn The listener that we need to find.
+   * @param {Mixed} context Only remove listeners matching this context.
    * @param {Boolean} once Only remove once listeners.
    * @api public
    */
-  EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
-    if (!this._events || !this._events[event]) return this;
+  EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+    var prefix = '~'+ event;
   
-    var listeners = this._events[event]
+    if (!this._events || !this._events[prefix]) return this;
+  
+    var listeners = this._events[prefix]
       , events = [];
   
     if (fn) {
-      if (listeners.fn && (listeners.fn !== fn || (once && !listeners.once))) {
-        events.push(listeners);
-      }
-      if (!listeners.fn) for (var i = 0, length = listeners.length; i < length; i++) {
-        if (listeners[i].fn !== fn || (once && !listeners[i].once)) {
-          events.push(listeners[i]);
+      if (listeners.fn) {
+        if (
+             listeners.fn !== fn
+          || (once && !listeners.once)
+          || (context && listeners.context !== context)
+        ) {
+          events.push(listeners);
+        }
+      } else {
+        for (var i = 0, length = listeners.length; i < length; i++) {
+          if (
+               listeners[i].fn !== fn
+            || (once && !listeners[i].once)
+            || (context && listeners[i].context !== context)
+          ) {
+            events.push(listeners[i]);
+          }
         }
       }
     }
@@ -1032,9 +1055,9 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
     // Reset the array, or remove it completely if we have no more listeners.
     //
     if (events.length) {
-      this._events[event] = events.length === 1 ? events[0] : events;
+      this._events[prefix] = events.length === 1 ? events[0] : events;
     } else {
-      delete this._events[event];
+      delete this._events[prefix];
     }
   
     return this;
@@ -1049,7 +1072,7 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
   EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
     if (!this._events) return this;
   
-    if (event) delete this._events[event];
+    if (event) delete this._events['~'+ event];
     else this._events = {};
   
     return this;
@@ -1067,13 +1090,6 @@ require.register('eventemitter3#0.1.6', function(module, exports, require) {
   EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
     return this;
   };
-  
-  //
-  // Expose the module.
-  //
-  EventEmitter.EventEmitter = EventEmitter;
-  EventEmitter.EventEmitter2 = EventEmitter;
-  EventEmitter.EventEmitter3 = EventEmitter;
   
   //
   // Expose the module.
@@ -1165,7 +1181,7 @@ require.register('lib/request.js', function(module, exports, require) {
    */
   
   var cookie = require('cookie#0.1.2')
-  	, emitter = require('eventemitter3#0.1.6')
+  	, emitter = require('eventemitter3#1.0.1')
   	, merge = require('lib/safeMerge.js')
   	, qsParse = require('query-string#1.0.0').parse
   	, urlUtils = require('@yr/url-utils#1.8.1');
