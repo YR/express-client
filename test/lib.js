@@ -661,14 +661,21 @@ require.register('lib/response.js', function(module, exports, require) {
   		return new Response();
   	}
   
-  	this.locals = {};
-  	this.statusCode = 404;
-  	this.finished = false;
-  	this.cached = false;
   	this.app;
   	this.req;
+  	this.reset();
   
   	merge(this, emitter.prototype);
+  };
+  
+  /**
+   * Reset state
+   */
+  Response.prototype.reset = function () {
+  	this.cached = false;
+  	this.finished = false;
+  	this.locals = {};
+  	this.statusCode = 404;
   };
   
   /**
@@ -685,14 +692,9 @@ require.register('lib/response.js', function(module, exports, require) {
    * Send response (last method called in pipeline)
    */
   Response.prototype.send = function () {
+  	// Reset state
+  	this.req.reset();
   	this.status(200);
-  	// Reset for first request
-  	// Prevents return to unhandled pages not triggering redirect
-  	this.req.bootstrap = false;
-  	// Resetting request state
-  	this.req.params = null;
-  	this.req.path = this.req.originalUrl;
-  	this.req.baseUrl = '';
   	this.finished = true;
   	this.emit('finish');
   };
@@ -1205,15 +1207,14 @@ require.register('lib/request.js', function(module, exports, require) {
   	var path = url.split('?')
   		, qs = path[1] || '';
   
-  	this.bootstrap = bootstrap;
-  	this.url = this.originalUrl = url;
-  	this.path = urlUtils.sanitize(path[0]);
-  	this.querystring = qs;
-  	this.search = qs ? '?' + qs : '';
-  	this.query = qsParse(qs);
-  	this.cached = false;
   	this.app;
   	this.cookies = cookie.parse(document.cookie);
+  	this.path = urlUtils.sanitize(path[0]);
+  	this.query = qsParse(qs);
+  	this.querystring = qs;
+  	this.search = qs ? '?' + qs : '';
+  	this.url = this.originalUrl = url;
+  	this.reset(bootstrap);
   
   	merge(this, emitter.prototype);
   }
@@ -1222,7 +1223,20 @@ require.register('lib/request.js', function(module, exports, require) {
    * Abort response
    */
   Request.prototype.abort = function () {
+  	this.reset();
   	this.emit('close');
+  };
+  
+  /**
+   * Reset state
+   * @param {Boolean} bootstrap
+   */
+  Request.prototype.reset = function (bootstrap) {
+  	this.baseUrl = '';
+  	this.bootstrap = bootstrap || false;
+  	this.cached = false;
+  	this.path = this.originalUrl;
+  	this.params = null;
   };
   
 });
@@ -2949,6 +2963,17 @@ require.register('lib/history.js', function(module, exports, require) {
   };
   
   /**
+   * Force a re-handle of current context
+   */
+  History.prototype.refresh = function () {
+  	var ctx = this.getCurrentContext();
+  	// Undo pipeline modifications
+  	ctx.req.reset();
+  	ctx.res.reset();
+  	this.fn(ctx.req, ctx.res);
+  };
+  
+  /**
    * Retrieve current context
    * @returns {Object}
    */
@@ -2990,15 +3015,18 @@ require.register('lib/history.js', function(module, exports, require) {
   	// Do nothing if current url is the same
   	if (this.current && this.current === url) return;
   
-  	// Always create new instance in order to reset express pipeline modifications
-  	req = this.request(url, bootstrap);
   	if (this.cache[url]) {
   		ctx = this.cache[url];
+  		req = ctx.req;
   		res = ctx.res;
+  		// Always reset in order to undo pipeline modifications
+  		req.reset();
+  		res.reset();
   		// Set flag for use downstream
   		req.cached = res.cached = true;
   		debug('context retrieved from cache: %s', url);
   	} else {
+  		req = this.request(url, bootstrap);
   		res = this.response();
   		debug('generating new context: %s', url);
   	}
@@ -3013,6 +3041,7 @@ require.register('lib/history.js', function(module, exports, require) {
   	// Abort if current request/response is not finished
   	if (this.current && !this.cache[this.current].res.finished) {
   		this.cache[this.current].req.abort();
+  		this.cache[this.current].res.reset();
   	}
   
   	// Store reference to current
@@ -3050,12 +3079,13 @@ require.register('lib/history.js', function(module, exports, require) {
   	if (evt.defaultPrevented) return;
   
   	// Find anchor
-  	while (el && 'A' != el.nodeName) {
+  	// svg elements on some platforms don't have nodeNames
+  	while (el && (el.nodeName == null || 'A' != el.nodeName.toUpperCase())) {
   		el = el.parentNode;
   	}
   
   	// Anchor not found
-  	if (!el || 'A' != el.nodeName) return;
+  	if (!el || 'A' != el.nodeName.toUpperCase()) return;
   
   	// Cross origin
   	if (!sameOrigin(el.href)) return;
@@ -6184,9 +6214,7 @@ require.register('lib/application.js', function(module, exports, require) {
    * @returns {Object}
    */
   Application.prototype.refresh = function () {
-   	var ctx = this.getCurrentContext();
-   	ctx.res.finished = false;
-   	(this.parent || this).handle(ctx.req, ctx.res);
+   	this[this.parent ? 'parent' : 'history'].refresh();
    };
 });
 require.register('express-client/index.js', function(module, exports, require) {

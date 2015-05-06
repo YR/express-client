@@ -358,7 +358,7 @@ describe('express-client', function () {
 				this.app.refresh();
 
 				expect(response.statusCode).to.be(200);
-				expect(response.req.params).to.equal(undefined);
+				expect(response.req.params).to.eql(null);
 				expect(count).to.be(2);
 			});
 		});
