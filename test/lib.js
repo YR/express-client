@@ -1217,7 +1217,7 @@ require.register('lib/request.js', function(module, exports, require) {
   	this.baseUrl = '';
   	this.bootstrap = bootstrap || false;
   	this.cached = false;
-  	this.path = this.originalUrl;
+  	this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
   	this.params = null;
   };
   
