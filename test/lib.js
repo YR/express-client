@@ -648,7 +648,7 @@ require.register('lib/response.js', function(module, exports, require) {
    */
   
   var cookie = require('cookie#0.1.2')
-  	, emitter = require('eventemitter3#1.0.1')
+  	, emitter = require('eventemitter3#1.0.2')
   	, merge = require('lib/safeMerge.js');
   
   module.exports = Response;
@@ -833,7 +833,7 @@ require.register('lib/safeMerge.js', function(module, exports, require) {
   	return a;
   };
 });
-require.register('eventemitter3#1.0.1', function(module, exports, require) {
+require.register('eventemitter3#1.0.2', function(module, exports, require) {
   'use strict';
   
   /**
@@ -876,7 +876,7 @@ require.register('eventemitter3#1.0.1', function(module, exports, require) {
    * @api public
    */
   EventEmitter.prototype.listeners = function listeners(event, exists) {
-    var prefix = '~'+ event
+    var prefix = typeof event !== 'symbol' ? '~' + event : event
       , available = this._events && this._events[prefix];
   
     if (exists) return !!available;
@@ -898,7 +898,7 @@ require.register('eventemitter3#1.0.1', function(module, exports, require) {
    * @api public
    */
   EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-    var prefix = '~'+ event;
+    var prefix = typeof event !== 'symbol' ? '~' + event : event;
   
     if (!this._events || !this._events[prefix]) return false;
   
@@ -958,7 +958,7 @@ require.register('eventemitter3#1.0.1', function(module, exports, require) {
    */
   EventEmitter.prototype.on = function on(event, fn, context) {
     var listener = new EE(fn, context || this)
-      , prefix = '~'+ event;
+      , prefix = typeof event !== 'symbol' ? '~' + event : event;
   
     if (!this._events) this._events = {};
     if (!this._events[prefix]) this._events[prefix] = listener;
@@ -982,7 +982,7 @@ require.register('eventemitter3#1.0.1', function(module, exports, require) {
    */
   EventEmitter.prototype.once = function once(event, fn, context) {
     var listener = new EE(fn, context || this, true)
-      , prefix = '~'+ event;
+      , prefix = typeof event !== 'symbol' ? '~' + event : event;
   
     if (!this._events) this._events = {};
     if (!this._events[prefix]) this._events[prefix] = listener;
@@ -1006,7 +1006,7 @@ require.register('eventemitter3#1.0.1', function(module, exports, require) {
    * @api public
    */
   EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
-    var prefix = '~'+ event;
+    var prefix = typeof event !== 'symbol' ? '~' + event : event;
   
     if (!this._events || !this._events[prefix]) return this;
   
@@ -1056,7 +1056,7 @@ require.register('eventemitter3#1.0.1', function(module, exports, require) {
   EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
     if (!this._events) return this;
   
-    if (event) delete this._events['~'+ event];
+    if (event) delete this._events[typeof event !== 'symbol' ? '~' + event : event];
     else this._events = {};
   
     return this;
@@ -1165,7 +1165,7 @@ require.register('lib/request.js', function(module, exports, require) {
    */
   
   var cookie = require('cookie#0.1.2')
-  	, emitter = require('eventemitter3#1.0.1')
+  	, emitter = require('eventemitter3#1.0.2')
   	, merge = require('lib/safeMerge.js')
   	, qsParse = require('query-string#2.0.0').parse
   	, urlUtils = require('@yr/url-utils#1.8.1');
