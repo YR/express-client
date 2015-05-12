@@ -304,8 +304,8 @@ require.register('lib/layer.js', function(module, exports, require) {
    * Router layer object
    */
   
-  var matcher = require('path-to-regexp#1.0.3')
-  	, urlUtils = require('@yr/url-utils#1.8.1');
+  var matcher = require('path-to-regexp#1.0.3'),
+      urlUtils = require('@yr/url-utils#1.8.1');
   
   module.exports = Layer;
   
@@ -313,7 +313,7 @@ require.register('lib/layer.js', function(module, exports, require) {
    * Constructor
    * @param {String} url
    */
-  function Layer (path, fn, options) {
+  function Layer(path, fn, options) {
   	if (!(this instanceof Layer)) {
   		return new Layer(path, fn, options);
   	}
@@ -324,9 +324,8 @@ require.register('lib/layer.js', function(module, exports, require) {
   	this.params = null;
   	this.fn = fn;
   	this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
-  	this.fastmatch = (path == '/' && !options.end);
+  	this.fastmatch = path == '/' && !options.end;
   	this.regexp = matcher(this._path(path), this.keys, options);
-  
   }
   
   /**
@@ -352,8 +351,9 @@ require.register('lib/layer.js', function(module, exports, require) {
   	this.params = {};
   	this.path = match[0];
   
-  	var n = 0
-  		, key, val;
+  	var n = 0,
+  	    key,
+  	    val;
   
   	for (var i = 1, len = match.length; i < len; ++i) {
   		key = this.keys[i - 1];
@@ -379,15 +379,11 @@ require.register('lib/layer.js', function(module, exports, require) {
   Layer.prototype.handle = function (err, req, res, next) {
   	if (err) {
   		// Only call if it handles errors
-  		return (this.fn.length > 3)
-  			? this.fn(err, req, res, next)
-  			: next(err);
+  		return this.fn.length > 3 ? this.fn(err, req, res, next) : next(err);
   	}
   
   	// Skip if error handler
-  	return (this.fn.length < 4)
-  		? this.fn(req, res, next)
-  		: next();
+  	return this.fn.length < 4 ? this.fn(req, res, next) : next();
   };
   
   /**
@@ -397,9 +393,7 @@ require.register('lib/layer.js', function(module, exports, require) {
    */
   Layer.prototype._path = function (path) {
   	// Convert wildcard
-  	return (path == '*')
-  		? '(.*)'
-  		: path;
+  	return path == '*' ? '(.*)' : path;
   };
 });
 require.register('lib/router.js', function(module, exports, require) {
@@ -408,20 +402,19 @@ require.register('lib/router.js', function(module, exports, require) {
    * Can be isolated under a specific mount path.
    */
   
-  var bind = require('lodash-compat/function/bind.js#3.7.0')
-  	, debug = require('debug#2.1.2')('express:router')
-  	, forEach = require('lodash-compat/collection/forEach.js#3.7.0')
-  	, layer = require('lib/layer.js')
-  	, merge = require('lodash-compat/object/merge.js#3.7.0')
-  	, objKeys = require('lodash-compat/object/keys.js#3.7.0')
-  	, urlUtils = require('@yr/url-utils#1.8.1')
-  
-  	, METHODS = ['get', 'post', 'all']
-  	, DEFAULTS = {
-  			mergeParams: true,
-  			caseSensitive: false,
-  			strict: false
-  		};
+  var bind = require('lodash-compat/function/bind.js#3.7.0'),
+      debug = require('debug#2.1.2')('express:router'),
+      forEach = require('lodash-compat/collection/forEach.js#3.7.0'),
+      layer = require('lib/layer.js'),
+      merge = require('lodash-compat/object/merge.js#3.7.0'),
+      objKeys = require('lodash-compat/object/keys.js#3.7.0'),
+      urlUtils = require('@yr/url-utils#1.8.1'),
+      METHODS = ['get', 'post', 'all'],
+      DEFAULTS = {
+  	mergeParams: true,
+  	caseSensitive: false,
+  	strict: false
+  };
   
   module.exports = Router;
   
@@ -429,7 +422,7 @@ require.register('lib/router.js', function(module, exports, require) {
    * Constructor
    * @param {Object} [options]
    */
-  function Router (options) {
+  function Router(options) {
   	if (!(this instanceof Router)) {
   		return new Router(options);
   	}
@@ -467,10 +460,10 @@ require.register('lib/router.js', function(module, exports, require) {
    * Add one or more 'fn' to middleware pipeline at optional 'path'
    * @param {Function} fn
    */
-  Router.prototype.use = function (/* path, */ fn /* ...fn */) {
-  	var offset = 0
-  		, path = '/'
-  		, fns;
+  Router.prototype.use = function ( /* path, */fn /* ...fn */) {
+  	var offset = 0,
+  	    path = '/',
+  	    fns;
   
   	if ('string' == typeof fn) {
   		offset = 1;
@@ -513,11 +506,11 @@ require.register('lib/router.js', function(module, exports, require) {
    * @param {Function} done
    */
   Router.prototype.handle = function (req, res, done) {
-  	var idx = 0
-  		, self = this
-  		, processedParams = {}
-  		, removed = ''
-  		, parentUrl = req.baseUrl || '';
+  	var idx = 0,
+  	    self = this,
+  	    processedParams = {},
+  	    removed = '',
+  	    parentUrl = req.baseUrl || '';
   
   	// Update done to restore req props
   	done = restore(done, req, 'baseUrl', 'next', 'params');
@@ -528,47 +521,57 @@ require.register('lib/router.js', function(module, exports, require) {
   
   	next();
   
-  	function next (err) {
-  		var lyr = self.stack[idx++]
-  			, layerErr = err;
+  	function next(_x) {
+  		var _again = true;
   
-  		if (removed.length != 0) {
-  			debug('untrim %s from url %s', removed, req.path);
-  			req.baseUrl = parentUrl;
-  			req.path = urlUtils.join(removed, req.path);
-  			removed = '';
+  		_function: while (_again) {
+  			lyr = layerErr = keys = undefined;
+  			_again = false;
+  			var err = _x;
+  
+  			var lyr = self.stack[idx++],
+  			    layerErr = err;
+  
+  			if (removed.length != 0) {
+  				debug('untrim %s from url %s', removed, req.path);
+  				req.baseUrl = parentUrl;
+  				req.path = urlUtils.join(removed, req.path);
+  				removed = '';
+  			}
+  
+  			// Exit
+  			if (!lyr) {
+  				return done(err);
+  			}
+  
+  			// Skip if no match
+  			if (!lyr.match(req.path)) {
+  				_x = err;
+  				_again = true;
+  				continue _function;
+  			}
+  
+  			debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
+  
+  			// Store params
+  			if (self.mergeParams) {
+  				if (!req.params) req.params = {};
+  				merge(req.params, lyr.params);
+  			} else {
+  				req.params = lyr.params;
+  			}
+  
+  			var keys = objKeys(lyr.params);
+  			// Process params if necessary
+  			self._processParams(processedParams, req.params, keys, req, res, function (err) {
+  				if (err) return next(layerErr || err);
+  				if (!lyr.route) trim(lyr);
+  				return lyr.handle(layerErr, req, res, next);
+  			});
   		}
-  
-  		// Exit
-  		if (!lyr) {
-  			return done(err);
-  		}
-  
-  		// Skip if no match
-  		if (!lyr.match(req.path)) {
-  			return next(err);
-  		}
-  
-  		debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
-  
-  		// Store params
-  		if (self.mergeParams) {
-  			if (!req.params) req.params = {};
-  			merge(req.params, lyr.params);
-  		} else {
-  			req.params = lyr.params;
-  		}
-  
-  		var keys = objKeys(lyr.params);
-  		// Process params if necessary
-  		self._processParams(processedParams, req.params, keys, req, res, function (err) {
-  			if (err) return next(layerErr || err);
-  			if (!lyr.route) trim(lyr);
-  			return lyr.handle(layerErr, req, res, next);
-  		});
   	}
   
-  	function trim (layer) {
+  	function trim(layer) {
   		if (layer.path.length != 0) {
   			debug('trim %s from url %s', layer.path, req.path);
   			removed = layer.path;
@@ -590,12 +593,12 @@ require.register('lib/router.js', function(module, exports, require) {
    * @param {Function} done(err)
    */
   Router.prototype._processParams = function (processedParams, params, keys, req, res, done) {
-  	function next (err) {
+  	function next(err) {
   		// Stop processing on any error
-  		if (err) return done(err);
-  
-  		var name = keys[idx++]
-  			, fn = self.params[name];
+  		if (err) {
+  			return done(err);
+  		}var name = keys[idx++],
+  		    fn = self.params[name];
   
   		// Process if match and not already processed
   		if (fn && !processedParams[name]) {
@@ -603,14 +606,12 @@ require.register('lib/router.js', function(module, exports, require) {
   			return fn(req, res, next, params[name]);
   		}
   
-  		(idx < keys.length)
-  			? next()
-  			: done();
+  		idx < keys.length ? next() : done();
   	}
   
   	if (this.params && keys.length) {
-  		var idx = 0
-  			, self = this;
+  		var idx = 0,
+  		    self = this;
   
   		next();
   	} else {
@@ -623,9 +624,9 @@ require.register('lib/router.js', function(module, exports, require) {
    * @param {Function} fn
    * @param {Object} obj
    */
-  function restore (fn, obj) {
-  	var props = new Array(arguments.length - 2)
-  		, vals = new Array(arguments.length - 2);
+  function restore(fn, obj) {
+  	var props = new Array(arguments.length - 2),
+  	    vals = new Array(arguments.length - 2);
   
   	for (var i = 0; i < props.length; i++) {
   		props[i] = arguments[i + 2];
@@ -647,35 +648,35 @@ require.register('lib/response.js', function(module, exports, require) {
    * Browser response object
    */
   
-  var cookie = require('cookie#0.1.2')
-  	, emitter = require('eventemitter3#1.0.2')
-  	, merge = require('lib/safeMerge.js');
+  var cookie = require('cookie#0.1.2'),
+      emitter = require('eventemitter3#1.0.2'),
+      merge = require('lodash-compat/object/merge.js#3.7.0');
   
   module.exports = Response;
   
   /**
    * Constructor
    */
-  function Response () {
-  	if (!(this instanceof Response)) {
-  		return new Response();
-  	}
+  function Response() {
+    if (!(this instanceof Response)) {
+      return new Response();
+    }
   
-  	this.app;
-  	this.req;
-  	this.reset();
+    this.app;
+    this.req;
+    this.reset();
   
-  	merge(this, emitter.prototype);
+    merge(this, emitter.prototype);
   };
   
   /**
    * Reset state
    */
   Response.prototype.reset = function () {
-  	this.cached = false;
-  	this.finished = false;
-  	this.locals = {};
-  	this.statusCode = 404;
+    this.cached = false;
+    this.finished = false;
+    this.locals = {};
+    this.statusCode = 404;
   };
   
   /**
@@ -684,19 +685,19 @@ require.register('lib/response.js', function(module, exports, require) {
    * @returns {Response}
    */
   Response.prototype.status = function (code) {
-  	this.statusCode = code;
-  	return this;
+    this.statusCode = code;
+    return this;
   };
   
   /**
    * Send response (last method called in pipeline)
    */
   Response.prototype.send = function () {
-  	// Reset state
-  	this.req.reset();
-  	this.status(200);
-  	this.finished = true;
-  	this.emit('finish');
+    // Reset state
+    this.req.reset();
+    this.status(200);
+    this.finished = true;
+    this.emit('finish');
   };
   
   /**
@@ -705,7 +706,7 @@ require.register('lib/response.js', function(module, exports, require) {
    * @param {String} url
    */
   Response.prototype.redirect = function (statusCode, url) {
-  	this.app.redirectTo(url || statusCode);
+    this.app.redirectTo(url || statusCode);
   };
   
   /**
@@ -715,27 +716,27 @@ require.register('lib/response.js', function(module, exports, require) {
    * @param {Function} [fn(err)]
    */
   Response.prototype.render = function (view, options, fn) {
-  	options = options || {};
+    options = options || {};
   
-  	var self = this
-  		, app = this.app
-  		, req = this.req;
+    var self = this,
+        app = this.app,
+        req = this.req;
   
-  	if ('function' == typeof options) {
-  		fn = options;
-  		options = {};
-  	}
+    if ('function' == typeof options) {
+      fn = options;
+      options = {};
+    }
   
-  	// Store locals so that app can merge
-  	options._locals = this.locals;
+    // Store locals so that app can merge
+    options._locals = this.locals;
   
-  	// Default callback
-  	fn = fn || function (err) {
-  		if (err) return req.next(err);
-  		self.send();
-  	};
+    // Default callback
+    fn = fn || function (err) {
+      if (err) return req.next(err);
+      self.send();
+    };
   
-  	app.render(view, options, fn);
+    app.render(view, options, fn);
   };
   
   /**
@@ -812,273 +813,6 @@ require.register('query-string#2.0.0', function(module, exports, require) {
   		return encodeURIComponent(key) + '=' + encodeURIComponent(val);
   	}).join('&') : '';
   };
-  
-});
-require.register('lib/safeMerge.js', function(module, exports, require) {
-  /**
-   * Safely merge object 'b' into 'a',
-   * making sure not to overwrite existing properties in 'a'
-   *
-   * @param {Object} a
-   * @param {Object} b
-   * @returns {Object}
-   */
-  module.exports = function safeMerge (a, b) {
-  	if (a && b) {
-  		for (var key in b) {
-  			if (a[key] == null) a[key] = b[key];
-  		}
-  	}
-  
-  	return a;
-  };
-});
-require.register('eventemitter3#1.0.2', function(module, exports, require) {
-  'use strict';
-  
-  /**
-   * Representation of a single EventEmitter function.
-   *
-   * @param {Function} fn Event handler to be called.
-   * @param {Mixed} context Context for function execution.
-   * @param {Boolean} once Only emit once
-   * @api private
-   */
-  function EE(fn, context, once) {
-    this.fn = fn;
-    this.context = context;
-    this.once = once || false;
-  }
-  
-  /**
-   * Minimal EventEmitter interface that is molded against the Node.js
-   * EventEmitter interface.
-   *
-   * @constructor
-   * @api public
-   */
-  function EventEmitter() { /* Nothing to set */ }
-  
-  /**
-   * Holds the assigned EventEmitters by name.
-   *
-   * @type {Object}
-   * @private
-   */
-  EventEmitter.prototype._events = undefined;
-  
-  /**
-   * Return a list of assigned event listeners.
-   *
-   * @param {String} event The events that should be listed.
-   * @param {Boolean} exists We only need to know if there are listeners.
-   * @returns {Array|Boolean}
-   * @api public
-   */
-  EventEmitter.prototype.listeners = function listeners(event, exists) {
-    var prefix = typeof event !== 'symbol' ? '~' + event : event
-      , available = this._events && this._events[prefix];
-  
-    if (exists) return !!available;
-    if (!available) return [];
-    if (this._events[prefix].fn) return [this._events[prefix].fn];
-  
-    for (var i = 0, l = this._events[prefix].length, ee = new Array(l); i < l; i++) {
-      ee[i] = this._events[prefix][i].fn;
-    }
-  
-    return ee;
-  };
-  
-  /**
-   * Emit an event to all registered event listeners.
-   *
-   * @param {String} event The name of the event.
-   * @returns {Boolean} Indication if we've emitted an event.
-   * @api public
-   */
-  EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-    var prefix = typeof event !== 'symbol' ? '~' + event : event;
-  
-    if (!this._events || !this._events[prefix]) return false;
-  
-    var listeners = this._events[prefix]
-      , len = arguments.length
-      , args
-      , i;
-  
-    if ('function' === typeof listeners.fn) {
-      if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
-  
-      switch (len) {
-        case 1: return listeners.fn.call(listeners.context), true;
-        case 2: return listeners.fn.call(listeners.context, a1), true;
-        case 3: return listeners.fn.call(listeners.context, a1, a2), true;
-        case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
-        case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
-        case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
-      }
-  
-      for (i = 1, args = new Array(len -1); i < len; i++) {
-        args[i - 1] = arguments[i];
-      }
-  
-      listeners.fn.apply(listeners.context, args);
-    } else {
-      var length = listeners.length
-        , j;
-  
-      for (i = 0; i < length; i++) {
-        if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
-  
-        switch (len) {
-          case 1: listeners[i].fn.call(listeners[i].context); break;
-          case 2: listeners[i].fn.call(listeners[i].context, a1); break;
-          case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
-          default:
-            if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
-              args[j - 1] = arguments[j];
-            }
-  
-            listeners[i].fn.apply(listeners[i].context, args);
-        }
-      }
-    }
-  
-    return true;
-  };
-  
-  /**
-   * Register a new EventListener for the given event.
-   *
-   * @param {String} event Name of the event.
-   * @param {Functon} fn Callback function.
-   * @param {Mixed} context The context of the function.
-   * @api public
-   */
-  EventEmitter.prototype.on = function on(event, fn, context) {
-    var listener = new EE(fn, context || this)
-      , prefix = typeof event !== 'symbol' ? '~' + event : event;
-  
-    if (!this._events) this._events = {};
-    if (!this._events[prefix]) this._events[prefix] = listener;
-    else {
-      if (!this._events[prefix].fn) this._events[prefix].push(listener);
-      else this._events[prefix] = [
-        this._events[prefix], listener
-      ];
-    }
-  
-    return this;
-  };
-  
-  /**
-   * Add an EventListener that's only called once.
-   *
-   * @param {String} event Name of the event.
-   * @param {Function} fn Callback function.
-   * @param {Mixed} context The context of the function.
-   * @api public
-   */
-  EventEmitter.prototype.once = function once(event, fn, context) {
-    var listener = new EE(fn, context || this, true)
-      , prefix = typeof event !== 'symbol' ? '~' + event : event;
-  
-    if (!this._events) this._events = {};
-    if (!this._events[prefix]) this._events[prefix] = listener;
-    else {
-      if (!this._events[prefix].fn) this._events[prefix].push(listener);
-      else this._events[prefix] = [
-        this._events[prefix], listener
-      ];
-    }
-  
-    return this;
-  };
-  
-  /**
-   * Remove event listeners.
-   *
-   * @param {String} event The event we want to remove.
-   * @param {Function} fn The listener that we need to find.
-   * @param {Mixed} context Only remove listeners matching this context.
-   * @param {Boolean} once Only remove once listeners.
-   * @api public
-   */
-  EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
-    var prefix = typeof event !== 'symbol' ? '~' + event : event;
-  
-    if (!this._events || !this._events[prefix]) return this;
-  
-    var listeners = this._events[prefix]
-      , events = [];
-  
-    if (fn) {
-      if (listeners.fn) {
-        if (
-             listeners.fn !== fn
-          || (once && !listeners.once)
-          || (context && listeners.context !== context)
-        ) {
-          events.push(listeners);
-        }
-      } else {
-        for (var i = 0, length = listeners.length; i < length; i++) {
-          if (
-               listeners[i].fn !== fn
-            || (once && !listeners[i].once)
-            || (context && listeners[i].context !== context)
-          ) {
-            events.push(listeners[i]);
-          }
-        }
-      }
-    }
-  
-    //
-    // Reset the array, or remove it completely if we have no more listeners.
-    //
-    if (events.length) {
-      this._events[prefix] = events.length === 1 ? events[0] : events;
-    } else {
-      delete this._events[prefix];
-    }
-  
-    return this;
-  };
-  
-  /**
-   * Remove all listeners or only the listeners for the specified event.
-   *
-   * @param {String} event The event want to remove all listeners for.
-   * @api public
-   */
-  EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
-    if (!this._events) return this;
-  
-    if (event) delete this._events[typeof event !== 'symbol' ? '~' + event : event];
-    else this._events = {};
-  
-    return this;
-  };
-  
-  //
-  // Alias methods names because people roll like that.
-  //
-  EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-  EventEmitter.prototype.addListener = EventEmitter.prototype.on;
-  
-  //
-  // This function doesn't apply anymore.
-  //
-  EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
-    return this;
-  };
-  
-  //
-  // Expose the module.
-  //
-  module.exports = EventEmitter;
   
 });
 require.register('cookie#0.1.2', function(module, exports, require) {
@@ -1164,11 +898,11 @@ require.register('lib/request.js', function(module, exports, require) {
    * Browser request object
    */
   
-  var cookie = require('cookie#0.1.2')
-  	, emitter = require('eventemitter3#1.0.2')
-  	, merge = require('lib/safeMerge.js')
-  	, qsParse = require('query-string#2.0.0').parse
-  	, urlUtils = require('@yr/url-utils#1.8.1');
+  var cookie = require('cookie#0.1.2'),
+      emitter = require('eventemitter3#1.0.2'),
+      merge = require('lodash-compat/object/merge.js#3.7.0'),
+      qsParse = require('query-string#2.0.0').parse,
+      urlUtils = require('@yr/url-utils#1.8.1');
   
   module.exports = Request;
   
@@ -1177,17 +911,15 @@ require.register('lib/request.js', function(module, exports, require) {
    * @param {String} url
    * @param {Boolean} bootstrap
    */
-  function Request (url, bootstrap) {
+  function Request(url, bootstrap) {
   	if (!(this instanceof Request)) {
   		return new Request(url, bootstrap);
   	}
   
-  	url = url
-  		? urlUtils.encode(url)
-  		: urlUtils.getCurrent();
+  	url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
   
-  	var path = url.split('?')
-  		, qs = path[1] || '';
+  	var path = url.split('?'),
+  	    qs = path[1] || '';
   
   	this.app;
   	this.cookies = cookie.parse(document.cookie);
@@ -1220,7 +952,6 @@ require.register('lib/request.js', function(module, exports, require) {
   	this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
   	this.params = null;
   };
-  
 });
 require.register('lodash-compat/internal/isIterateeCall.js#3.7.0', function(module, exports, require) {
   var getLength = require('lodash-compat/internal/getLength.js#3.7.0'),
@@ -2850,10 +2581,10 @@ require.register('lib/history.js', function(module, exports, require) {
    * and responds to changes to state via History API.
    */
   
-  var bind = require('lodash-compat/function/bind.js#3.7.0')
-  	, debug = require('debug#2.1.2')('express:history')
-  	, urlUtils = require('@yr/url-utils#1.8.1')
-  	, bootstrap = true;
+  var bind = require('lodash-compat/function/bind.js#3.7.0'),
+      debug = require('debug#2.1.2')('express:history'),
+      urlUtils = require('@yr/url-utils#1.8.1'),
+      bootstrap = true;
   
   module.exports = History;
   
@@ -2863,7 +2594,7 @@ require.register('lib/history.js', function(module, exports, require) {
    * @param {Function} response
    * @param {Function} fn(req, res)
    */
-  function History (request, response, fn) {
+  function History(request, response, fn) {
   	if (!(this instanceof History)) {
   		return new History(request, response, fn);
   	}
@@ -2982,13 +2713,12 @@ require.register('lib/history.js', function(module, exports, require) {
    * @returns {Object}
    */
   History.prototype.handle = function (url) {
-  	var ctx = {}
-  		, req, res;
+  	var ctx = {},
+  	    req,
+  	    res;
   
   	try {
-  		url = url
-  			? urlUtils.encode(url)
-  			: urlUtils.getCurrent();
+  		url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
   	} catch (err) {
   		// Error encoding url
   		return this.redirectTo(url);
@@ -3050,10 +2780,8 @@ require.register('lib/history.js', function(module, exports, require) {
    * @param {Object} evt
    */
   History.prototype.onClick = function (evt) {
-  	var which = (null == evt.which)
-  			? evt.button
-  			: evt.which
-  		, el = evt.target;
+  	var which = null == evt.which ? evt.button : evt.which,
+  	    el = evt.target;
   
   	// Modifiers present
   	if (which != 1) return;
@@ -3070,7 +2798,7 @@ require.register('lib/history.js', function(module, exports, require) {
   	if (!el || 'A' != el.nodeName.toUpperCase()) return;
   
   	// Cross origin
-  	if (!sameOrigin(el.href)) return;
+  	if (!sameOrigin(el.href)) return this.fn(el.href);
   
   	var path = el.pathname + el.search;
   
@@ -3088,20 +2816,16 @@ require.register('lib/history.js', function(module, exports, require) {
    * Test for history API (Modernizr)
    * @returns {Boolean}
    */
-  function hasHistory () {
+  function hasHistory() {
   	var ua = navigator.userAgent;
   
   	// Stock android browser 2.2 & 2.3 & 4.0.x are buggy, ignore
-  	if ((ua.indexOf('Android 2.') !== -1
-  		|| (ua.indexOf('Android 4.0') !== -1))
-  		// Chrome identifies itself as 'Mobile Safari'
-  		&& ua.indexOf('Mobile Safari') !== -1
-  		&& ua.indexOf('Chrome') === -1) {
-  			return false;
+  	if ((ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) && ua.indexOf('Mobile Safari') !== -1 && ua.indexOf('Chrome') === -1) {
+  		return false;
   	}
   
   	// Usual test
-  	return (window.history && 'pushState' in window.history);
+  	return window.history && 'pushState' in window.history;
   }
   
   /**
@@ -3109,11 +2833,13 @@ require.register('lib/history.js', function(module, exports, require) {
    * @param {String} url
    * @returns {Boolean}
    */
-  function sameOrigin (url) {
+  function sameOrigin(url) {
   	var origin = location.protocol + '//' + location.hostname;
   	if (location.port) origin += ':' + location.port;
-  	return (url && (url.indexOf(origin) == 0));
+  	return url && url.indexOf(origin) == 0;
   }
+  
+  // Chrome identifies itself as 'Mobile Safari'
 });
 require.register('lodash-compat/internal/bindCallback.js#3.7.0', function(module, exports, require) {
   var identity = require('lodash-compat/utility/identity.js#3.7.0');
@@ -3740,6 +3466,254 @@ require.register('lodash-compat/collection/forEach.js#3.7.0', function(module, e
   var forEach = createForEach(arrayEach, baseEach);
   
   module.exports = forEach;
+  
+});
+require.register('eventemitter3#1.0.2', function(module, exports, require) {
+  'use strict';
+  
+  /**
+   * Representation of a single EventEmitter function.
+   *
+   * @param {Function} fn Event handler to be called.
+   * @param {Mixed} context Context for function execution.
+   * @param {Boolean} once Only emit once
+   * @api private
+   */
+  function EE(fn, context, once) {
+    this.fn = fn;
+    this.context = context;
+    this.once = once || false;
+  }
+  
+  /**
+   * Minimal EventEmitter interface that is molded against the Node.js
+   * EventEmitter interface.
+   *
+   * @constructor
+   * @api public
+   */
+  function EventEmitter() { /* Nothing to set */ }
+  
+  /**
+   * Holds the assigned EventEmitters by name.
+   *
+   * @type {Object}
+   * @private
+   */
+  EventEmitter.prototype._events = undefined;
+  
+  /**
+   * Return a list of assigned event listeners.
+   *
+   * @param {String} event The events that should be listed.
+   * @param {Boolean} exists We only need to know if there are listeners.
+   * @returns {Array|Boolean}
+   * @api public
+   */
+  EventEmitter.prototype.listeners = function listeners(event, exists) {
+    var prefix = typeof event !== 'symbol' ? '~' + event : event
+      , available = this._events && this._events[prefix];
+  
+    if (exists) return !!available;
+    if (!available) return [];
+    if (this._events[prefix].fn) return [this._events[prefix].fn];
+  
+    for (var i = 0, l = this._events[prefix].length, ee = new Array(l); i < l; i++) {
+      ee[i] = this._events[prefix][i].fn;
+    }
+  
+    return ee;
+  };
+  
+  /**
+   * Emit an event to all registered event listeners.
+   *
+   * @param {String} event The name of the event.
+   * @returns {Boolean} Indication if we've emitted an event.
+   * @api public
+   */
+  EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+    var prefix = typeof event !== 'symbol' ? '~' + event : event;
+  
+    if (!this._events || !this._events[prefix]) return false;
+  
+    var listeners = this._events[prefix]
+      , len = arguments.length
+      , args
+      , i;
+  
+    if ('function' === typeof listeners.fn) {
+      if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+  
+      switch (len) {
+        case 1: return listeners.fn.call(listeners.context), true;
+        case 2: return listeners.fn.call(listeners.context, a1), true;
+        case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+        case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+        case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+        case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+      }
+  
+      for (i = 1, args = new Array(len -1); i < len; i++) {
+        args[i - 1] = arguments[i];
+      }
+  
+      listeners.fn.apply(listeners.context, args);
+    } else {
+      var length = listeners.length
+        , j;
+  
+      for (i = 0; i < length; i++) {
+        if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
+  
+        switch (len) {
+          case 1: listeners[i].fn.call(listeners[i].context); break;
+          case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+          case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+          default:
+            if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+              args[j - 1] = arguments[j];
+            }
+  
+            listeners[i].fn.apply(listeners[i].context, args);
+        }
+      }
+    }
+  
+    return true;
+  };
+  
+  /**
+   * Register a new EventListener for the given event.
+   *
+   * @param {String} event Name of the event.
+   * @param {Functon} fn Callback function.
+   * @param {Mixed} context The context of the function.
+   * @api public
+   */
+  EventEmitter.prototype.on = function on(event, fn, context) {
+    var listener = new EE(fn, context || this)
+      , prefix = typeof event !== 'symbol' ? '~' + event : event;
+  
+    if (!this._events) this._events = {};
+    if (!this._events[prefix]) this._events[prefix] = listener;
+    else {
+      if (!this._events[prefix].fn) this._events[prefix].push(listener);
+      else this._events[prefix] = [
+        this._events[prefix], listener
+      ];
+    }
+  
+    return this;
+  };
+  
+  /**
+   * Add an EventListener that's only called once.
+   *
+   * @param {String} event Name of the event.
+   * @param {Function} fn Callback function.
+   * @param {Mixed} context The context of the function.
+   * @api public
+   */
+  EventEmitter.prototype.once = function once(event, fn, context) {
+    var listener = new EE(fn, context || this, true)
+      , prefix = typeof event !== 'symbol' ? '~' + event : event;
+  
+    if (!this._events) this._events = {};
+    if (!this._events[prefix]) this._events[prefix] = listener;
+    else {
+      if (!this._events[prefix].fn) this._events[prefix].push(listener);
+      else this._events[prefix] = [
+        this._events[prefix], listener
+      ];
+    }
+  
+    return this;
+  };
+  
+  /**
+   * Remove event listeners.
+   *
+   * @param {String} event The event we want to remove.
+   * @param {Function} fn The listener that we need to find.
+   * @param {Mixed} context Only remove listeners matching this context.
+   * @param {Boolean} once Only remove once listeners.
+   * @api public
+   */
+  EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+    var prefix = typeof event !== 'symbol' ? '~' + event : event;
+  
+    if (!this._events || !this._events[prefix]) return this;
+  
+    var listeners = this._events[prefix]
+      , events = [];
+  
+    if (fn) {
+      if (listeners.fn) {
+        if (
+             listeners.fn !== fn
+          || (once && !listeners.once)
+          || (context && listeners.context !== context)
+        ) {
+          events.push(listeners);
+        }
+      } else {
+        for (var i = 0, length = listeners.length; i < length; i++) {
+          if (
+               listeners[i].fn !== fn
+            || (once && !listeners[i].once)
+            || (context && listeners[i].context !== context)
+          ) {
+            events.push(listeners[i]);
+          }
+        }
+      }
+    }
+  
+    //
+    // Reset the array, or remove it completely if we have no more listeners.
+    //
+    if (events.length) {
+      this._events[prefix] = events.length === 1 ? events[0] : events;
+    } else {
+      delete this._events[prefix];
+    }
+  
+    return this;
+  };
+  
+  /**
+   * Remove all listeners or only the listeners for the specified event.
+   *
+   * @param {String} event The event want to remove all listeners for.
+   * @api public
+   */
+  EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+    if (!this._events) return this;
+  
+    if (event) delete this._events[typeof event !== 'symbol' ? '~' + event : event];
+    else this._events = {};
+  
+    return this;
+  };
+  
+  //
+  // Alias methods names because people roll like that.
+  //
+  EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+  EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+  
+  //
+  // This function doesn't apply anymore.
+  //
+  EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
+    return this;
+  };
+  
+  //
+  // Expose the module.
+  //
+  module.exports = EventEmitter;
   
 });
 require.register('ms#0.7.0', function(module, exports, require) {
@@ -5967,23 +5941,23 @@ require.register('lib/application.js', function(module, exports, require) {
    * Browser application
    */
   
-  var bind = require('lodash-compat/function/bind.js#3.7.0')
-  	, debug = require('debug#2.1.2')('express:application')
-  	, forEach = require('lodash-compat/collection/forEach.js#3.7.0')
-  	, history = require('lib/history.js')
-  	, merge = require('lodash-compat/object/merge.js#3.7.0')
-  	, request = require('lib/request.js')
-  	, response = require('lib/response.js')
-  	, router = require('lib/router.js')
-  
-  	, METHODS = ['get', 'post', 'all'];
+  var bind = require('lodash-compat/function/bind.js#3.7.0'),
+      debug = require('debug#2.1.2')('express:application'),
+      emitter = require('eventemitter3#1.0.2'),
+      forEach = require('lodash-compat/collection/forEach.js#3.7.0'),
+      history = require('lib/history.js'),
+      merge = require('lodash-compat/object/merge.js#3.7.0'),
+      request = require('lib/request.js'),
+      response = require('lib/response.js'),
+      router = require('lib/router.js'),
+      METHODS = ['get', 'post', 'all'];
   
   module.exports = Application;
   
   /**
    * Constructor
    */
-  function Application () {
+  function Application() {
   	if (!(this instanceof Application)) {
   		return new Application();
   	}
@@ -6009,19 +5983,21 @@ require.register('lib/application.js', function(module, exports, require) {
   	this.refresh = bind(this.refresh, this);
   
   	// Create request/response factories
-  	var app = this
-  		, req = function (url, bootstrap) {
-  				var req = request(url, bootstrap);
-  				req.app = app;
-  				return req;
-  			}
-  		, res = function () {
-  				var res = response();
-  				res.app = app;
-  				return res;
-  			};
+  	var app = this,
+  	    req = function (url, bootstrap) {
+  		var req = request(url, bootstrap);
+  		req.app = app;
+  		return req;
+  	},
+  	    res = function () {
+  		var res = response();
+  		res.app = app;
+  		return res;
+  	};
   
   	this.history = history(req, res, this.handle);
+  
+  	merge(this, emitter.prototype);
   }
   
   /**
@@ -6040,10 +6016,11 @@ require.register('lib/application.js', function(module, exports, require) {
    * Add one or more 'fn' to middleware pipeline at optional 'path'
    * @param {Function} fn(req, res, next)
    */
-  Application.prototype.use = function (/* path, */ fn /* ...fn */) {
-  	var offset = 0
-  		, path = '/'
-  		, fns, path;
+  Application.prototype.use = function ( /* path, */fn /* ...fn */) {
+  	var offset = 0,
+  	    path = '/',
+  	    fns,
+  	    path;
   
   	if ('string' == typeof fn) {
   		offset = 1;
@@ -6054,11 +6031,11 @@ require.register('lib/application.js', function(module, exports, require) {
   
   	forEach(fns, function (fn) {
   		if (fn instanceof Application) {
-  			var app = fn
-  				, handler = app.handle;
+  			var app = fn,
+  			    handler = app.handle;
   			app.mountpath = path;
   			app.parent = this;
-  			fn = function mounted_app (req, res, next) {
+  			fn = function mounted_app(req, res, next) {
   				// Change app reference to mounted
   				var orig = req.app;
   				req.app = res.app = app;
@@ -6113,14 +6090,17 @@ require.register('lib/application.js', function(module, exports, require) {
    * @param {Function} done
    */
   Application.prototype.handle = function (req, res, done) {
-  	this._router.handle(req, res, done || this.finalhandler);
+  	if ('string' == typeof req) {
+  		this.emit('link:external', req);
+  	} else {
+  		this._router.handle(req, res, done || this.finalhandler);
+  	}
   };
   
   /**
    *
    */
-  Application.prototype.finalhandler = function (err) {
-  };
+  Application.prototype.finalhandler = function (err) {};
   
   /**
    * Render view with given 'name', 'options' and callback 'fn'
@@ -6129,8 +6109,8 @@ require.register('lib/application.js', function(module, exports, require) {
    * @param {Function} fn(err, html)
    */
   Application.prototype.render = function (name, options, fn) {
-  	var opts = {}
-  		, view;
+  	var opts = {},
+  	    view;
   
   	if ('function' == typeof options) {
   		fn = options;
@@ -6143,9 +6123,7 @@ require.register('lib/application.js', function(module, exports, require) {
   	view = this.cache[name];
   
   	if (!view) {
-  		view = new (this.get('view'))(name, {
-  			//
-  		});
+  		view = new (this.get('view'))(name, {});
   
   		if (!view) {
   			var err = new Error('Failed to lookup view ' + name);
@@ -6196,20 +6174,22 @@ require.register('lib/application.js', function(module, exports, require) {
    * @returns {Object}
    */
   Application.prototype.refresh = function () {
-   	this[this.parent ? 'parent' : 'history'].refresh();
-   };
+  	this[this.parent ? 'parent' : 'history'].refresh();
+  };
+  
+  //
 });
 require.register('express-client/index.js', function(module, exports, require) {
-  var application = require('lib/application.js')
-  	, Router = require('lib/router.js');
+  var application = require('lib/application.js'),
+      Router = require('lib/router.js');
   
   module.exports = createApplication;
   
   /**
    * Application factory
    */
-  function createApplication () {
-  	return application();
+  function createApplication() {
+    return application();
   };
   
   /**
