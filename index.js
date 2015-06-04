@@ -1,3 +1,5 @@
+'use strict';
+
 var application = require('./lib/application')
 	, Router = require('./lib/router');
 
@@ -8,7 +10,7 @@ module.exports = createApplication;
  */
 function createApplication () {
 	return application();
-};
+}
 
 /**
  * Expose
