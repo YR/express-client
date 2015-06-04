@@ -230,6 +230,18 @@ describe('express-client', function () {
 					expect(count).to.be(1);
 				});
 			});
+			it('should handle error in param processing', function () {
+				var router = Router()
+					, request = Request('/bar')
+					, response = Response();
+
+				router.param('foo', function (req, res, next, foo) {
+					next(new Error('foo'));
+				});
+				router.handle(request, response, function (err) {
+					expect(err).to.exist;
+				});
+			});
 		});
 	});
 
