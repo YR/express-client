@@ -13,7 +13,7 @@
     "@yr/url-utils": "1.8.1"
   },
   "devDependencies": {
-    "buddy": "popeindustries/buddy",
+    "buddy": "*",
     "expect.js": "0.3.1",
     "mocha": "*",
     "mocha-phantomjs": "*"
@@ -22,7 +22,8 @@
   "repository": "https://github.com/YR/express-client.git",
   "license": "MIT",
   "scripts": {
-    "test": "buddy build && mocha-phantomjs test/test-runner.html"
+    "test": "buddy build && mocha-phantomjs test/test-runner.html",
+    "lint": "NODE_ENV=development node ./node_modules/buddy/bin/buddy -l watch"
   },
   "buddy": {
     "build": {
