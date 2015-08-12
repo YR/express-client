@@ -5,7 +5,7 @@ node_modules/mocha/*
 !node_modules/mocha/mocha.css
 node_modules/.bin
 node_modules/buddy
-node_modules/lodash-compat
+node_modules/object-assign
 node_modules/eventemitter3
 node_modules/debug
 node_modules/mocha-phantomjs
