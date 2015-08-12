@@ -10,7 +10,7 @@
     "object-assign": "3.0.0",
     "path-to-regexp": "1.2.0",
     "query-string": "2.4.0",
-    "@yr/url-utils": "2.0.0"
+    "@yr/url-utils": "2.0.3"
   },
   "devDependencies": {
     "buddy": "3.0.0-beta-1",

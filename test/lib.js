@@ -490,8 +490,8 @@ require.register('lib/layer.js', function(module, exports, require) {
    * Router layer object
    */
   
-  var matcher = require('path-to-regexp#1.2.0'),
-      urlUtils = require('@yr/url-utils#2.0.0');
+  var matcher = require('path-to-regexp#1.2.0')
+  	, urlUtils = require('@yr/url-utils#2.0.3');
   
   module.exports = Layer;
   
@@ -499,7 +499,7 @@ require.register('lib/layer.js', function(module, exports, require) {
    * Constructor
    * @param {String} url
    */
-  function Layer(path, fn, options) {
+  function Layer (path, fn, options) {
   	if (!(this instanceof Layer)) {
   		return new Layer(path, fn, options);
   	}
@@ -510,7 +510,7 @@ require.register('lib/layer.js', function(module, exports, require) {
   	this.params = null;
   	this.fn = fn;
   	this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
-  	this.fastmatch = path == '/' && !options.end;
+  	this.fastmatch = (path == '/' && !options.end);
   	this.regexp = matcher(path, this.keys, options);
   }
   
@@ -537,9 +537,8 @@ require.register('lib/layer.js', function(module, exports, require) {
   	this.params = {};
   	this.path = match[0];
   
-  	var n = 0,
-  	    key,
-  	    val;
+  	var n = 0
+  		, key, val;
   
   	for (var i = 1, len = match.length; i < len; ++i) {
   		key = this.keys[i - 1];
@@ -565,11 +564,15 @@ require.register('lib/layer.js', function(module, exports, require) {
   Layer.prototype.handle = function (err, req, res, next) {
   	if (err) {
   		// Only call if it handles errors
-  		return this.fn.length > 3 ? this.fn(err, req, res, next) : next(err);
+  		return (this.fn.length > 3)
+  			? this.fn(err, req, res, next)
+  			: next(err);
   	}
   
   	// Skip if error handler
-  	return this.fn.length < 4 ? this.fn(req, res, next) : next();
+  	return (this.fn.length < 4)
+  		? this.fn(req, res, next)
+  		: next();
   };
 });
 require.register('lib/router.js', function(module, exports, require) {
@@ -580,16 +583,17 @@ require.register('lib/router.js', function(module, exports, require) {
    * Can be isolated under a specific mount path.
    */
   
-  var assign = require('object-assign#3.0.0'),
-      debug = require('debug#2.2.0')('express:router'),
-      layer = require('lib/layer.js'),
-      urlUtils = require('@yr/url-utils#2.0.0'),
-      METHODS = ['get', 'post', 'all'],
-      DEFAULTS = {
-  	mergeParams: true,
-  	caseSensitive: false,
-  	strict: false
-  };
+  var assign = require('object-assign#3.0.0')
+  	, debug = require('debug#2.2.0')('express:router')
+  	, layer = require('lib/layer.js')
+  	, urlUtils = require('@yr/url-utils#2.0.3')
+  
+  	, METHODS = ['get', 'post', 'all']
+  	, DEFAULTS = {
+  			mergeParams: true,
+  			caseSensitive: false,
+  			strict: false
+  		};
   
   module.exports = Router;
   
@@ -597,7 +601,7 @@ require.register('lib/router.js', function(module, exports, require) {
    * Constructor
    * @param {Object} [options]
    */
-  function Router(options) {
+  function Router (options) {
   	if (!(this instanceof Router)) {
   		return new Router(options);
   	}
@@ -635,10 +639,10 @@ require.register('lib/router.js', function(module, exports, require) {
    * Add one or more 'fn' to middleware pipeline at optional 'path'
    * @param {Function} fn
    */
-  Router.prototype.use = function ( /* path, */fn /* ...fn */) {
-  	var offset = 0,
-  	    path = '/',
-  	    fns;
+  Router.prototype.use = function (/* path, */ fn /* ...fn */) {
+  	var offset = 0
+  		, path = '/'
+  		, fns;
   
   	if ('string' == typeof fn) {
   		offset = 1;
@@ -681,11 +685,11 @@ require.register('lib/router.js', function(module, exports, require) {
    * @param {Function} done
    */
   Router.prototype.handle = function (req, res, done) {
-  	var idx = 0,
-  	    self = this,
-  	    processedParams = {},
-  	    removed = '',
-  	    parentUrl = req.baseUrl || '';
+  	var idx = 0
+  		, self = this
+  		, processedParams = {}
+  		, removed = ''
+  		, parentUrl = req.baseUrl || '';
   
   	// Update done to restore req props
   	done = restore(done, req, 'baseUrl', 'next', 'params');
@@ -696,57 +700,47 @@ require.register('lib/router.js', function(module, exports, require) {
   
   	next();
   
-  	function next(_x) {
-  		var _again = true;
+  	function next (err) {
+  		var lyr = self.stack[idx++]
+  			, layerErr = err;
   
-  		_function: while (_again) {
-  			var err = _x;
-  			lyr = layerErr = keys = undefined;
-  			_again = false;
-  
-  			var lyr = self.stack[idx++],
-  			    layerErr = err;
-  
-  			if (removed.length != 0) {
-  				debug('untrim %s from url %s', removed, req.path);
-  				req.baseUrl = parentUrl;
-  				req.path = urlUtils.join(removed, req.path);
-  				removed = '';
-  			}
-  
-  			// Exit
-  			if (!lyr) {
-  				return done(err);
-  			}
-  
-  			// Skip if no match
-  			if (!lyr.match(req.path)) {
-  				_x = err;
-  				_again = true;
-  				continue _function;
-  			}
-  
-  			debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
-  
-  			// Store params
-  			if (self.mergeParams) {
-  				if (!req.params) req.params = {};
-  				assign(req.params, lyr.params);
-  			} else {
-  				req.params = lyr.params;
-  			}
-  
-  			var keys = Object.keys(lyr.params);
-  			// Process params if necessary
-  			self._processParams(processedParams, req.params, keys, req, res, function (err) {
-  				if (err) return next(layerErr || err);
-  				if (!lyr.route) trim(lyr);
-  				return lyr.handle(layerErr, req, res, next);
-  			});
+  		if (removed.length != 0) {
+  			debug('untrim %s from url %s', removed, req.path);
+  			req.baseUrl = parentUrl;
+  			req.path = urlUtils.join(removed, req.path);
+  			removed = '';
   		}
+  
+  		// Exit
+  		if (!lyr) {
+  			return done(err);
+  		}
+  
+  		// Skip if no match
+  		if (!lyr.match(req.path)) {
+  			return next(err);
+  		}
+  
+  		debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
+  
+  		// Store params
+  		if (self.mergeParams) {
+  			if (!req.params) req.params = {};
+  			assign(req.params, lyr.params);
+  		} else {
+  			req.params = lyr.params;
+  		}
+  
+  		var keys = Object.keys(lyr.params);
+  		// Process params if necessary
+  		self._processParams(processedParams, req.params, keys, req, res, function (err) {
+  			if (err) return next(layerErr || err);
+  			if (!lyr.route) trim(lyr);
+  			return lyr.handle(layerErr, req, res, next);
+  		});
   	}
   
-  	function trim(layer) {
+  	function trim (layer) {
   		if (layer.path.length != 0) {
   			debug('trim %s from url %s', layer.path, req.path);
   			removed = layer.path;
@@ -768,14 +762,14 @@ require.register('lib/router.js', function(module, exports, require) {
    * @param {Function} done(err)
    */
   Router.prototype._processParams = function (processedParams, params, keys, req, res, done) {
-  	function next(err) {
+  	function next (err) {
   		// Stop processing on any error
   		if (err) return done(err);
   
   		if (idx >= keys.length) return done();
   
-  		var name = keys[idx++],
-  		    fn = self.params[name];
+  		var name = keys[idx++]
+  			, fn = self.params[name];
   
   		// Process if match and not already processed
   		if (fn && !processedParams[name]) {
@@ -787,8 +781,8 @@ require.register('lib/router.js', function(module, exports, require) {
   	}
   
   	if (this.params && keys.length) {
-  		var idx = 0,
-  		    self = this;
+  		var idx = 0
+  			, self = this;
   
   		next();
   	} else {
@@ -801,9 +795,9 @@ require.register('lib/router.js', function(module, exports, require) {
    * @param {Function} fn
    * @param {Object} obj
    */
-  function restore(fn, obj) {
-  	var props = new Array(arguments.length - 2),
-  	    vals = new Array(arguments.length - 2);
+  function restore (fn, obj) {
+  	var props = new Array(arguments.length - 2)
+  		, vals = new Array(arguments.length - 2);
   
   	for (var i = 0; i < props.length; i++) {
   		props[i] = arguments[i + 2];
@@ -827,35 +821,35 @@ require.register('lib/response.js', function(module, exports, require) {
    * Browser response object
    */
   
-  var assign = require('object-assign#3.0.0'),
-      cookie = require('cookie#0.1.3'),
-      emitter = require('eventemitter3#1.1.1');
+  var assign = require('object-assign#3.0.0')
+  	, cookie = require('cookie#0.1.3')
+  	, emitter = require('eventemitter3#1.1.1');
   
   module.exports = Response;
   
   /**
    * Constructor
    */
-  function Response() {
-    if (!(this instanceof Response)) {
-      return new Response();
-    }
+  function Response () {
+  	if (!(this instanceof Response)) {
+  		return new Response();
+  	}
   
-    this.app;
-    this.req;
-    this.reset();
+  	this.app;
+  	this.req;
+  	this.reset();
   
-    assign(this, emitter.prototype);
+  	assign(this, emitter.prototype);
   }
   
   /**
    * Reset state
    */
   Response.prototype.reset = function () {
-    this.cached = false;
-    this.finished = false;
-    this.locals = {};
-    this.statusCode = 404;
+  	this.cached = false;
+  	this.finished = false;
+  	this.locals = {};
+  	this.statusCode = 404;
   };
   
   /**
@@ -864,19 +858,19 @@ require.register('lib/response.js', function(module, exports, require) {
    * @returns {Response}
    */
   Response.prototype.status = function (code) {
-    this.statusCode = code;
-    return this;
+  	this.statusCode = code;
+  	return this;
   };
   
   /**
    * Send response (last method called in pipeline)
    */
   Response.prototype.send = function () {
-    // Reset state
-    this.req.reset();
-    this.status(200);
-    this.finished = true;
-    this.emit('finish');
+  	// Reset state
+  	this.req.reset();
+  	this.status(200);
+  	this.finished = true;
+  	this.emit('finish');
   };
   
   /**
@@ -885,7 +879,7 @@ require.register('lib/response.js', function(module, exports, require) {
    * @param {String} url
    */
   Response.prototype.redirect = function (statusCode, url) {
-    this.app.redirectTo(url || statusCode);
+  	this.app.redirectTo(url || statusCode);
   };
   
   /**
@@ -1106,11 +1100,11 @@ require.register('lib/request.js', function(module, exports, require) {
    * Browser request object
    */
   
-  var assign = require('object-assign#3.0.0'),
-      cookie = require('cookie#0.1.3'),
-      emitter = require('eventemitter3#1.1.1'),
-      qsParse = require('query-string#2.4.0').parse,
-      urlUtils = require('@yr/url-utils#2.0.0');
+  var assign = require('object-assign#3.0.0')
+  	, cookie = require('cookie#0.1.3')
+  	, emitter = require('eventemitter3#1.1.1')
+  	, qsParse = require('query-string#2.4.0').parse
+  	, urlUtils = require('@yr/url-utils#2.0.3');
   
   module.exports = Request;
   
@@ -1119,15 +1113,17 @@ require.register('lib/request.js', function(module, exports, require) {
    * @param {String} url
    * @param {Boolean} bootstrap
    */
-  function Request(url, bootstrap) {
+  function Request (url, bootstrap) {
   	if (!(this instanceof Request)) {
   		return new Request(url, bootstrap);
   	}
   
-  	url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
+  	url = url
+  		? urlUtils.encode(url)
+  		: urlUtils.getCurrent();
   
-  	var path = url.split('?'),
-  	    qs = path[1] || '';
+  	var path = url.split('?')
+  		, qs = path[1] || '';
   
   	this.app;
   	this.cookies = cookie.parse(document.cookie);
@@ -1160,6 +1156,7 @@ require.register('lib/request.js', function(module, exports, require) {
   	this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
   	this.params = null;
   };
+  
 });
 require.register('@yr/runtime#0.1.0', function(module, exports, require) {
   var isNode = (typeof process !== 'undefined'
@@ -1168,7 +1165,7 @@ require.register('@yr/runtime#0.1.0', function(module, exports, require) {
   exports.isServer = isNode;
   exports.isBrowser = !isNode;
 });
-require.register('@yr/url-utils#2.0.0', function(module, exports, require) {
+require.register('@yr/url-utils#2.0.3', function(module, exports, require) {
   var isServer = require('@yr/runtime#0.1.0').isServer
   
   	, RE_TEMPLATE = /\{([0-9a-zA-Z]+)\}/g
@@ -1272,26 +1269,39 @@ require.register('@yr/url-utils#2.0.0', function(module, exports, require) {
    * @returns {String}
    */
   exports.decode = function decode (url) {
-  	try {
-  		url = decodeURIComponent(url);
-  		return url;
-  	} catch (err) {
-  		throw new Error('failed to decode "' + url + '"');
+  	if ('string' == typeof url) {
+  		try {
+  			url = decodeURI(url);
+  			return url;
+  		} catch (err) {
+  			throw new Error('failed to decode "' + url + '"');
+  		}
   	}
+  
+  	return url;
   };
   
   /**
-   * Encode 'url', and replace slash hex code with /
+   * Encode 'url'
    * @param {String} url
    * @returns {String}
    */
   exports.encode = function encode (url) {
-  	try {
-  		if (!~url.indexOf('%')) return encodeURI(url);
-  		return url;
-  	} catch (err) {
-  		throw new Error('failed to encode"' + url + '"');
+  	if ('string' == typeof url) {
+  		try {
+  			// Try to decode first in-case url is encoded
+  			try {
+  				url = decodeURI(url);
+  			} catch (err) {
+  				// Do nothing
+  			}
+  			return encodeURI(url);
+  		} catch (err) {
+  			throw new Error('failed to encode"' + url + '"');
+  		}
   	}
+  
+  	return url;
   };
   
   /**
@@ -1331,9 +1341,9 @@ require.register('lib/history.js', function(module, exports, require) {
    * and responds to changes to state via History API.
    */
   
-  var debug = require('debug#2.2.0')('express:history'),
-      urlUtils = require('@yr/url-utils#2.0.0'),
-      bootstrap = true;
+  var debug = require('debug#2.2.0')('express:history')
+  	, urlUtils = require('@yr/url-utils#2.0.3')
+  	, bootstrap = true;
   
   module.exports = History;
   
@@ -1343,7 +1353,7 @@ require.register('lib/history.js', function(module, exports, require) {
    * @param {Function} response
    * @param {Function} fn(req, res)
    */
-  function History(request, response, fn) {
+  function History (request, response, fn) {
   	if (!(this instanceof History)) {
   		return new History(request, response, fn);
   	}
@@ -1462,12 +1472,13 @@ require.register('lib/history.js', function(module, exports, require) {
    * @returns {Object}
    */
   History.prototype.handle = function (url) {
-  	var ctx = {},
-  	    req,
-  	    res;
+  	var ctx = {}
+  		, req, res;
   
   	try {
-  		url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
+  		url = url
+  			? urlUtils.encode(url)
+  			: urlUtils.getCurrent();
   	} catch (err) {
   		// Error encoding url
   		return this.redirectTo(url);
@@ -1529,8 +1540,10 @@ require.register('lib/history.js', function(module, exports, require) {
    * @param {Object} evt
    */
   History.prototype.onClick = function (evt) {
-  	var which = null == evt.which ? evt.button : evt.which,
-  	    el = evt.target;
+  	var which = (null == evt.which)
+  			? evt.button
+  			: evt.which
+  		, el = evt.target;
   
   	// Modifiers present
   	if (which != 1) return;
@@ -1565,18 +1578,20 @@ require.register('lib/history.js', function(module, exports, require) {
    * Test for history API (Modernizr)
    * @returns {Boolean}
    */
-  function hasHistory() {
+  function hasHistory () {
   	var ua = navigator.userAgent;
   
   	// Stock android browser 2.2 & 2.3 & 4.0.x are buggy, ignore
-  	if ((ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
-  	// Chrome identifies itself as 'Mobile Safari'
-  	ua.indexOf('Mobile Safari') !== -1 && ua.indexOf('Chrome') === -1) {
-  		return false;
+  	if ((ua.indexOf('Android 2.') !== -1
+  		|| (ua.indexOf('Android 4.0') !== -1))
+  		// Chrome identifies itself as 'Mobile Safari'
+  		&& ua.indexOf('Mobile Safari') !== -1
+  		&& ua.indexOf('Chrome') === -1) {
+  			return false;
   	}
   
   	// Usual test
-  	return window.history && 'pushState' in window.history;
+  	return (window.history && 'pushState' in window.history);
   }
   
   /**
@@ -1584,10 +1599,10 @@ require.register('lib/history.js', function(module, exports, require) {
    * @param {String} url
    * @returns {Boolean}
    */
-  function sameOrigin(url) {
+  function sameOrigin (url) {
   	var origin = location.protocol + '//' + location.hostname;
   	if (location.port) origin += ':' + location.port;
-  	return url && url.indexOf(origin) == 0;
+  	return (url && (url.indexOf(origin) == 0));
   }
 });
 require.register('eventemitter3#1.1.1', function(module, exports, require) {
@@ -2403,21 +2418,22 @@ require.register('lib/application.js', function(module, exports, require) {
    * Browser application
    */
   
-  var assign = require('object-assign#3.0.0'),
-      debug = require('debug#2.2.0')('express:application'),
-      emitter = require('eventemitter3#1.1.1'),
-      history = require('lib/history.js'),
-      request = require('lib/request.js'),
-      response = require('lib/response.js'),
-      router = require('lib/router.js'),
-      METHODS = ['get', 'post', 'all'];
+  var assign = require('object-assign#3.0.0')
+  	, debug = require('debug#2.2.0')('express:application')
+  	, emitter = require('eventemitter3#1.1.1')
+  	, history = require('lib/history.js')
+  	, request = require('lib/request.js')
+  	, response = require('lib/response.js')
+  	, router = require('lib/router.js')
+  
+  	, METHODS = ['get', 'post', 'all'];
   
   module.exports = Application;
   
   /**
    * Constructor
    */
-  function Application() {
+  function Application () {
   	if (!(this instanceof Application)) {
   		return new Application();
   	}
@@ -2442,17 +2458,17 @@ require.register('lib/application.js', function(module, exports, require) {
   	this.refresh = this.refresh.bind(this);
   
   	// Create request/response factories
-  	var app = this,
-  	    req = function (url, bootstrap) {
-  		var req = request(url, bootstrap);
-  		req.app = app;
-  		return req;
-  	},
-  	    res = function () {
-  		var res = response();
-  		res.app = app;
-  		return res;
-  	};
+  	var app = this
+  		, req = function (url, bootstrap) {
+  				var req = request(url, bootstrap);
+  				req.app = app;
+  				return req;
+  			}
+  		, res = function () {
+  				var res = response();
+  				res.app = app;
+  				return res;
+  			};
   
   	this.history = history(req, res, this.handle);
   
@@ -2475,11 +2491,10 @@ require.register('lib/application.js', function(module, exports, require) {
    * Add one or more 'fn' to middleware pipeline at optional 'path'
    * @param {Function} fn(req, res, next)
    */
-  Application.prototype.use = function ( /* path, */fn /* ...fn */) {
-  	var offset = 0,
-  	    path = '/',
-  	    fns,
-  	    path;
+  Application.prototype.use = function (/* path, */ fn /* ...fn */) {
+  	var offset = 0
+  		, path = '/'
+  		, fns, path;
   
   	if ('string' == typeof fn) {
   		offset = 1;
@@ -2490,11 +2505,11 @@ require.register('lib/application.js', function(module, exports, require) {
   
   	fns.forEach(function (fn) {
   		if (fn instanceof Application) {
-  			var app = fn,
-  			    handler = app.handle;
+  			var app = fn
+  				, handler = app.handle;
   			app.mountpath = path;
   			app.parent = this;
-  			fn = function mounted_app(req, res, next) {
+  			fn = function mounted_app (req, res, next) {
   				// Change app reference to mounted
   				var orig = req.app;
   				req.app = res.app = app;
@@ -2553,7 +2568,7 @@ require.register('lib/application.js', function(module, exports, require) {
   	if ('string' == typeof req) {
   		this.emit('link:external', req);
   	} else {
-  		this._router.handle(req, res, done || function () {});
+  		this._router.handle(req, res, done || function () { });
   	}
   };
   
@@ -2595,16 +2610,16 @@ require.register('lib/application.js', function(module, exports, require) {
 require.register('express-client/index.js', function(module, exports, require) {
   'use strict';
   
-  var application = require('lib/application.js'),
-      Router = require('lib/router.js');
+  var application = require('lib/application.js')
+  	, Router = require('lib/router.js');
   
   module.exports = createApplication;
   
   /**
    * Application factory
    */
-  function createApplication() {
-    return application();
+  function createApplication () {
+  	return application();
   }
   
   /**
