@@ -8,7 +8,12 @@ const assign = require('object-assign')
 	, cookie = require('cookie')
 	, Emitter = require('eventemitter3');
 
-module.exports = Response;
+/**
+ * Instance factory
+ */
+module.exports = function () {
+	return new Response();
+};
 
 class Response extends Emitter {
 	/**
@@ -50,7 +55,7 @@ class Response extends Emitter {
 		this.req.reset();
 		this.status(200);
 		this.finished = true;
-		super.emit('finish');
+		this.emit('finish');
 	}
 
 	/**

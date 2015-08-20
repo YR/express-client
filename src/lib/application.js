@@ -12,7 +12,12 @@ const assign = require('object-assign')
 	, response = require('./response')
 	, router = require('./router');
 
-module.exports = Application;
+/**
+ * Instance factory
+ */
+module.exports = function () {
+	return new Application();
+};
 
 class Application extends Emitter {
 	/**
@@ -41,7 +46,7 @@ class Application extends Emitter {
 		this.refresh = this.refresh.bind(this);
 
 		// Create request/response factories
-		const self = this
+		const app = this
 			, req = function (url, bootstrap) {
 					let req = request(url, bootstrap);
 					req.app = app;

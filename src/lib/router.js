@@ -16,7 +16,9 @@ const assign = require('object-assign')
 			strict: false
 		};
 
-module.exports = Router;
+module.exports = function (options) {
+	return new Router(options);
+};
 
 class Router {
 	/**
@@ -180,7 +182,12 @@ class Router {
 	 * @param {Function} done(err)
 	 */
 	_processParams (processedParams, params, keys, req, res, done) {
+		const self = this;
+
+		let idx = 0;
+
 		function next (err) {
+
 			// Stop processing on any error
 			if (err) return done(err);
 
@@ -199,10 +206,6 @@ class Router {
 		}
 
 		if (this.params && keys.length) {
-			const self = this;
-
-			let idx = 0;
-
 			next();
 		} else {
 			done();

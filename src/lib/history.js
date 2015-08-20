@@ -11,7 +11,15 @@ const debug = require('debug')('express:history')
 
 let bootstrap = true;
 
-module.exports = History;
+/**
+ * Instance factory
+ * @param {Function} request(url)
+ * @param {Function} response
+ * @param {Function} fn(req, res)
+ */
+module.exports = function (request, response, fn) {
+	return new History(request, response, fn);
+};
 
 class History {
 	/**

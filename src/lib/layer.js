@@ -7,7 +7,15 @@
 const matcher = require('path-to-regexp')
 	, urlUtils = require('@yr/url-utils');
 
-module.exports = Layer;
+/**
+ * Instance Factory
+ * @param {String} path
+ * @param {Function} fn
+ * @param {Object} options
+ */
+module.exports = function (path, fn, options) {
+	return new Layer(path, fn, options);
+};
 
 class Layer {
 	/**

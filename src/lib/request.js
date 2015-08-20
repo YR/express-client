@@ -10,7 +10,15 @@ const assign = require('object-assign')
 	, qsParse = require('query-string').parse
 	, urlUtils = require('@yr/url-utils');
 
-module.exports = Request;
+
+/**
+ * Instance factory
+ * @param {String} url
+ * @param {Boolean} bootstrap
+ */
+module.exports = function (url, bootstrap) {
+	return new Request(url, bootstrap);
+};
 
 class Request extends Emitter {
 	/**
@@ -43,7 +51,7 @@ class Request extends Emitter {
 	 */
 	abort () {
 		this.reset();
-		super.emit('close');
+		this.emit('close');
 	}
 
 	/**

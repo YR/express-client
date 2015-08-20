@@ -16,12 +16,10 @@ try {
 
 describe('express-client', function () {
 	describe('application factory', function () {
-		it('should return an application middleware function', function () {
-			expect(express()).to.be.a(Application);
-		});
 		it('should store the app instance on the Request/Response instance', function () {
 			var app = express()
 				, req = app.history.request();
+
 			expect(req.app).to.be(app);
 		});
 	});
