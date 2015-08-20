@@ -1,15 +1,15 @@
 'use strict';
 
-var application = require('./lib/application')
-	, Router = require('./lib/router');
+var application = require('./lib/application'),
+    Router = require('./lib/router');
 
 module.exports = createApplication;
 
 /**
  * Application factory
  */
-function createApplication () {
-	return application();
+function createApplication() {
+  return application();
 }
 
 /**

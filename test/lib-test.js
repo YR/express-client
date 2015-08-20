@@ -1,20 +1,25 @@
-var express = require('express-client/index.js')
-	, Application = require('lib/application.js')
-	, Request = require('lib/request.js')
-	, Response = require('lib/response.js')
-	, Router = require('lib/router.js')
-	, History = require('lib/history.js')
-	, expect = window.expect
-	, historyApp;
+'use strict';
+
+var express, Application, Request, Response, Router, History, expect, historyApp;
+
+try {
+		express = require('index.js');
+		Application = require('lib/application.js');
+		Request = require('lib/request.js');
+		Response = require('lib/response.js');
+		Router = require('lib/router.js');
+		History = require('lib/history.js');
+		expect = window.expect;
+} catch (err) {
+	console.log(err);
+}
 
 describe('express-client', function () {
 	describe('application factory', function () {
-		it('should return an application middleware function', function () {
-			expect(express()).to.be.a(Application);
-		});
 		it('should store the app instance on the Request/Response instance', function () {
 			var app = express()
 				, req = app.history.request();
+
 			expect(req.app).to.be(app);
 		});
 	});
