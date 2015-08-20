@@ -79,7 +79,7 @@ require.register('isarray/index.js#0.0.1', function(require, module, exports) {
     };
     
 });
-require.register('path-to-regexp/index.js#1.2.0', function(require, module, exports) {
+require.register('path-to-regexp/index.js#1.2.1', function(require, module, exports) {
     var isarray = require('isarray/index.js#0.0.1')
     
     /**
@@ -202,57 +202,61 @@ require.register('path-to-regexp/index.js#1.2.0', function(require, module, expo
     
       return function (obj) {
         var path = ''
-    
-        obj = obj || {}
+        var data = obj || {}
     
         for (var i = 0; i < tokens.length; i++) {
-          var key = tokens[i]
+          var token = tokens[i]
     
-          if (typeof key === 'string') {
-            path += key
+          if (typeof token === 'string') {
+            path += token
     
             continue
           }
     
-          var value = obj[key.name]
+          var value = data[token.name]
+          var segment
     
           if (value == null) {
-            if (key.optional) {
+            if (token.optional) {
               continue
             } else {
-              throw new TypeError('Expected "' + key.name + '" to be defined')
+              throw new TypeError('Expected "' + token.name + '" to be defined')
             }
           }
     
           if (isarray(value)) {
-            if (!key.repeat) {
-              throw new TypeError('Expected "' + key.name + '" to not repeat')
+            if (!token.repeat) {
+              throw new TypeError('Expected "' + token.name + '" to not repeat, but received "' + value + '"')
             }
     
             if (value.length === 0) {
-              if (key.optional) {
+              if (token.optional) {
                 continue
               } else {
-                throw new TypeError('Expected "' + key.name + '" to not be empty')
+                throw new TypeError('Expected "' + token.name + '" to not be empty')
               }
             }
     
             for (var j = 0; j < value.length; j++) {
-              if (!matches[i].test(value[j])) {
-                throw new TypeError('Expected all "' + key.name + '" to match "' + key.pattern + '"')
+              segment = encodeURIComponent(value[j])
+    
+              if (!matches[i].test(segment)) {
+                throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
               }
     
-              path += (j === 0 ? key.prefix : key.delimiter) + encodeURIComponent(value[j])
+              path += (j === 0 ? token.prefix : token.delimiter) + segment
             }
     
             continue
           }
     
-          if (!matches[i].test(value)) {
-            throw new TypeError('Expected "' + key.name + '" to match "' + key.pattern + '"')
+          segment = encodeURIComponent(value)
+    
+          if (!matches[i].test(segment)) {
+            throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
           }
     
-          path += key.prefix + encodeURIComponent(value)
+          path += token.prefix + segment
         }
     
         return path
@@ -481,7 +485,7 @@ require.register('lib/layer.js', function(require, module, exports) {
     	}
     }
     
-    var matcher = require('path-to-regexp/index.js#1.2.0'),
+    var matcher = require('path-to-regexp/index.js#1.2.1'),
         urlUtils = require('@yr/url-utils/index.js#2.1.0');
     
     /**
@@ -602,6 +606,10 @@ require.register('lib/router.js', function(require, module, exports) {
     	strict: false
     };
     
+    /**
+     * Instance factory
+     * @param {Object} [options]
+     */
     module.exports = function (options) {
     	return new Router(options);
     };
@@ -673,6 +681,7 @@ require.register('lib/router.js', function(require, module, exports) {
     				fn = fn.handle;
     			}
     			var lyr = layer(path, fn, this.matcherOpts);
+    
     			debug('adding router middleware %s with path %s', lyr.name, path);
     			this.stack.push(lyr);
     		}, this);
@@ -738,9 +747,7 @@ require.register('lib/router.js', function(require, module, exports) {
     				}
     
     				// Exit
-    				if (!lyr) {
-    					return done(err);
-    				}
+    				if (!lyr) return done(err);
     
     				// Skip if no match
     				if (!lyr.match(req.path)) {
@@ -760,6 +767,7 @@ require.register('lib/router.js', function(require, module, exports) {
     				}
     
     				var keys = Object.keys(lyr.params);
+    
     				// Process params if necessary
     				self._processParams(processedParams, req.params, keys, req, res, function (err) {
     					if (err) return next(layerErr || err);
@@ -797,7 +805,6 @@ require.register('lib/router.js', function(require, module, exports) {
     		var idx = 0;
     
     		function next(err) {
-    
     			// Stop processing on any error
     			if (err) return done(err);
     
@@ -1547,6 +1554,7 @@ require.register('lib/history.js', function(require, module, exports) {
     
     	History.prototype.refresh = function refresh() {
     		var ctx = this.getCurrentContext();
+    
     		// Undo pipeline modifications
     		ctx.req.reset();
     		ctx.res.reset();
@@ -1709,6 +1717,7 @@ require.register('lib/history.js', function(require, module, exports) {
      */
     function sameOrigin(url) {
     	var origin = location.protocol + '//' + location.hostname;
+    
     	if (location.port) origin += ':' + location.port;
     	return url && url.indexOf(origin) == 0;
     }
@@ -2517,10 +2526,6 @@ require.register('object-assign/index.js#3.0.0', function(require, module, expor
     
     	return to;
     };
-    
-    
-    
-    
     
 });
 require.register('lib/application.js', function(require, module, exports) {

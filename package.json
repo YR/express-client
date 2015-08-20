@@ -13,6 +13,7 @@
     "@yr/url-utils": "~2.1"
   },
   "devDependencies": {
+    "buddy": "~3.0",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*",
