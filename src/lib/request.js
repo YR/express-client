@@ -10,7 +10,6 @@ const assign = require('object-assign')
 	, qsParse = require('query-string').parse
 	, urlUtils = require('@yr/url-utils');
 
-
 /**
  * Instance factory
  * @param {String} url

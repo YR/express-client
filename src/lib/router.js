@@ -16,6 +16,10 @@ const assign = require('object-assign')
 			strict: false
 		};
 
+/**
+ * Instance factory
+ * @param {Object} [options]
+ */
 module.exports = function (options) {
 	return new Router(options);
 };
@@ -75,7 +79,8 @@ class Router {
 			if (fn instanceof Router) {
 				fn = fn.handle;
 			}
-			var lyr = layer(path, fn, this.matcherOpts);
+			const lyr = layer(path, fn, this.matcherOpts);
+
 			debug('adding router middleware %s with path %s', lyr.name, path);
 			this.stack.push(lyr);
 		}, this);
@@ -132,14 +137,10 @@ class Router {
 			}
 
 			// Exit
-			if (!lyr) {
-				return done(err);
-			}
+			if (!lyr) return done(err);
 
 			// Skip if no match
-			if (!lyr.match(req.path)) {
-				return next(err);
-			}
+			if (!lyr.match(req.path)) return next(err);
 
 			debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
 
@@ -151,7 +152,8 @@ class Router {
 				req.params = lyr.params;
 			}
 
-			var keys = Object.keys(lyr.params);
+			const keys = Object.keys(lyr.params);
+
 			// Process params if necessary
 			self._processParams(processedParams, req.params, keys, req, res, function (err) {
 				if (err) return next(layerErr || err);
@@ -187,7 +189,6 @@ class Router {
 		let idx = 0;
 
 		function next (err) {
-
 			// Stop processing on any error
 			if (err) return done(err);
 

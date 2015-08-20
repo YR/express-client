@@ -110,6 +110,7 @@ class History {
 	 */
 	refresh () {
 		let ctx = this.getCurrentContext();
+
 		// Undo pipeline modifications
 		ctx.req.reset();
 		ctx.res.reset();
@@ -272,6 +273,7 @@ function hasHistory () {
  */
 function sameOrigin (url) {
 	let origin = location.protocol + '//' + location.hostname;
+
 	if (location.port) origin += ':' + location.port;
 	return (url && (url.indexOf(origin) == 0));
 }

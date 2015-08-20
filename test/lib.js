@@ -79,7 +79,7 @@ require.register('isarray/index.js#0.0.1', function(require, module, exports) {
     };
     
 });
-require.register('path-to-regexp/index.js#1.2.1', function(require, module, exports) {
+require.register('path-to-regexp/index.js#1.2.0', function(require, module, exports) {
     var isarray = require('isarray/index.js#0.0.1')
     
     /**
@@ -202,61 +202,57 @@ require.register('path-to-regexp/index.js#1.2.1', function(require, module, expo
     
       return function (obj) {
         var path = ''
-        var data = obj || {}
+    
+        obj = obj || {}
     
         for (var i = 0; i < tokens.length; i++) {
-          var token = tokens[i]
+          var key = tokens[i]
     
-          if (typeof token === 'string') {
-            path += token
+          if (typeof key === 'string') {
+            path += key
     
             continue
           }
     
-          var value = data[token.name]
-          var segment
+          var value = obj[key.name]
     
           if (value == null) {
-            if (token.optional) {
+            if (key.optional) {
               continue
             } else {
-              throw new TypeError('Expected "' + token.name + '" to be defined')
+              throw new TypeError('Expected "' + key.name + '" to be defined')
             }
           }
     
           if (isarray(value)) {
-            if (!token.repeat) {
-              throw new TypeError('Expected "' + token.name + '" to not repeat, but received "' + value + '"')
+            if (!key.repeat) {
+              throw new TypeError('Expected "' + key.name + '" to not repeat')
             }
     
             if (value.length === 0) {
-              if (token.optional) {
+              if (key.optional) {
                 continue
               } else {
-                throw new TypeError('Expected "' + token.name + '" to not be empty')
+                throw new TypeError('Expected "' + key.name + '" to not be empty')
               }
             }
     
             for (var j = 0; j < value.length; j++) {
-              segment = encodeURIComponent(value[j])
-    
-              if (!matches[i].test(segment)) {
-                throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
+              if (!matches[i].test(value[j])) {
+                throw new TypeError('Expected all "' + key.name + '" to match "' + key.pattern + '"')
               }
     
-              path += (j === 0 ? token.prefix : token.delimiter) + segment
+              path += (j === 0 ? key.prefix : key.delimiter) + encodeURIComponent(value[j])
             }
     
             continue
           }
     
-          segment = encodeURIComponent(value)
-    
-          if (!matches[i].test(segment)) {
-            throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
+          if (!matches[i].test(value)) {
+            throw new TypeError('Expected "' + key.name + '" to match "' + key.pattern + '"')
           }
     
-          path += token.prefix + segment
+          path += key.prefix + encodeURIComponent(value)
         }
     
         return path
@@ -485,7 +481,7 @@ require.register('lib/layer.js', function(require, module, exports) {
     	}
     }
     
-    var matcher = require('path-to-regexp/index.js#1.2.1'),
+    var matcher = require('path-to-regexp/index.js#1.2.0'),
         urlUtils = require('@yr/url-utils/index.js#2.1.0');
     
     /**
@@ -2521,6 +2517,10 @@ require.register('object-assign/index.js#3.0.0', function(require, module, expor
     
     	return to;
     };
+    
+    
+    
+    
     
 });
 require.register('lib/application.js', function(require, module, exports) {
