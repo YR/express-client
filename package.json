@@ -1,7 +1,7 @@
 {
   "name": "@yr/express-client",
   "description": "An express.js framework for browser clients",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "cookie": "~0.1",
@@ -13,11 +13,11 @@
     "@yr/url-utils": "~2.1"
   },
   "devDependencies": {
-    "buddy": "~3.0",
+    "buddy": "3.0.0-beta-9",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*",
-    "transfigure-babel": "~5.8"
+    "transfigure-babel": "5.8.22-2"
   },
   "main": "index.js",
   "repository": "https://github.com/YR/express-client.git",
