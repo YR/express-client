@@ -1,7 +1,7 @@
 {
   "name": "@yr/express-client",
   "description": "An express.js framework for browser clients",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "cookie": "~0.1",
@@ -19,7 +19,7 @@
     "mocha-phantomjs": "*",
     "transfigure-babel": "~5.8"
   },
-  "main": "lib/index.js",
+  "main": "index.js",
   "repository": "https://github.com/YR/express-client.git",
   "license": "MIT",
   "scripts": {
