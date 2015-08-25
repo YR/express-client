@@ -1,18 +1,12 @@
 'use strict';
 
-var express, Application, Request, Response, Router, History, expect, historyApp;
-
-try {
-		express = require('index.js');
-		Application = require('lib/application.js');
-		Request = require('lib/request.js');
-		Response = require('lib/response.js');
-		Router = require('lib/router.js');
-		History = require('lib/history.js');
-		expect = window.expect;
-} catch (err) {
-	console.log(err);
-}
+var Application = require('src/lib/application.js')
+	, expect = window.expect
+	, express = require('src/index.js')
+	, History = require('src/lib/history.js')
+	, Request = require('src/lib/request.js')
+	, Response = require('src/lib/response.js')
+	, Router = require('src/lib/router.js');
 
 describe('express-client', function () {
 	describe('application factory', function () {
@@ -383,6 +377,7 @@ describe('express-client', function () {
 
 	describe('History', function () {
 		describe('handle()', function () {
+			var historyApp;
 			beforeEach(function (done) {
 			  historyApp = Application();
 				historyApp.history.running = true;

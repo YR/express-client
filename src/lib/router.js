@@ -32,9 +32,14 @@ class Router {
 	constructor (options) {
 		options = assign({}, DEFAULTS, options);
 
+		let boundMethod = this.method.bind(this);
+
+		this.all = boundMethod;
+		this.get = boundMethod;
+		this.post = boundMethod;
+		this.handle = this.handle.bind(this);
 		this.stack = [];
 		this.mergeParams = options.mergeParams;
-		this.handle = this.handle.bind(this);
 		// Init matcher options
 		this.matcherOpts = {
 			sensitive: options.caseSensitive,
@@ -87,16 +92,17 @@ class Router {
 	}
 
 	/**
-	 * Add get at 'path' with strict matching of path
+	 * Register method at 'path'
 	 * @param {String} path
- 	 * @returns {Object}
 	 */
-	get (path) {
-		let fns = Array.prototype.slice.call(arguments, 1);
+	method (path) {
+		const fns = Array.prototype.slice.call(arguments, 1);
 
 		fns.forEach(function (fn) {
 			let lyr = layer(path, fn, this.strictMatcherOpts);
+
 			lyr.route = true;
+
 			debug('adding router route %s with path %s', lyr.name, path);
 			this.stack.push(lyr);
 		}, this);

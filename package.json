@@ -33,7 +33,7 @@
     "build": {
       "targets": [
         {
-          "input": "index.js",
+          "input": "src/index.js",
           "output": "test/lib.js",
           "boilerplate": true,
           "bootstrap": true

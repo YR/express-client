@@ -59,6 +59,10 @@ class Application extends Emitter {
 				};
 
 		this.history = history(req, res, this.handle);
+
+		// Route ALL/POST methods to router
+		this.all = this._router.all.bind(this._router);
+		this.post = this._router.post.bind(this._router);
 	}
 
 	/**
@@ -115,14 +119,15 @@ class Application extends Emitter {
 	}
 
 	/**
-	 * Add get at 'path' with strict matching of path
+	 * Add GET at 'path' with strict matching of path
 	 * @param {String} path
- 	 * @returns {Object}
+	 * @returns {Object}
 	 */
 	get (path) {
+		// Not verb, only get/set
 		if (arguments.length == 1) return this.set(path);
 
-		this._router.get(Array.prototype.slice.call(arguments));
+		this._router.get.apply(this._router, Array.prototype.slice.call(arguments));
 
 		return this;
 	}
