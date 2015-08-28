@@ -13,11 +13,11 @@
     "@yr/url-utils": "~2.1"
   },
   "devDependencies": {
-    "buddy": "3.0.0-beta-9",
+    "buddy": "~3.0",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*",
-    "transfigure-babel": "5.8.22-2"
+    "transfigure-babel": "~5.8"
   },
   "main": "index.js",
   "repository": "https://github.com/YR/express-client.git",
