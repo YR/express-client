@@ -1,7 +1,7 @@
 'use strict';
 
 const application = require('./lib/application')
-	, Router = require('./lib/router');
+  , Router = require('./lib/router');
 
 module.exports = createApplication;
 
@@ -9,7 +9,7 @@ module.exports = createApplication;
  * Application factory
  */
 function createApplication () {
-	return application();
+  return application();
 }
 
 /**
