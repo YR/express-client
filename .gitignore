@@ -1,3 +1,5 @@
 node_modules
 .buddy-filelog
 npm-debug.log
+index.js
+lib/
