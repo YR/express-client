@@ -1,33 +1,30 @@
 {
   "name": "@yr/express-client",
-  "description": "An express.js framework for browser clients",
+  "description": "An express.js framework for the browser",
   "version": "2.1.5",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
-    "cookie": "~0.1",
-    "eventemitter3": "~1.1",
-    "debug": "~2.2",
-    "object-assign": "~4.0",
-    "path-to-regexp": "~1.2",
-    "query-string": "~2.4",
-    "@yr/url-utils": "~2.1"
+    "cookie": "0.2.x",
+    "eventemitter3": "1.1.x",
+    "debug": "2.2.x",
+    "object-assign": "4.0.x",
+    "path-to-regexp": "1.2.x",
+    "query-string": "3.0.x",
+    "@yr/url-utils": "2.1.x"
   },
   "devDependencies": {
-    "buddy": "~3.0",
+    "buddy": "*",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*",
-    "transfigure-babel": "~5.8"
+    "transfigure-babel": "*"
   },
   "main": "index.js",
   "repository": "https://github.com/YR/express-client.git",
   "license": "MIT",
   "scripts": {
     "prepublish": "buddy build",
-    "test": "buddy build && mocha-phantomjs test/test-runner.html",
-    "lint": "NODE_ENV=development node ./node_modules/buddy/bin/buddy -l watch"
-  },
-  "browser": {
+    "test": "buddy build && mocha-phantomjs test/test-runner.html"
   },
   "buddy": {
     "build": {
