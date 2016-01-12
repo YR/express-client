@@ -12,6 +12,7 @@ const matcher = require('path-to-regexp')
  * @param {String} path
  * @param {Function} fn
  * @param {Object} options
+ * @returns {Layer}
  */
 module.exports = function (path, fn, options) {
   return new Layer(path, fn, options);
@@ -47,23 +48,23 @@ class Layer {
       return true;
     }
 
-    const match = this.regexp.exec(path);
+    const mtch = this.regexp.exec(path);
 
-    if (!match) {
+    if (!mtch) {
       this.params = null;
       this.path = null;
       return false;
     }
 
     this.params = {};
-    this.path = match[0];
+    this.path = mtch[0];
 
     let n = 0
       , key, val;
 
-    for (let i = 1, len = match.length; i < len; ++i) {
+    for (let i = 1, len = mtch.length; i < len; ++i) {
       key = this.keys[i - 1];
-      val = urlUtils.decode(match[i]);
+      val = urlUtils.decode(mtch[i]);
 
       if (key) {
         this.params[key.name] = val;
@@ -81,6 +82,7 @@ class Layer {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
+   * @returns {null}
    */
   handle (err, req, res, next) {
     if (err) {

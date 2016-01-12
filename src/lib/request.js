@@ -4,8 +4,7 @@
  * Browser request object
  */
 
-const assign = require('object-assign')
-  , cookie = require('cookie')
+const cookie = require('cookie')
   , Emitter = require('eventemitter3')
   , qsParse = require('query-string').parse
   , urlUtils = require('@yr/url-utils');
@@ -14,6 +13,7 @@ const assign = require('object-assign')
  * Instance factory
  * @param {String} url
  * @param {Boolean} bootstrap
+ * @returns {Request}
  */
 module.exports = function (url, bootstrap) {
   return new Request(url, bootstrap);
@@ -35,7 +35,7 @@ class Request extends Emitter {
     const path = url.split('?')
       , qs = path[1] || '';
 
-    this.app;
+    this.app = null;
     this.cookies = cookie.parse(document.cookie);
     this.path = urlUtils.sanitize(path[0]);
     this.query = qsParse(qs);

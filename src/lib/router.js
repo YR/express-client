@@ -19,6 +19,7 @@ const assign = require('object-assign')
 /**
  * Instance factory
  * @param {Object} [options]
+ * @returns {Router}
  */
 module.exports = function (options) {
   return new Router(options);
@@ -32,7 +33,7 @@ class Router {
   constructor (options) {
     options = assign({}, DEFAULTS, options);
 
-    let boundMethod = this.method.bind(this);
+    const boundMethod = this.method.bind(this);
 
     this.all = boundMethod;
     this.get = boundMethod;
@@ -51,7 +52,7 @@ class Router {
       strict: options.strict,
       end: true
     };
-    this.params;
+    this.params = null;
   }
 
   /**
@@ -161,7 +162,7 @@ class Router {
       const keys = Object.keys(lyr.params);
 
       // Process params if necessary
-      self._processParams(processedParams, req.params, keys, req, res, function (err) {
+      self._processParams(processedParams, req.params, keys, req, res, (err) => {
         if (err) return next(layerErr || err);
         if (!lyr.route) trim(lyr);
         return lyr.handle(layerErr, req, res, next);
@@ -224,6 +225,7 @@ class Router {
  * Restore 'obj' props
  * @param {Function} fn
  * @param {Object} obj
+ * @returns {Function}
  */
 function restore (fn, obj) {
   let props = new Array(arguments.length - 2)

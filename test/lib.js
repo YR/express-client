@@ -586,98 +586,108 @@ require.register('src/lib/layer.js', function(require, module, exports) {
      * Router layer object
      */
     
-    const matcher = require('path-to-regexp/index.js#1.2.1')
-    	, urlUtils = require('@yr/url-utils/index.js#2.1.2');
+    var matcher = require('path-to-regexp/index.js#1.2.1'),
+        urlUtils = require('@yr/url-utils/index.js#2.1.2');
     
     /**
      * Instance Factory
      * @param {String} path
      * @param {Function} fn
      * @param {Object} options
+     * @returns {Layer}
      */
     module.exports = function (path, fn, options) {
-    	return new Layer(path, fn, options);
+      return new Layer(path, fn, options);
     };
     
-    class Layer {
-    	/**
-    	 * Constructor
-    	 * @param {String} path
-    	 * @param {Function} fn
-    	 * @param {Object} options
-    	 */
-    	constructor (path, fn, options) {
-    		// To be filled by matcher
-    		this.keys = [];
-    		this.path = null;
-    		this.params = null;
-    		this.fn = fn;
-    		this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
-    		this.fastmatch = (path == '/' && !options.end);
-    		this.regexp = matcher(path, this.keys, options);
-    	}
+    var Layer = function () {
+      /**
+       * Constructor
+       * @param {String} path
+       * @param {Function} fn
+       * @param {Object} options
+       */
     
-    	/**
-    	 * Determine if this route matches 'path'
-    	 * @param {String} path
-    	 * @returns {Boolean}
-    	 */
-    	match (path) {
-    		if (this.fastmatch) {
-    			this.params = {};
-    			this.path = '';
-    			return true;
-    		}
+      function Layer(path, fn, options) {
+        babelHelpers.classCallCheck(this, Layer);
     
-    		const match = this.regexp.exec(path);
+        // To be filled by matcher
+        this.keys = [];
+        this.path = null;
+        this.params = null;
+        this.fn = fn;
+        this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
+        this.fastmatch = path == '/' && !options.end;
+        this.regexp = matcher(path, this.keys, options);
+      }
     
-    		if (!match) {
-    			this.params = null;
-    			this.path = null;
-    			return false;
-    		}
+      /**
+       * Determine if this route matches 'path'
+       * @param {String} path
+       * @returns {Boolean}
+       */
     
-    		this.params = {};
-    		this.path = match[0];
+      babelHelpers.createClass(Layer, [{
+        key: 'match',
+        value: function match(path) {
+          if (this.fastmatch) {
+            this.params = {};
+            this.path = '';
+            return true;
+          }
     
-    		let n = 0
-    			, key, val;
+          var mtch = this.regexp.exec(path);
     
-    		for (let i = 1, len = match.length; i < len; ++i) {
-    			key = this.keys[i - 1];
-    			val = urlUtils.decode(match[i]);
+          if (!mtch) {
+            this.params = null;
+            this.path = null;
+            return false;
+          }
     
-    			if (key) {
-    				this.params[key.name] = val;
-    			} else {
-    				this.params[n++] = val;
-    			}
-    		}
+          this.params = {};
+          this.path = mtch[0];
     
-    		return true;
-    	}
+          var n = 0,
+              key = undefined,
+              val = undefined;
     
-    	/**
-    	 * Handle
-    	 * @param {Error} err
-    	 * @param {Request} req
-    	 * @param {Response} res
-    	 * @param {Function} next
-    	 */
-    	handle (err, req, res, next) {
-    		if (err) {
-    			// Only call if it handles errors
-    			return (this.fn.length > 3)
-    				? this.fn(err, req, res, next)
-    				: next(err);
-    		}
+          for (var i = 1, len = mtch.length; i < len; ++i) {
+            key = this.keys[i - 1];
+            val = urlUtils.decode(mtch[i]);
     
-    		// Skip if error handler
-    		return (this.fn.length < 4)
-    			? this.fn(req, res, next)
-    			: next();
-    	}
-    }
+            if (key) {
+              this.params[key.name] = val;
+            } else {
+              this.params[n++] = val;
+            }
+          }
+    
+          return true;
+        }
+    
+        /**
+         * Handle
+         * @param {Error} err
+         * @param {Request} req
+         * @param {Response} res
+         * @param {Function} next
+         * @returns {null}
+         */
+    
+      }, {
+        key: 'handle',
+        value: function handle(err, req, res, next) {
+          if (err) {
+            // Only call if it handles errors
+            return this.fn.length > 3 ? this.fn(err, req, res, next) : next(err);
+          }
+    
+          // Skip if error handler
+          return this.fn.length < 4 ? this.fn(req, res, next) : next();
+        }
+      }]);
+      return Layer;
+    }();
 });
 require.register('src/lib/router.js', function(require, module, exports) {
     'use strict';
@@ -692,259 +702,303 @@ require.register('src/lib/router.js', function(require, module, exports) {
         layer = require('src/lib/layer.js'),
         urlUtils = require('@yr/url-utils/index.js#2.1.2'),
         DEFAULTS = {
-    	mergeParams: true,
-    	caseSensitive: false,
-    	strict: false
+      mergeParams: true,
+      caseSensitive: false,
+      strict: false
     };
     
     /**
      * Instance factory
      * @param {Object} [options]
+     * @returns {Router}
      */
     module.exports = function (options) {
-    	return new Router(options);
+      return new Router(options);
     };
     
     var Router = function () {
-    	/**
-      * Constructor
-      * @param {Object} [options]
-      */
-    
-    	function Router(options) {
-    		babelHelpers.classCallCheck(this, Router);
-    
-    		options = assign({}, DEFAULTS, options);
-    
-    		var boundMethod = this.method.bind(this);
-    
-    		this.all = boundMethod;
-    		this.get = boundMethod;
-    		this.post = boundMethod;
-    		this.handle = this.handle.bind(this);
-    		this.stack = [];
-    		this.mergeParams = options.mergeParams;
-    		// Init matcher options
-    		this.matcherOpts = {
-    			sensitive: options.caseSensitive,
-    			strict: options.strict,
-    			end: false
-    		};
-    		this.strictMatcherOpts = {
-    			sensitive: options.caseSensitive,
-    			strict: options.strict,
-    			end: true
-    		};
-    		this.params;
-    	}
-    
-    	/**
-      * Handle param 'name' with 'fn'
-      * @param {String} name
-      * @param {Function} fn(req, res, next, value)
-      */
-    
-    	babelHelpers.createClass(Router, [{
-    		key: 'param',
-    		value: function param(name, fn) {
-    			if (!this.params) this.params = {};
-    			this.params[name] = fn;
-    		}
-    
-    		/**
-       * Add one or more 'fn' to middleware pipeline at optional 'path'
-       * @param {Function} fn
+      /**
+       * Constructor
+       * @param {Object} [options]
        */
     
-    	}, {
-    		key: 'use',
-    		value: function use( /* path, */fn /* ...fn */) {
-    			var offset = 0,
-    			    path = '/',
-    			    fns = undefined;
+      function Router(options) {
+        babelHelpers.classCallCheck(this, Router);
     
-    			if ('string' == typeof fn) {
-    				offset = 1;
-    				path = fn;
-    			}
+        options = assign({}, DEFAULTS, options);
     
-    			fns = Array.prototype.slice.call(arguments, offset);
+        var boundMethod = this.method.bind(this);
     
-    			fns.forEach(function (fn) {
-    				if (fn instanceof Router) {
-    					fn = fn.handle;
-    				}
-    				var lyr = layer(path, fn, this.matcherOpts);
+        this.all = boundMethod;
+        this.get = boundMethod;
+        this.post = boundMethod;
+        this.handle = this.handle.bind(this);
+        this.stack = [];
+        this.mergeParams = options.mergeParams;
+        // Init matcher options
+        this.matcherOpts = {
+          sensitive: options.caseSensitive,
+          strict: options.strict,
+          end: false
+        };
+        this.strictMatcherOpts = {
+          sensitive: options.caseSensitive,
+          strict: options.strict,
+          end: true
+        };
+        this.params = null;
+      }
     
-    				debug('adding router middleware %s with path %s', lyr.name, path);
-    				this.stack.push(lyr);
-    			}, this);
-    		}
-    
-    		/**
-       * Register method at 'path'
-       * @param {String} path
+      /**
+       * Handle param 'name' with 'fn'
+       * @param {String} name
+       * @param {Function} fn(req, res, next, value)
        */
     
-    	}, {
-    		key: 'method',
-    		value: function method(path) {
-    			var fns = Array.prototype.slice.call(arguments, 1);
+      babelHelpers.createClass(Router, [{
+        key: 'param',
+        value: function param(name, fn) {
+          if (!this.params) this.params = {};
+          this.params[name] = fn;
+        }
     
-    			fns.forEach(function (fn) {
-    				var lyr = layer(path, fn, this.strictMatcherOpts);
+        /**
+         * Add one or more 'fn' to middleware pipeline at optional 'path'
+         * @param {Function} fn
+         */
     
-    				lyr.route = true;
+      }, {
+        key: 'use',
+        value: function use( /* path, */fn /* ...fn */) {
+          var offset = 0,
+              path = '/',
+              fns = undefined;
     
-    				debug('adding router route %s with path %s', lyr.name, path);
-    				this.stack.push(lyr);
-    			}, this);
-    		}
+          if ('string' == typeof fn) {
+            offset = 1;
+            path = fn;
+          }
     
-    		/**
-       * Run request/response through middleware pipline
-       * @param {Request} req
-       * @param {Response} res
-       * @param {Function} done
-       */
+          fns = Array.prototype.slice.call(arguments, offset);
     
-    	}, {
-    		key: 'handle',
-    		value: function handle(req, res, done) {
-    			var self = this,
-    			    parentUrl = req.baseUrl || '';
+          fns.forEach(function (fn) {
+            if (fn instanceof Router) {
+              fn = fn.handle;
+            }
+            var lyr = layer(path, fn, this.matcherOpts);
     
-    			var idx = 0,
-    			    processedParams = {},
-    			    removed = '';
+            debug('adding router middleware %s with path %s', lyr.name, path);
+            this.stack.push(lyr);
+          }, this);
+        }
     
-    			// Update done to restore req props
-    			done = restore(done, req, 'baseUrl', 'next', 'params');
+        /**
+         * Register method at 'path'
+         * @param {String} path
+         */
     
-    			// Setup next layer
-    			req.next = next;
-    			req.baseUrl = parentUrl;
+      }, {
+        key: 'method',
+        value: function method(path) {
+          var fns = Array.prototype.slice.call(arguments, 1);
     
-    			next();
+          fns.forEach(function (fn) {
+            var lyr = layer(path, fn, this.strictMatcherOpts);
     
-    			function next(err) {
-    				var lyr = self.stack[idx++],
-    				    layerErr = err;
+            lyr.route = true;
     
-    				if (removed.length != 0) {
-    					debug('untrim %s from url %s', removed, req.path);
-    					req.baseUrl = parentUrl;
-    					req.path = urlUtils.join(removed, req.path);
-    					removed = '';
-    				}
+            debug('adding router route %s with path %s', lyr.name, path);
+            this.stack.push(lyr);
+          }, this);
+        }
     
-    				// Exit
-    				if (!lyr) return done(err);
+        /**
+         * Run request/response through middleware pipline
+         * @param {Request} req
+         * @param {Response} res
+         * @param {Function} done
+         */
     
-    				// Skip if no match
-    				if (!lyr.match(req.path)) return next(err);
+      }, {
+        key: 'handle',
+        value: function handle(req, res, done) {
+          var self = this,
+              parentUrl = req.baseUrl || '';
     
-    				debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
+          var idx = 0,
+              processedParams = {},
+              removed = '';
     
-    				// Store params
-    				if (self.mergeParams) {
-    					if (!req.params) req.params = {};
-    					assign(req.params, lyr.params);
-    				} else {
-    					req.params = lyr.params;
-    				}
+          // Update done to restore req props
+          done = restore(done, req, 'baseUrl', 'next', 'params');
     
-    				var keys = Object.keys(lyr.params);
+          // Setup next layer
+          req.next = next;
+          req.baseUrl = parentUrl;
     
-    				// Process params if necessary
-    				self._processParams(processedParams, req.params, keys, req, res, function (err) {
-    					if (err) return next(layerErr || err);
-    					if (!lyr.route) trim(lyr);
-    					return lyr.handle(layerErr, req, res, next);
-    				});
-    			}
+          next();
     
-    			function trim(layer) {
-    				if (layer.path.length != 0) {
-    					debug('trim %s from url %s', layer.path, req.path);
-    					removed = layer.path;
-    					req.path = req.path.substr(removed.length);
-    					if (req.path.charAt(0) != '/') req.path = '/' + req.path;
+          function next(err) {
+            var lyr = self.stack[idx++],
+                layerErr = err;
     
-    					req.baseUrl = urlUtils.join(parentUrl, removed);
-    				}
-    			}
-    		}
+            if (removed.length != 0) {
+              debug('untrim %s from url %s', removed, req.path);
+              req.baseUrl = parentUrl;
+              req.path = urlUtils.join(removed, req.path);
+              removed = '';
+            }
     
-    		/**
-       * Process middleware matched parameters
-       * @param {Object} processedParams
-       * @param {Object} params
-       * @param {Array} keys
-       * @param {Request} req
-       * @param {Response} res
-       * @param {Function} done(err)
-       */
+            // Exit
+            if (!lyr) return done(err);
     
-    	}, {
-    		key: '_processParams',
-    		value: function _processParams(processedParams, params, keys, req, res, done) {
-    			var self = this;
+            // Skip if no match
+            if (!lyr.match(req.path)) return next(err);
     
-    			var idx = 0;
+            debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
     
-    			function next(err) {
-    				// Stop processing on any error
-    				if (err) return done(err);
+            // Store params
+            if (self.mergeParams) {
+              if (!req.params) req.params = {};
+              assign(req.params, lyr.params);
+            } else {
+              req.params = lyr.params;
+            }
     
-    				if (idx >= keys.length) return done();
+            var keys = Object.keys(lyr.params);
     
-    				var name = keys[idx++],
-    				    fn = self.params[name];
+            // Process params if necessary
+            self._processParams(processedParams, req.params, keys, req, res, function (err) {
+              if (err) return next(layerErr || err);
+              if (!lyr.route) trim(lyr);
+              return lyr.handle(layerErr, req, res, next);
+            });
+          }
     
-    				// Process if match and not already processed
-    				if (fn && !processedParams[name]) {
-    					processedParams[name] = true;
-    					fn(req, res, next, params[name]);
-    				} else {
-    					next();
-    				}
-    			}
+          function trim(layer) {
+            if (layer.path.length != 0) {
+              debug('trim %s from url %s', layer.path, req.path);
+              removed = layer.path;
+              req.path = req.path.substr(removed.length);
+              if (req.path.charAt(0) != '/') req.path = '/' + req.path;
     
-    			if (this.params && keys.length) {
-    				next();
-    			} else {
-    				done();
-    			}
-    		}
-    	}]);
-    	return Router;
+              req.baseUrl = urlUtils.join(parentUrl, removed);
+            }
+          }
+        }
+    
+        /**
+         * Process middleware matched parameters
+         * @param {Object} processedParams
+         * @param {Object} params
+         * @param {Array} keys
+         * @param {Request} req
+         * @param {Response} res
+         * @param {Function} done(err)
+         */
+    
+      }, {
+        key: '_processParams',
+        value: function _processParams(processedParams, params, keys, req, res, done) {
+          var self = this;
+    
+          var idx = 0;
+    
+          function next(err) {
+            // Stop processing on any error
+            if (err) return done(err);
+    
+            if (idx >= keys.length) return done();
+    
+            var name = keys[idx++],
+                fn = self.params[name];
+    
+            // Process if match and not already processed
+            if (fn && !processedParams[name]) {
+              processedParams[name] = true;
+              fn(req, res, next, params[name]);
+            } else {
+              next();
+            }
+          }
+    
+          if (this.params && keys.length) {
+            next();
+          } else {
+            done();
+          }
+        }
+      }]);
+      return Router;
     }();
     
     /**
      * Restore 'obj' props
      * @param {Function} fn
      * @param {Object} obj
+     * @returns {Function}
      */
     
     function restore(fn, obj) {
-    	var props = new Array(arguments.length - 2),
-    	    vals = new Array(arguments.length - 2);
+      var props = new Array(arguments.length - 2),
+          vals = new Array(arguments.length - 2);
     
-    	for (var i = 0; i < props.length; i++) {
-    		props[i] = arguments[i + 2];
-    		vals[i] = obj[props[i]];
+      for (var i = 0; i < props.length; i++) {
+        props[i] = arguments[i + 2];
+        vals[i] = obj[props[i]];
+      }
+    
+      return function () {
+        // Restore vals
+        for (var i = 0; i < props.length; i++) {
+          obj[props[i]] = vals[i];
+        }
+    
+        return fn.apply(this, arguments);
+      };
+    }
+});
+require.register('object-assign/index.js#4.0.1', function(require, module, exports) {
+    /* eslint-disable no-unused-vars */
+    'use strict';
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+    
+    function toObject(val) {
+    	if (val === null || val === undefined) {
+    		throw new TypeError('Object.assign cannot be called with null or undefined');
     	}
     
-    	return function () {
-    		// Restore vals
-    		for (var i = 0; i < props.length; i++) {
-    			obj[props[i]] = vals[i];
+    	return Object(val);
+    }
+    
+    module.exports = Object.assign || function (target, source) {
+    	var from;
+    	var to = toObject(target);
+    	var symbols;
+    
+    	for (var s = 1; s < arguments.length; s++) {
+    		from = Object(arguments[s]);
+    
+    		for (var key in from) {
+    			if (hasOwnProperty.call(from, key)) {
+    				to[key] = from[key];
+    			}
     		}
     
-    		return fn.apply(this, arguments);
-    	};
-    }
+    		if (Object.getOwnPropertySymbols) {
+    			symbols = Object.getOwnPropertySymbols(from);
+    			for (var i = 0; i < symbols.length; i++) {
+    				if (propIsEnumerable.call(from, symbols[i])) {
+    					to[symbols[i]] = from[symbols[i]];
+    				}
+    			}
+    		}
+    	}
+    
+    	return to;
+    };
+    
 });
 require.register('src/lib/response.js', function(require, module, exports) {
     'use strict';
@@ -954,116 +1008,116 @@ require.register('src/lib/response.js', function(require, module, exports) {
      */
     
     var assign = require('object-assign/index.js#4.0.1'),
-        _cookie = require('cookie/index.js#0.1.5'),
+        _cookie = require('cookie/index.js#0.2.3'),
         Emitter = require('eventemitter3/index.js#1.1.1');
     
     /**
      * Instance factory
+     * @returns {Response}
      */
     module.exports = function () {
-    	return new Response();
+      return new Response();
     };
     
     var Response = function (_Emitter) {
-    	babelHelpers.inherits(Response, _Emitter);
+      babelHelpers.inherits(Response, _Emitter);
     
-    	/**
-      * Constructor
-      */
-    
-    	function Response() {
-    		babelHelpers.classCallCheck(this, Response);
-    
-    		var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Response).call(this));
-    
-    		_this.app;
-    		_this.req;
-    		_this.reset();
-    		return _this;
-    	}
-    
-    	/**
-      * Reset state
-      */
-    
-    	babelHelpers.createClass(Response, [{
-    		key: 'reset',
-    		value: function reset() {
-    			this.cached = false;
-    			this.finished = false;
-    			this.locals = {};
-    			this.statusCode = 404;
-    		}
-    
-    		/**
-       * Set status 'code'
-       * @param {Number} code
-       * @returns {Response}
+      /**
+       * Constructor
        */
     
-    	}, {
-    		key: 'status',
-    		value: function status(code) {
-    			this.statusCode = code;
-    			return this;
-    		}
+      function Response() {
+        babelHelpers.classCallCheck(this, Response);
     
-    		/**
-       * Send response (last method called in pipeline)
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Response).call(this));
+    
+        _this.app = null;
+        _this.req = null;
+        _this.reset();
+        return _this;
+      }
+    
+      /**
+       * Reset state
        */
     
-    	}, {
-    		key: 'send',
-    		value: function send() {
-    			// Reset state
-    			this.req.reset();
-    			this.status(200);
-    			this.finished = true;
-    			this.emit('finish');
-    		}
+      babelHelpers.createClass(Response, [{
+        key: 'reset',
+        value: function reset() {
+          this.cached = false;
+          this.finished = false;
+          this.locals = {};
+          this.statusCode = 404;
+        }
     
-    		/**
-       * Redirect to 'url'
-       * @param {Number} statusCode
-       * @param {String} url
-       */
+        /**
+         * Set status 'code'
+         * @param {Number} code
+         * @returns {Response}
+         */
     
-    	}, {
-    		key: 'redirect',
-    		value: function redirect(statusCode, url) {
-    			this.app.redirectTo(url || statusCode);
-    		}
+      }, {
+        key: 'status',
+        value: function status(code) {
+          this.statusCode = code;
+          return this;
+        }
     
-    		/**
-       * Set cookie
-       * @param {String} name
-       * @param {String|Object} val
-       * @param {Object} options
-       * @returns {Response}
-       */
+        /**
+         * Send response (last method called in pipeline)
+         */
     
-    	}, {
-    		key: 'cookie',
-    		value: function cookie(name, val, options) {
-    			options = assign({}, options);
+      }, {
+        key: 'send',
+        value: function send() {
+          // Reset state
+          this.req.reset();
+          this.status(200);
+          this.finished = true;
+          this.emit('finish');
+        }
     
-    			if ('number' == typeof val) val = val.toString();
-    			if ('object' == (typeof val === 'undefined' ? 'undefined' : babelHelpers['typeof'](val))) val = 'j:' + JSON.stringify(val);
+        /**
+         * Redirect to 'url'
+         * @param {Number} statusCode
+         * @param {String} url
+         */
     
-    			if ('maxAge' in options) {
-    				options.expires = new Date(Date.now() + options.maxAge);
-    				options.maxAge /= 1000;
-    			}
+      }, {
+        key: 'redirect',
+        value: function redirect(statusCode, url) {
+          this.app.redirectTo(url || statusCode);
+        }
     
-    			if (null == options.path) options.path = '/';
-    			var headerVal = _cookie.serialize(name, String(val), options);
+        /**
+         * Set cookie
+         * @param {String} name
+         * @param {String|Object} val
+         * @param {Object} options
+         * @returns {Response}
+         */
     
-    			document.cookie = headerVal;
+      }, {
+        key: 'cookie',
+        value: function cookie(name, val, options) {
+          options = assign({}, options);
     
-    			return this;
-    		}
-    	}]);
-    	return Response;
+          if ('number' == typeof val) val = val.toString();
+          if ('object' == (typeof val === 'undefined' ? 'undefined' : babelHelpers['typeof'](val))) val = 'j:' + JSON.stringify(val);
+    
+          if ('maxAge' in options) {
+            options.expires = new Date(Date.now() + options.maxAge);
+            options.maxAge /= 1000;
+          }
+    
+          if (options.path == null) options.path = '/';
+    
+          document.cookie = _cookie.serialize(name, String(val), options);
+    
+          return this;
+        }
+      }]);
+      return Response;
     }(Emitter);
 });
 require.register('strict-uri-encode/index.js#1.1.0', function(require, module, exports) {
@@ -1075,7 +1129,7 @@ require.register('strict-uri-encode/index.js#1.1.0', function(require, module, e
     };
     
 });
-require.register('query-string/index.js#2.4.2', function(require, module, exports) {
+require.register('query-string/index.js#3.0.0', function(require, module, exports) {
     'use strict';
     var strictUriEncode = require('strict-uri-encode/index.js#1.1.0');
     
@@ -1123,6 +1177,14 @@ require.register('query-string/index.js#2.4.2', function(require, module, export
     	return obj ? Object.keys(obj).sort().map(function (key) {
     		var val = obj[key];
     
+    		if (val === undefined) {
+    			return '';
+    		}
+    
+    		if (val === null) {
+    			return key;
+    		}
+    
     		if (Array.isArray(val)) {
     			return val.sort().map(function (val2) {
     				return strictUriEncode(key) + '=' + strictUriEncode(val2);
@@ -1136,7 +1198,7 @@ require.register('query-string/index.js#2.4.2', function(require, module, export
     };
     
 });
-require.register('cookie/index.js#0.1.5', function(require, module, exports) {
+require.register('cookie/index.js#0.2.3', function(require, module, exports) {
     /*!    
      * cookie    
      * Copyright(c) 2012-2014 Roman Shtylman    
@@ -1159,6 +1221,7 @@ require.register('cookie/index.js#0.1.5', function(require, module, exports) {
         
     var decode = decodeURIComponent;    
     var encode = encodeURIComponent;    
+    var pairSplitRegExp = /; */;    
         
     /**    
      * RegExp to match field-content in RFC 7230 sec 3.2    
@@ -1189,7 +1252,7 @@ require.register('cookie/index.js#0.1.5', function(require, module, exports) {
         
       var obj = {}    
       var opt = options || {};    
-      var pairs = str.split(/; */);    
+      var pairs = str.split(pairSplitRegExp);    
       var dec = opt.decode || decode;    
         
       pairs.forEach(function(pair) {    
@@ -1252,7 +1315,7 @@ require.register('cookie/index.js#0.1.5', function(require, module, exports) {
       if (null != opt.maxAge) {    
         var maxAge = opt.maxAge - 0;    
         if (isNaN(maxAge)) throw new Error('maxAge should be a Number');    
-        pairs.push('Max-Age=' + maxAge);    
+        pairs.push('Max-Age=' + Math.floor(maxAge));    
       }    
         
       if (opt.domain) {    
@@ -1274,6 +1337,7 @@ require.register('cookie/index.js#0.1.5', function(require, module, exports) {
       if (opt.expires) pairs.push('Expires=' + opt.expires.toUTCString());    
       if (opt.httpOnly) pairs.push('HttpOnly');    
       if (opt.secure) pairs.push('Secure');    
+      if (opt.firstPartyOnly) pairs.push('First-Party-Only');    
         
       return pairs.join('; ');    
     }    
@@ -1302,78 +1366,78 @@ require.register('src/lib/request.js', function(require, module, exports) {
      * Browser request object
      */
     
-    var assign = require('object-assign/index.js#4.0.1'),
-        cookie = require('cookie/index.js#0.1.5'),
+    var cookie = require('cookie/index.js#0.2.3'),
         Emitter = require('eventemitter3/index.js#1.1.1'),
-        qsParse = require('query-string/index.js#2.4.2').parse,
+        qsParse = require('query-string/index.js#3.0.0').parse,
         urlUtils = require('@yr/url-utils/index.js#2.1.2');
     
     /**
      * Instance factory
      * @param {String} url
      * @param {Boolean} bootstrap
+     * @returns {Request}
      */
     module.exports = function (url, bootstrap) {
-    	return new Request(url, bootstrap);
+      return new Request(url, bootstrap);
     };
     
     var Request = function (_Emitter) {
-    	babelHelpers.inherits(Request, _Emitter);
+      babelHelpers.inherits(Request, _Emitter);
     
-    	/**
-      * Constructor
-      * @param {String} url
-      * @param {Boolean} bootstrap
-      */
-    
-    	function Request(url, bootstrap) {
-    		babelHelpers.classCallCheck(this, Request);
-    
-    		var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Request).call(this));
-    
-    		url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
-    
-    		var path = url.split('?'),
-    		    qs = path[1] || '';
-    
-    		_this.app;
-    		_this.cookies = cookie.parse(document.cookie);
-    		_this.path = urlUtils.sanitize(path[0]);
-    		_this.query = qsParse(qs);
-    		_this.querystring = qs;
-    		_this.search = qs ? '?' + qs : '';
-    		_this.url = _this.originalUrl = url;
-    		_this.reset(bootstrap);
-    		return _this;
-    	}
-    
-    	/**
-      * Abort response
-      */
-    
-    	babelHelpers.createClass(Request, [{
-    		key: 'abort',
-    		value: function abort() {
-    			this.reset();
-    			this.emit('close');
-    		}
-    
-    		/**
-       * Reset state
+      /**
+       * Constructor
+       * @param {String} url
        * @param {Boolean} bootstrap
        */
     
-    	}, {
-    		key: 'reset',
-    		value: function reset(bootstrap) {
-    			this.baseUrl = '';
-    			this.bootstrap = bootstrap || false;
-    			this.cached = false;
-    			this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
-    			this.params = null;
-    		}
-    	}]);
-    	return Request;
+      function Request(url, bootstrap) {
+        babelHelpers.classCallCheck(this, Request);
+    
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Request).call(this));
+    
+        url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
+    
+        var path = url.split('?'),
+            qs = path[1] || '';
+    
+        _this.app = null;
+        _this.cookies = cookie.parse(document.cookie);
+        _this.path = urlUtils.sanitize(path[0]);
+        _this.query = qsParse(qs);
+        _this.querystring = qs;
+        _this.search = qs ? '?' + qs : '';
+        _this.url = _this.originalUrl = url;
+        _this.reset(bootstrap);
+        return _this;
+      }
+    
+      /**
+       * Abort response
+       */
+    
+      babelHelpers.createClass(Request, [{
+        key: 'abort',
+        value: function abort() {
+          this.reset();
+          this.emit('close');
+        }
+    
+        /**
+         * Reset state
+         * @param {Boolean} bootstrap
+         */
+    
+      }, {
+        key: 'reset',
+        value: function reset(bootstrap) {
+          this.baseUrl = '';
+          this.bootstrap = bootstrap || false;
+          this.cached = false;
+          this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
+          this.params = null;
+        }
+      }]);
+      return Request;
     }(Emitter);
 });
 require.register('@yr/runtime/index.js#1.1.0', function(require, module, exports) {
@@ -1569,9 +1633,10 @@ require.register('src/lib/history.js', function(require, module, exports) {
     
     /**
      * Instance factory
-     * @param {Function} request(url)
+     * @param {Function} request
      * @param {Function} response
      * @param {Function} fn(req, res)
+     * @returns {History}
      */
     module.exports = function (request, response, fn) {
       return new History(request, response, fn);
@@ -1618,20 +1683,17 @@ require.register('src/lib/history.js', function(require, module, exports) {
           if (!this.running && ctx) {
             // Test History API availability
             if (hasHistory()) {
-              (function () {
-                var self = _this;
-                // Delay to prevent premature trigger when navigating back from nothing
-                setTimeout(function () {
-                  window.addEventListener('click', self.onClick, false);
-                  window.addEventListener('popstate', self.onPopstate, false);
-                  self.running = true;
-                }, 500);
+              // Delay to prevent premature trigger when navigating back from nothing
+              setTimeout(function () {
+                window.addEventListener('click', _this.onClick, false);
+                window.addEventListener('popstate', _this.onPopstate, false);
+                _this.running = true;
+              }, 500);
     
-                // Update so that popstate will trigger for this route
-                window.history.replaceState({}, document.title);
+              // Update so that popstate will trigger for this route
+              window.history.replaceState({}, document.title);
     
-                debug('listening with history API');
-              })();
+              debug('listening with history API');
             }
           }
     
@@ -1796,6 +1858,7 @@ require.register('src/lib/history.js', function(require, module, exports) {
         /**
          * Handle click event
          * @param {Object} evt
+         * @returns {null}
          */
     
       }, {
@@ -1822,15 +1885,21 @@ require.register('src/lib/history.js', function(require, module, exports) {
           // Cross origin
           if (!sameOrigin(el.href)) return this.fn(el.href);
     
-          var path = el.pathname + el.search;
+          var path = el.pathname + el.search,
+              isSameAsCurrent = path == urlUtils.getCurrent();
+    
+          // Anchor target on same page
+          if (isSameAsCurrent && 'string' == typeof el.hash && el.hash) return;
     
           evt.preventDefault();
     
           // Same as current
-          if (path == urlUtils.getCurrent()) return;
+          if (isSameAsCurrent) return;
+    
+          // Blur focus
+          el.blur();
     
           debug('click event intercepted from %s', el);
-          // TODO: what about title?
           this.navigateTo(path);
         }
       }]);
@@ -2632,48 +2701,6 @@ require.register('debug/browser.js#2.2.0', function(require, module, exports) {
     }
     
 });
-require.register('object-assign/index.js#4.0.1', function(require, module, exports) {
-    /* eslint-disable no-unused-vars */
-    'use strict';
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
-    var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-    
-    function toObject(val) {
-    	if (val === null || val === undefined) {
-    		throw new TypeError('Object.assign cannot be called with null or undefined');
-    	}
-    
-    	return Object(val);
-    }
-    
-    module.exports = Object.assign || function (target, source) {
-    	var from;
-    	var to = toObject(target);
-    	var symbols;
-    
-    	for (var s = 1; s < arguments.length; s++) {
-    		from = Object(arguments[s]);
-    
-    		for (var key in from) {
-    			if (hasOwnProperty.call(from, key)) {
-    				to[key] = from[key];
-    			}
-    		}
-    
-    		if (Object.getOwnPropertySymbols) {
-    			symbols = Object.getOwnPropertySymbols(from);
-    			for (var i = 0; i < symbols.length; i++) {
-    				if (propIsEnumerable.call(from, symbols[i])) {
-    					to[symbols[i]] = from[symbols[i]];
-    				}
-    			}
-    		}
-    	}
-    
-    	return to;
-    };
-    
-});
 require.register('src/lib/application.js', function(require, module, exports) {
     'use strict';
     
@@ -2681,8 +2708,7 @@ require.register('src/lib/application.js', function(require, module, exports) {
      * Browser application
      */
     
-    var assign = require('object-assign/index.js#4.0.1'),
-        debug = require('debug/browser.js#2.2.0')('express:application'),
+    var debug = require('debug/browser.js#2.2.0')('express:application'),
         Emitter = require('eventemitter3/index.js#1.1.1'),
         history = require('src/lib/history.js'),
         request = require('src/lib/request.js'),
@@ -2691,231 +2717,232 @@ require.register('src/lib/application.js', function(require, module, exports) {
     
     /**
      * Instance factory
+     * @returns {Application}
      */
     module.exports = function () {
-    	return new Application();
+      return new Application();
     };
     
     var Application = function (_Emitter) {
-    	babelHelpers.inherits(Application, _Emitter);
+      babelHelpers.inherits(Application, _Emitter);
     
-    	/**
-      * Constructor
-      */
-    
-    	function Application() {
-    		babelHelpers.classCallCheck(this, Application);
-    
-    		var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Application).call(this));
-    
-    		_this.settings = {
-    			env: undefined || 'development'
-    		};
-    		_this.cache = {};
-    		_this.locals = {};
-    		_this.mountpath = '/';
-    		_this._router = router({
-    			caseSensitive: false,
-    			strict: false,
-    			mergeParams: true
-    		});
-    		_this.parent;
-    
-    		_this.handle = _this.handle.bind(_this);
-    		_this.navigateTo = _this.navigateTo.bind(_this);
-    		_this.redirectTo = _this.redirectTo.bind(_this);
-    		_this.getCurrentContext = _this.getCurrentContext.bind(_this);
-    		_this.refresh = _this.refresh.bind(_this);
-    
-    		// Create request/response factories
-    		var app = _this,
-    		    req = function req(url, bootstrap) {
-    			var req = request(url, bootstrap);
-    			req.app = app;
-    			return req;
-    		},
-    		    res = function res() {
-    			var res = response();
-    			res.app = app;
-    			return res;
-    		};
-    
-    		_this.history = history(req, res, _this.handle);
-    
-    		// Route ALL/POST methods to router
-    		_this.all = _this._router.all.bind(_this._router);
-    		_this.post = _this._router.post.bind(_this._router);
-    		return _this;
-    	}
-    
-    	/**
-      * Store 'value' for 'key'
-      * @param {String} key
-      * @param {Object} value
-      */
-    
-    	babelHelpers.createClass(Application, [{
-    		key: 'set',
-    		value: function set(key, value) {
-    			// get()
-    			if (arguments.length == 1) return this.settings[key];
-    
-    			this.settings[key] = value;
-    		}
-    
-    		/**
-       * Add one or more 'fn' to middleware pipeline at optional 'path'
-       * @param {Function} fn(req, res, next)
+      /**
+       * Constructor
        */
     
-    	}, {
-    		key: 'use',
-    		value: function use( /* path, */fn /* ...fn */) {
-    			var offset = 0,
-    			    path = '/',
-    			    fns = undefined;
+      function Application() {
+        babelHelpers.classCallCheck(this, Application);
     
-    			if ('string' == typeof fn) {
-    				offset = 1;
-    				path = fn;
-    			}
+        var _this = babelHelpers.possibleConstructorReturn(this, Object.getPrototypeOf(Application).call(this));
     
-    			fns = Array.prototype.slice.call(arguments, offset);
+        _this.settings = {
+          env: undefined || 'development'
+        };
+        _this.cache = {};
+        _this.locals = {};
+        _this.mountpath = '/';
+        _this._router = router({
+          caseSensitive: false,
+          strict: false,
+          mergeParams: true
+        });
+        _this.parent = null;
     
-    			fns.forEach(function (fn) {
-    				var _this2 = this;
+        _this.handle = _this.handle.bind(_this);
+        _this.navigateTo = _this.navigateTo.bind(_this);
+        _this.redirectTo = _this.redirectTo.bind(_this);
+        _this.getCurrentContext = _this.getCurrentContext.bind(_this);
+        _this.refresh = _this.refresh.bind(_this);
     
-    				if (fn instanceof Application) {
-    					(function () {
-    						var app = fn,
-    						    handler = app.handle;
+        // Create request/response factories
+        var app = _this,
+            req = function req(url, bootstrap) {
+          var req = request(url, bootstrap);
+          req.app = app;
+          return req;
+        },
+            res = function res() {
+          var res = response();
+          res.app = app;
+          return res;
+        };
     
-    						app.mountpath = path;
-    						app.parent = _this2;
-    						fn = function mounted_app(req, res, next) {
-    							// Change app reference to mounted
-    							var orig = req.app;
+        _this.history = history(req, res, _this.handle);
     
-    							req.app = res.app = app;
-    							handler(req, res, function (err) {
-    								// Restore app reference when done
-    								req.app = res.app = orig;
-    								next(err);
-    							});
-    						};
-    					})();
-    				}
+        // Route ALL/POST methods to router
+        _this.all = _this._router.all.bind(_this._router);
+        _this.post = _this._router.post.bind(_this._router);
+        return _this;
+      }
     
-    				debug('adding application middleware layer with path %s', path);
-    				this._router.use(path, fn);
-    			}, this);
-    		}
-    
-    		/**
-       * Add GET at 'path' with strict matching of path
-       * @param {String} path
+      /**
+       * Store 'value' for 'key'
+       * @param {String} key
+       * @param {Object} value
        * @returns {Object}
        */
     
-    	}, {
-    		key: 'get',
-    		value: function get(path) {
-    			// Not verb, only get/set
-    			if (arguments.length == 1) return this.set(path);
+      babelHelpers.createClass(Application, [{
+        key: 'set',
+        value: function set(key, value) {
+          // get()
+          if (arguments.length == 1) return this.settings[key];
     
-    			this._router.get.apply(this._router, Array.prototype.slice.call(arguments));
+          this.settings[key] = value;
+        }
     
-    			return this;
-    		}
+        /**
+         * Add one or more 'fn' to middleware pipeline at optional 'path'
+         * @param {Function} fn(req, res, next)
+         */
     
-    		/**
-       * Handle param 'name' with 'fn'
-       * @param {String} name
-       * @param {Function} fn(req, res, next, value)
-       */
+      }, {
+        key: 'use',
+        value: function use( /* path, */fn /* ...fn */) {
+          var offset = 0,
+              path = '/',
+              fns = undefined;
     
-    	}, {
-    		key: 'param',
-    		value: function param(name, fn) {
-    			this._router.param(name, fn);
-    		}
+          if ('string' == typeof fn) {
+            offset = 1;
+            path = fn;
+          }
     
-    		/**
-       * Start listening for requests
-       */
+          fns = Array.prototype.slice.call(arguments, offset);
     
-    	}, {
-    		key: 'listen',
-    		value: function listen() {
-    			if (!this.parent) this.history.listen();
-    		}
+          fns.forEach(function (fn) {
+            var _this2 = this;
     
-    		/**
-       * Run request/response through router's middleware pipline
-       * @param {Request} req
-       * @param {Response} res
-       * @param {Function} done
-       */
+            if (fn instanceof Application) {
+              (function () {
+                var app = fn,
+                    handler = app.handle;
     
-    	}, {
-    		key: 'handle',
-    		value: function handle(req, res, done) {
-    			// Handle external link
-    			if ('string' == typeof req) {
-    				babelHelpers.get(Object.getPrototypeOf(Application.prototype), 'emit', this).call(this, 'link:external', req);
-    			} else {
-    				this._router.handle(req, res, done || function () {});
-    			}
-    		}
+                app.mountpath = path;
+                app.parent = _this2;
+                fn = function mounted_app(req, res, next) {
+                  // Change app reference to mounted
+                  var orig = req.app;
     
-    		/**
-       * Change/update browser history state
-       * @param {String} url
-       * @param {String} title
-       * @param {Boolean} isUpdate
-       */
+                  req.app = res.app = app;
+                  handler(req, res, function (err) {
+                    // Restore app reference when done
+                    req.app = res.app = orig;
+                    next(err);
+                  });
+                };
+              })();
+            }
     
-    	}, {
-    		key: 'navigateTo',
-    		value: function navigateTo(url, title, isUpdate) {
-    			this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate);
-    		}
+            debug('adding application middleware layer with path %s', path);
+            this._router.use(path, fn);
+          }, this);
+        }
     
-    		/**
-       * Force browser location change
-       * @param {String} url
-       * @param {String} title
-       */
+        /**
+         * Add GET at 'path' with strict matching of path
+         * @param {String} path
+         * @returns {Object}
+         */
     
-    	}, {
-    		key: 'redirectTo',
-    		value: function redirectTo(url) {
-    			this[this.parent ? 'parent' : 'history'].redirectTo(url);
-    		}
+      }, {
+        key: 'get',
+        value: function get(path) {
+          // Not verb, only get/set
+          if (arguments.length == 1) return this.set(path);
     
-    		/**
-       * Retrieve current context
-       * @returns {Object}
-       */
+          this._router.get.apply(this._router, Array.prototype.slice.call(arguments));
     
-    	}, {
-    		key: 'getCurrentContext',
-    		value: function getCurrentContext() {
-    			return this[this.parent ? 'parent' : 'history'].getCurrentContext();
-    		}
+          return this;
+        }
     
-    		/**
-       * Refresh current location
-       * @returns {Object}
-       */
+        /**
+         * Handle param 'name' with 'fn'
+         * @param {String} name
+         * @param {Function} fn(req, res, next, value)
+         */
     
-    	}, {
-    		key: 'refresh',
-    		value: function refresh() {
-    			this[this.parent ? 'parent' : 'history'].refresh();
-    		}
-    	}]);
-    	return Application;
+      }, {
+        key: 'param',
+        value: function param(name, fn) {
+          this._router.param(name, fn);
+        }
+    
+        /**
+         * Start listening for requests
+         */
+    
+      }, {
+        key: 'listen',
+        value: function listen() {
+          if (!this.parent) this.history.listen();
+        }
+    
+        /**
+         * Run request/response through router's middleware pipline
+         * @param {Request} req
+         * @param {Response} res
+         * @param {Function} done
+         */
+    
+      }, {
+        key: 'handle',
+        value: function handle(req, res, done) {
+          // Handle external link
+          if ('string' == typeof req) {
+            babelHelpers.get(Object.getPrototypeOf(Application.prototype), 'emit', this).call(this, 'link:external', req);
+          } else {
+            this._router.handle(req, res, done || function () {});
+          }
+        }
+    
+        /**
+         * Change/update browser history state
+         * @param {String} url
+         * @param {String} title
+         * @param {Boolean} isUpdate
+         */
+    
+      }, {
+        key: 'navigateTo',
+        value: function navigateTo(url, title, isUpdate) {
+          this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate);
+        }
+    
+        /**
+         * Force browser location change
+         * @param {String} url
+         * @param {String} title
+         */
+    
+      }, {
+        key: 'redirectTo',
+        value: function redirectTo(url) {
+          this[this.parent ? 'parent' : 'history'].redirectTo(url);
+        }
+    
+        /**
+         * Retrieve current context
+         * @returns {Object}
+         */
+    
+      }, {
+        key: 'getCurrentContext',
+        value: function getCurrentContext() {
+          return this[this.parent ? 'parent' : 'history'].getCurrentContext();
+        }
+    
+        /**
+         * Refresh current location
+         */
+    
+      }, {
+        key: 'refresh',
+        value: function refresh() {
+          this[this.parent ? 'parent' : 'history'].refresh();
+        }
+      }]);
+      return Application;
     }(Emitter);
 });
 require.register('src/index.js', function(require, module, exports) {
@@ -2928,6 +2955,7 @@ require.register('src/index.js', function(require, module, exports) {
     
     /**
      * Application factory
+     * @returns {Application}
      */
     function createApplication() {
       return application();

@@ -55,12 +55,11 @@ class History {
     if (!this.running && ctx) {
       // Test History API availability
       if (hasHistory()) {
-        const self = this;
         // Delay to prevent premature trigger when navigating back from nothing
-        setTimeout(function () {
-          window.addEventListener('click', self.onClick, false);
-          window.addEventListener('popstate', self.onPopstate, false);
-          self.running = true;
+        setTimeout(() => {
+          window.addEventListener('click', this.onClick, false);
+          window.addEventListener('popstate', this.onPopstate, false);
+          this.running = true;
         }, 500);
 
         // Update so that popstate will trigger for this route
@@ -211,6 +210,7 @@ class History {
   /**
    * Handle click event
    * @param {Object} evt
+   * @returns {null}
    */
   onClick (evt) {
     const which = (null == evt.which) ? evt.button : evt.which;
@@ -234,15 +234,21 @@ class History {
     // Cross origin
     if (!sameOrigin(el.href)) return this.fn(el.href);
 
-    const path = el.pathname + el.search;
+    const path = el.pathname + el.search
+      , isSameAsCurrent = (path == urlUtils.getCurrent());
+
+    // Anchor target on same page
+    if (isSameAsCurrent && 'string' == typeof el.hash && el.hash) return;
 
     evt.preventDefault();
 
     // Same as current
-    if (path == urlUtils.getCurrent()) return;
+    if (isSameAsCurrent) return;
+
+    // Blur focus
+    el.blur();
 
     debug('click event intercepted from %s', el);
-    // TODO: what about title?
     this.navigateTo(path);
   }
 }

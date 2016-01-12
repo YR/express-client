@@ -4,8 +4,7 @@
  * Browser application
  */
 
-const assign = require('object-assign')
-  , debug = require('debug')('express:application')
+const debug = require('debug')('express:application')
   , Emitter = require('eventemitter3')
   , history = require('./history')
   , request = require('./request')
@@ -14,6 +13,7 @@ const assign = require('object-assign')
 
 /**
  * Instance factory
+ * @returns {Application}
  */
 module.exports = function () {
   return new Application();
@@ -37,7 +37,7 @@ class Application extends Emitter {
       strict: false,
       mergeParams: true
     });
-    this.parent;
+    this.parent = null;
 
     this.handle = this.handle.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
@@ -69,6 +69,7 @@ class Application extends Emitter {
    * Store 'value' for 'key'
    * @param {String} key
    * @param {Object} value
+   * @returns {Object}
    */
   set (key, value) {
     // get()
@@ -193,7 +194,6 @@ class Application extends Emitter {
 
   /**
    * Refresh current location
-   * @returns {Object}
    */
   refresh () {
     this[this.parent ? 'parent' : 'history'].refresh();

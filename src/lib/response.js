@@ -10,6 +10,7 @@ const assign = require('object-assign')
 
 /**
  * Instance factory
+ * @returns {Response}
  */
 module.exports = function () {
   return new Response();
@@ -22,8 +23,8 @@ class Response extends Emitter {
   constructor () {
     super();
 
-    this.app;
-    this.req;
+    this.app = null;
+    this.req = null;
     this.reset();
   }
 
@@ -85,10 +86,9 @@ class Response extends Emitter {
       options.maxAge /= 1000;
     }
 
-    if (null == options.path) options.path = '/';
-    const headerVal = cookie.serialize(name, String(val), options);
+    if (options.path == null) options.path = '/';
 
-    document.cookie = headerVal;
+    document.cookie = cookie.serialize(name, String(val), options);
 
     return this;
   }
