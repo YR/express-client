@@ -234,7 +234,8 @@ class History {
     // Cross origin
     if (!sameOrigin(el.href)) return this.fn(el.href);
 
-    const path = el.pathname + el.search
+    // IE11 prefixes extra slash on absolute links
+    const path = (el.pathname + el.search).replace(/\/\//, '/')
       , isSameAsCurrent = (path == urlUtils.getCurrent());
 
     // Anchor target on same page

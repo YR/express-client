@@ -1885,7 +1885,8 @@ require.register('src/lib/history.js', function(require, module, exports) {
           // Cross origin
           if (!sameOrigin(el.href)) return this.fn(el.href);
     
-          var path = el.pathname + el.search,
+          // IE11 prefixes extra slash on absolute links
+          var path = (el.pathname + el.search).replace(/\/\//, '/'),
               isSameAsCurrent = path == urlUtils.getCurrent();
     
           // Anchor target on same page
