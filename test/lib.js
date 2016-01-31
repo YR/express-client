@@ -1705,11 +1705,12 @@ require.register('src/lib/history.js', function(require, module, exports) {
          * @param {String} url
          * @param {String} title
          * @param {Boolean} isUpdate
+         * @param {Boolean} noScroll
          */
     
       }, {
         key: 'navigateTo',
-        value: function navigateTo(url, title, isUpdate) {
+        value: function navigateTo(url, title, isUpdate, noScroll) {
           // Only navigate if not same as current
           if (url != urlUtils.getCurrent()) {
             if (this.running) {
@@ -1720,7 +1721,7 @@ require.register('src/lib/history.js', function(require, module, exports) {
     
               window.history[isUpdate ? 'replaceState' : 'pushState']({}, title, url);
               if (title) document.title = title;
-              this.handle(url);
+              this.handle(url, noScroll);
             } else {
               this.redirectTo(url);
             }
@@ -1783,13 +1784,13 @@ require.register('src/lib/history.js', function(require, module, exports) {
         /**
          * Handle history change and notify
          * @param {String} [url]
-         * @param {State} [state]
+         * @param {Boolean} [noScroll]
          * @returns {Object}
          */
     
       }, {
         key: 'handle',
-        value: function handle(url) {
+        value: function handle(url, noScroll) {
           var ctx = {},
               req = undefined,
               res = undefined;
@@ -1824,9 +1825,6 @@ require.register('src/lib/history.js', function(require, module, exports) {
           ctx.res = res;
           this.cache[url] = ctx;
     
-          // Make sure only first request flagged as bootstrap
-          bootstrap = false;
-    
           // Abort if current request/response is not finished
           if (this.current && !this.cache[this.current].res.finished) {
             this.cache[this.current].req.abort();
@@ -1836,7 +1834,13 @@ require.register('src/lib/history.js', function(require, module, exports) {
           // Store reference to current
           this.current = url;
     
+          // Set scroll position to top if not bootstrap or overridden
+          if (!bootstrap && !noScroll) window.scrollTo(0, 0);
+    
           this.fn(req, res);
+    
+          // Make sure only first request flagged as bootstrap
+          bootstrap = false;
     
           return ctx;
         }
@@ -2902,12 +2906,13 @@ require.register('src/lib/application.js', function(require, module, exports) {
          * @param {String} url
          * @param {String} title
          * @param {Boolean} isUpdate
+         * @param {Boolean} noScroll
          */
     
       }, {
         key: 'navigateTo',
-        value: function navigateTo(url, title, isUpdate) {
-          this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate);
+        value: function navigateTo(url, title, isUpdate, noScroll) {
+          this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
         }
     
         /**
