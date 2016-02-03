@@ -1922,7 +1922,7 @@ require.register('src/lib/history.js', function(require, module, exports) {
       // Stock android browser 2.2 & 2.3 & 4.0.x are buggy, ignore
       if ((ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
       // Chrome identifies itself as 'Mobile Safari'
-      ua.indexOf('Mobile Safari') !== -1 && ua.indexOf('Chrome') === -1) {
+      ua.indexOf('Mobile Safari') !== -1 && ua.indexOf('Chrome') === -1 && ua.indexOf('Windows Phone') === -1) {
         return false;
       }
     
