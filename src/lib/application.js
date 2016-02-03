@@ -170,9 +170,10 @@ class Application extends Emitter {
    * @param {String} url
    * @param {String} title
    * @param {Boolean} isUpdate
+   * @param {Boolean} noScroll
    */
-  navigateTo (url, title, isUpdate) {
-    this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate);
+  navigateTo (url, title, isUpdate, noScroll) {
+    this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
   }
 
   /**
