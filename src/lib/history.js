@@ -266,7 +266,8 @@ function hasHistory () {
     || (ua.indexOf('Android 4.0') !== -1))
     // Chrome identifies itself as 'Mobile Safari'
     && ua.indexOf('Mobile Safari') !== -1
-    && ua.indexOf('Chrome') === -1) {
+    && ua.indexOf('Chrome') === -1)
+    && ua.indexOf('Windows Phone') === -1) {
       return false;
   }
 
