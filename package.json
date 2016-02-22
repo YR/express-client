@@ -14,10 +14,10 @@
   },
   "devDependencies": {
     "buddy": "*",
+    "buddy-plugin-babel": "6.5.2-2",
     "expect.js": "*",
     "mocha": "*",
-    "mocha-phantomjs": "*",
-    "transfigure-babel": "*"
+    "mocha-phantomjs": "*"
   },
   "main": "index.js",
   "repository": "https://github.com/YR/express-client.git",
@@ -30,15 +30,15 @@
     "build": {
       "targets": [
         {
+          "input": "src",
+          "output": ".",
+          "modular": false
+        },
+        {
           "input": "src/index.js",
           "output": "test/lib.js",
           "boilerplate": true,
           "bootstrap": true
-        },
-        {
-          "input": "src",
-          "output": ".",
-          "modular": false
         }
       ]
     }
