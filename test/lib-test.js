@@ -3,7 +3,6 @@
 var Application = require('src/lib/application.js')
   , expect = window.expect
   , express = require('src/index.js')
-  , History = require('src/lib/history.js')
   , Request = require('src/lib/request.js')
   , Response = require('src/lib/response.js')
   , Router = require('src/lib/router.js');
@@ -251,6 +250,7 @@ describe('express-client', function () {
           , foo = {
               foo: 'bar'
             };
+
         app.set('foo', 'bar');
         app.set('fooObj', foo);
         expect(app.get('fooObj').foo).to.be('bar');
@@ -336,15 +336,16 @@ describe('express-client', function () {
           render: function (view,opt,fn) {}
         };
         this.app.listen();
-
         done();
       });
+
       it('should refresh app using current context', function () {
         this.app.handle(Request('/url'), Response());
         var oldCtx = this.app.getCurrentContext();
 
         this.app.refresh();
         var newCtx = this.app.getCurrentContext();
+
         expect(oldCtx).to.be.equal(newCtx);
       });
       it('should refresh app and reset request state', function () {
@@ -357,6 +358,7 @@ describe('express-client', function () {
           next();
         });
         var self = this;
+
         this.app.use('/:foo', function (req, res, next) {
           count++;
           res.app = self.app;
@@ -378,6 +380,7 @@ describe('express-client', function () {
   describe('History', function () {
     describe('handle()', function () {
       var historyApp;
+
       beforeEach(function (done) {
         historyApp = Application();
         historyApp.history.running = true;
@@ -387,15 +390,19 @@ describe('express-client', function () {
         historyApp.history.destroy();
         done();
       });
+
       it('should handle encoded urls', function () {
         var url = '/nb/s%C3%B8k?q=Oslo';
+
         historyApp.history.handle(url);
         expect(historyApp.history.current).to.eql(url);
       });
       it('should store encoded previous history in cache', function () {
         var url = '/nb/tabell/%C3%85s~1-60637';
+
         historyApp.history.handle(url);
         var cache = historyApp.history.cache;
+
         expect(cache).to.have.key(url);
         expect(cache[url].req.originalUrl).to.eql(url);
         expect(cache[url].req.path).to.eql(url);
@@ -422,15 +429,44 @@ describe('express-client', function () {
     describe('cookies()', function () {
       beforeEach(function (done) {
         var response = Response();
+
+        // Set on document
         response.cookie('foo', 'bar');
         response.cookie('boo', 'bat');
         done();
       });
       it('should get cookies', function () {
         var request = Request();
+
         expect(request.cookies).to.have.property('foo', 'bar');
         expect(request.cookies).to.have.property('boo', 'bat');
       });
     });
-  })
+
+    describe('parse', function () {
+      it('should parse query params', function () {
+        var request = Request('http://www.yr.no/en/search?q=foo');
+
+        expect(request.query).to.eql({ q: 'foo' });
+        expect(request.querystring).to.eql('q=foo');
+        expect(request.search).to.eql('?q=foo');
+      });
+      it('should parse simple hash fragments', function () {
+        var request = Request('http://www.yr.no/en#page');
+
+        expect(request.hash).to.eql({ page: null });
+      });
+      it('should parse complex hash fragments', function () {
+        var request = Request('http://www.yr.no/en#fav=123,456&visit=789');
+
+        expect(request.hash).to.eql({ fav: '123,456', visit: '789' });
+      });
+      it('should parse both query params and hash fragments', function () {
+        var request = Request('http://www.yr.no/en/search?q=foo#fav=123,456&visit=789');
+
+        expect(request.query).to.eql({ q: 'foo' });
+        expect(request.hash).to.eql({ fav: '123,456', visit: '789' });
+      });
+    });
+  });
 });

@@ -640,8 +640,8 @@ require.register('src/lib/layer.js', function(require, module, exports) {
         this.path = mtch[0];
     
         var n = 0,
-            key = undefined,
-            val = undefined;
+            key = void 0,
+            val = void 0;
     
         for (var i = 1, len = mtch.length; i < len; ++i) {
           key = this.keys[i - 1];
@@ -761,7 +761,7 @@ require.register('src/lib/router.js', function(require, module, exports) {
       Router.prototype.use = function use( /* path, */fn /* ...fn */) {
         var offset = 0,
             path = '/',
-            fns = undefined;
+            fns = void 0;
     
         if ('string' == typeof fn) {
           offset = 1;
@@ -937,8 +937,8 @@ require.register('src/lib/router.js', function(require, module, exports) {
     
       return function () {
         // Restore vals
-        for (var i = 0; i < props.length; i++) {
-          obj[props[i]] = vals[i];
+        for (var _i = 0; _i < props.length; _i++) {
+          obj[props[_i]] = vals[_i];
         }
     
         return fn.apply(this, arguments);
@@ -1111,7 +1111,7 @@ require.register('strict-uri-encode/index.js#1.1.0', function(require, module, e
     };
     
 });
-require.register('query-string/index.js#3.0.0', function(require, module, exports) {
+require.register('query-string/index.js#3.0.1', function(require, module, exports) {
     'use strict';
     var strictUriEncode = require('strict-uri-encode/index.js#1.1.0');
     
@@ -1168,7 +1168,7 @@ require.register('query-string/index.js#3.0.0', function(require, module, export
     		}
     
     		if (Array.isArray(val)) {
-    			return val.sort().map(function (val2) {
+    			return val.slice().sort().map(function (val2) {
     				return strictUriEncode(key) + '=' + strictUriEncode(val2);
     			}).join('&');
     		}
@@ -1350,8 +1350,9 @@ require.register('src/lib/request.js', function(require, module, exports) {
     
     var cookie = require('cookie/index.js#0.2.3'),
         Emitter = require('eventemitter3/index.js#1.1.1'),
-        qsParse = require('query-string/index.js#3.0.0').parse,
-        urlUtils = require('@yr/url-utils/index.js#2.1.3');
+        qsParse = require('query-string/index.js#3.0.1').parse,
+        urlUtils = require('@yr/url-utils/index.js#2.1.3'),
+        RE_SPLIT = /[?#]/;
     
     /**
      * Instance factory
@@ -1379,12 +1380,14 @@ require.register('src/lib/request.js', function(require, module, exports) {
     
         url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
     
-        var path = url.split('?'),
-            qs = path[1] || '';
+        var path = url.split(RE_SPLIT),
+            qs = ~url.indexOf('?') && path[1] || '',
+            hash = ~url.indexOf('#') && path[path.length - 1] || '';
     
         _this.app = null;
         _this.cookies = cookie.parse(document.cookie);
         _this.path = urlUtils.sanitize(path[0]);
+        _this.hash = qsParse(hash);
         _this.query = qsParse(qs);
         _this.querystring = qs;
         _this.search = qs ? '?' + qs : '';
@@ -1776,8 +1779,8 @@ require.register('src/lib/history.js', function(require, module, exports) {
     
       History.prototype.handle = function handle(url, noScroll) {
         var ctx = {},
-            req = undefined,
-            res = undefined;
+            req = void 0,
+            res = void 0;
     
         try {
           url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
@@ -2787,7 +2790,7 @@ require.register('src/lib/application.js', function(require, module, exports) {
       Application.prototype.use = function use( /* path, */fn /* ...fn */) {
         var offset = 0,
             path = '/',
-            fns = undefined;
+            fns = void 0;
     
         if ('string' == typeof fn) {
           offset = 1;

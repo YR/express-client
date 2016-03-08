@@ -7,7 +7,9 @@
 const cookie = require('cookie')
   , Emitter = require('eventemitter3')
   , qsParse = require('query-string').parse
-  , urlUtils = require('@yr/url-utils');
+  , urlUtils = require('@yr/url-utils')
+
+  , RE_SPLIT = /[?#]/;
 
 /**
  * Instance factory
@@ -32,15 +34,17 @@ class Request extends Emitter {
       ? urlUtils.encode(url)
       : urlUtils.getCurrent();
 
-    const path = url.split('?')
-      , qs = path[1] || '';
+    const path = url.split(RE_SPLIT)
+      , qs = (~url.indexOf('?') && path[1]) || ''
+      , hash = (~url.indexOf('#') && path[path.length - 1]) || '';
 
     this.app = null;
     this.cookies = cookie.parse(document.cookie);
     this.path = urlUtils.sanitize(path[0]);
+    this.hash = qsParse(hash);
     this.query = qsParse(qs);
     this.querystring = qs;
-    this.search = qs ? '?' + qs : '';
+    this.search = qs ? `?${qs}` : '';
     this.url = this.originalUrl = url;
     this.reset(bootstrap);
   }
