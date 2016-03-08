@@ -45,7 +45,8 @@ class Request extends Emitter {
     this.query = qsParse(qs);
     this.querystring = qs;
     this.search = qs ? `?${qs}` : '';
-    this.url = this.originalUrl = url;
+    // Ignore hash
+    this.url = this.originalUrl = url.split('#')[0];
     this.reset(bootstrap);
   }
 

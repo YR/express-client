@@ -466,6 +466,7 @@ describe('express-client', function () {
 
         expect(request.query).to.eql({ q: 'foo' });
         expect(request.hash).to.eql({ fav: '123,456', visit: '789' });
+        expect(request.url).to.eql('http://www.yr.no/en/search?q=foo');
       });
     });
   });

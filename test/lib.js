@@ -580,7 +580,7 @@ require.register('src/lib/layer.js', function(require, module, exports) {
      */
     
     var matcher = require('path-to-regexp/index.js#1.2.1'),
-        urlUtils = require('@yr/url-utils/index.js#2.1.3');
+        urlUtils = require('@yr/url-utils/index.js#2.2.0');
     
     /**
      * Instance Factory
@@ -691,7 +691,7 @@ require.register('src/lib/router.js', function(require, module, exports) {
     var assign = require('object-assign/index.js#4.0.1'),
         debug = require('debug/browser.js#2.2.0')('express:router'),
         layer = require('src/lib/layer.js'),
-        urlUtils = require('@yr/url-utils/index.js#2.1.3'),
+        urlUtils = require('@yr/url-utils/index.js#2.2.0'),
         DEFAULTS = {
       mergeParams: true,
       caseSensitive: false,
@@ -1351,7 +1351,7 @@ require.register('src/lib/request.js', function(require, module, exports) {
     var cookie = require('cookie/index.js#0.2.3'),
         Emitter = require('eventemitter3/index.js#1.1.1'),
         qsParse = require('query-string/index.js#3.0.1').parse,
-        urlUtils = require('@yr/url-utils/index.js#2.1.3'),
+        urlUtils = require('@yr/url-utils/index.js#2.2.0'),
         RE_SPLIT = /[?#]/;
     
     /**
@@ -1391,7 +1391,8 @@ require.register('src/lib/request.js', function(require, module, exports) {
         _this.query = qsParse(qs);
         _this.querystring = qs;
         _this.search = qs ? '?' + qs : '';
-        _this.url = _this.originalUrl = url;
+        // Ignore hash
+        _this.url = _this.originalUrl = url.split('#')[0];
         _this.reset(bootstrap);
         return _this;
       }
@@ -1439,7 +1440,7 @@ require.register('@yr/runtime/index.js#1.2.0', function(require, module, exports
     exports.isServer = isNode;
     exports.isBrowser = !isNode;
 });
-require.register('@yr/url-utils/index.js#2.1.3', function(require, module, exports) {
+require.register('@yr/url-utils/index.js#2.2.0', function(require, module, exports) {
     'use strict';
     
     /**
@@ -1592,7 +1593,7 @@ require.register('@yr/url-utils/index.js#2.1.3', function(require, module, expor
      * @returns {String}
      */
     exports.getCurrent = function () {
-      return !isServer ? exports.encode(window.location.pathname + window.location.search) : '';
+      return !isServer ? exports.encode(window.location.pathname + window.location.search + window.location.hash) : '';
     };
     
     /**
@@ -1621,7 +1622,7 @@ require.register('src/lib/history.js', function(require, module, exports) {
      */
     
     var debug = require('debug/browser.js#2.2.0')('express:history'),
-        urlUtils = require('@yr/url-utils/index.js#2.1.3');
+        urlUtils = require('@yr/url-utils/index.js#2.2.0');
     
     var bootstrap = true;
     
