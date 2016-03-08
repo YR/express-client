@@ -2927,6 +2927,13 @@ require.register('src/lib/application.js', function(require, module, exports) {
 require.register('src/index.js', function(require, module, exports) {
     'use strict';
     
+    /**
+     * An express.js framework for the browser
+     * https://github.com/yr/express-client
+     * @copyright Yr
+     * @license MIT
+     */
+    
     var application = require('src/lib/application.js'),
         Router = require('src/lib/router.js');
     
