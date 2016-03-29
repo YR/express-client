@@ -996,7 +996,7 @@ require.register('src/lib/response.js', function(require, module, exports) {
     
     var assign = require('object-assign/index.js#4.0.1'),
         _cookie = require('cookie/index.js#0.2.3'),
-        Emitter = require('eventemitter3/index.js#1.1.1');
+        Emitter = require('eventemitter3/index.js#1.2.0');
     
     /**
      * Instance factory
@@ -1111,7 +1111,7 @@ require.register('strict-uri-encode/index.js#1.1.0', function(require, module, e
     };
     
 });
-require.register('query-string/index.js#3.0.1', function(require, module, exports) {
+require.register('query-string/index.js#4.0.2', function(require, module, exports) {
     'use strict';
     var strictUriEncode = require('strict-uri-encode/index.js#1.1.0');
     
@@ -1120,17 +1120,21 @@ require.register('query-string/index.js#3.0.1', function(require, module, export
     };
     
     exports.parse = function (str) {
+    	// Create an object with no prototype
+    	// https://github.com/sindresorhus/query-string/issues/47
+    	var ret = Object.create(null);
+    
     	if (typeof str !== 'string') {
-    		return {};
+    		return ret;
     	}
     
     	str = str.trim().replace(/^(\?|#|&)/, '');
     
     	if (!str) {
-    		return {};
+    		return ret;
     	}
     
-    	return str.split('&').reduce(function (ret, param) {
+    	str.split('&').forEach(function (param) {
     		var parts = param.replace(/\+/g, ' ').split('=');
     		// Firefox (pre 40) decodes `%3D` to `=`
     		// https://github.com/sindresorhus/query-string/pull/37
@@ -1143,16 +1147,16 @@ require.register('query-string/index.js#3.0.1', function(require, module, export
     		// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
     		val = val === undefined ? null : decodeURIComponent(val);
     
-    		if (!ret.hasOwnProperty(key)) {
+    		if (ret[key] === undefined) {
     			ret[key] = val;
     		} else if (Array.isArray(ret[key])) {
     			ret[key].push(val);
     		} else {
     			ret[key] = [ret[key], val];
     		}
+    	});
     
-    		return ret;
-    	}, {});
+    	return ret;
     };
     
     exports.stringify = function (obj) {
@@ -1168,9 +1172,21 @@ require.register('query-string/index.js#3.0.1', function(require, module, export
     		}
     
     		if (Array.isArray(val)) {
-    			return val.slice().sort().map(function (val2) {
-    				return strictUriEncode(key) + '=' + strictUriEncode(val2);
-    			}).join('&');
+    			var result = [];
+    
+    			val.slice().sort().forEach(function (val2) {
+    				if (val2 === undefined) {
+    					return;
+    				}
+    
+    				if (val2 === null) {
+    					result.push(strictUriEncode(key));
+    				} else {
+    					result.push(strictUriEncode(key) + '=' + strictUriEncode(val2));
+    				}
+    			});
+    
+    			return result.join('&');
     		}
     
     		return strictUriEncode(key) + '=' + strictUriEncode(val);
@@ -1349,8 +1365,8 @@ require.register('src/lib/request.js', function(require, module, exports) {
      */
     
     var cookie = require('cookie/index.js#0.2.3'),
-        Emitter = require('eventemitter3/index.js#1.1.1'),
-        qsParse = require('query-string/index.js#3.0.1').parse,
+        Emitter = require('eventemitter3/index.js#1.2.0'),
+        qsParse = require('query-string/index.js#4.0.2').parse,
         urlUtils = require('@yr/url-utils/index.js#2.2.0'),
         RE_SPLIT = /[?#]/;
     
@@ -1929,8 +1945,10 @@ require.register('src/lib/history.js', function(require, module, exports) {
       return url && url.indexOf(origin) == 0;
     }
 });
-require.register('eventemitter3/index.js#1.1.1', function(require, module, exports) {
+require.register('eventemitter3/index.js#1.2.0', function(require, module, exports) {
     'use strict';
+    
+    var has = Object.prototype.hasOwnProperty;
     
     //
     // We store our EE objects in a plain object whose properties are event names.
@@ -1947,7 +1965,7 @@ require.register('eventemitter3/index.js#1.1.1', function(require, module, expor
      *
      * @param {Function} fn Event handler to be called.
      * @param {Mixed} context Context for function execution.
-     * @param {Boolean} once Only emit once
+     * @param {Boolean} [once=false] Only emit once
      * @api private
      */
     function EE(fn, context, once) {
@@ -1966,12 +1984,37 @@ require.register('eventemitter3/index.js#1.1.1', function(require, module, expor
     function EventEmitter() { /* Nothing to set */ }
     
     /**
-     * Holds the assigned EventEmitters by name.
+     * Hold the assigned EventEmitters by name.
      *
      * @type {Object}
      * @private
      */
     EventEmitter.prototype._events = undefined;
+    
+    /**
+     * Return an array listing the events for which the emitter has registered
+     * listeners.
+     *
+     * @returns {Array}
+     * @api public
+     */
+    EventEmitter.prototype.eventNames = function eventNames() {
+      var events = this._events
+        , names = []
+        , name;
+    
+      if (!events) return names;
+    
+      for (name in events) {
+        if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+      }
+    
+      if (Object.getOwnPropertySymbols) {
+        return names.concat(Object.getOwnPropertySymbols(events));
+      }
+    
+      return names;
+    };
     
     /**
      * Return a list of assigned event listeners.
@@ -2058,8 +2101,8 @@ require.register('eventemitter3/index.js#1.1.1', function(require, module, expor
      * Register a new EventListener for the given event.
      *
      * @param {String} event Name of the event.
-     * @param {Functon} fn Callback function.
-     * @param {Mixed} context The context of the function.
+     * @param {Function} fn Callback function.
+     * @param {Mixed} [context=this] The context of the function.
      * @api public
      */
     EventEmitter.prototype.on = function on(event, fn, context) {
@@ -2083,7 +2126,7 @@ require.register('eventemitter3/index.js#1.1.1', function(require, module, expor
      *
      * @param {String} event Name of the event.
      * @param {Function} fn Callback function.
-     * @param {Mixed} context The context of the function.
+     * @param {Mixed} [context=this] The context of the function.
      * @api public
      */
     EventEmitter.prototype.once = function once(event, fn, context) {
@@ -2701,7 +2744,7 @@ require.register('src/lib/application.js', function(require, module, exports) {
      */
     
     var debug = require('debug/browser.js#2.2.0')('express:application'),
-        Emitter = require('eventemitter3/index.js#1.1.1'),
+        Emitter = require('eventemitter3/index.js#1.2.0'),
         history = require('src/lib/history.js'),
         request = require('src/lib/request.js'),
         response = require('src/lib/response.js'),
