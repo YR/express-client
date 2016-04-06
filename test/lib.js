@@ -580,7 +580,7 @@ require.register('src/lib/layer.js', function(require, module, exports) {
      */
     
     var matcher = require('path-to-regexp/index.js#1.2.1'),
-        urlUtils = require('@yr/url-utils/index.js#2.2.0');
+        urlUtils = require('@yr/url-utils/index.js#2.3.0');
     
     /**
      * Instance Factory
@@ -691,7 +691,7 @@ require.register('src/lib/router.js', function(require, module, exports) {
     var assign = require('object-assign/index.js#4.0.1'),
         debug = require('debug/browser.js#2.2.0')('express:router'),
         layer = require('src/lib/layer.js'),
-        urlUtils = require('@yr/url-utils/index.js#2.2.0'),
+        urlUtils = require('@yr/url-utils/index.js#2.3.0'),
         DEFAULTS = {
       mergeParams: true,
       caseSensitive: false,
@@ -1367,7 +1367,7 @@ require.register('src/lib/request.js', function(require, module, exports) {
     var cookie = require('cookie/index.js#0.2.3'),
         Emitter = require('eventemitter3/index.js#1.2.0'),
         qsParse = require('query-string/index.js#4.0.2').parse,
-        urlUtils = require('@yr/url-utils/index.js#2.2.0'),
+        urlUtils = require('@yr/url-utils/index.js#2.3.0'),
         RE_SPLIT = /[?#]/;
     
     /**
@@ -1456,7 +1456,7 @@ require.register('@yr/runtime/index.js#1.2.0', function(require, module, exports
     exports.isServer = isNode;
     exports.isBrowser = !isNode;
 });
-require.register('@yr/url-utils/index.js#2.2.0', function(require, module, exports) {
+require.register('@yr/url-utils/index.js#2.3.0', function(require, module, exports) {
     'use strict';
     
     /**
@@ -1572,9 +1572,8 @@ require.register('@yr/url-utils/index.js#2.2.0', function(require, module, expor
       if ('string' == typeof url) {
         try {
           url = decodeURI(url);
-          return url;
         } catch (err) {
-          throw new Error('failed to decode "' + url + '"');
+          url = '';
         }
       }
     
@@ -1595,9 +1594,9 @@ require.register('@yr/url-utils/index.js#2.2.0', function(require, module, expor
           } catch (err) {
             // Do nothing
           }
-          return encodeURI(url);
+          url = encodeURI(url);
         } catch (err) {
-          throw new Error('failed to encode"' + url + '"');
+          url = '';
         }
       }
     
@@ -1638,7 +1637,7 @@ require.register('src/lib/history.js', function(require, module, exports) {
      */
     
     var debug = require('debug/browser.js#2.2.0')('express:history'),
-        urlUtils = require('@yr/url-utils/index.js#2.2.0');
+        urlUtils = require('@yr/url-utils/index.js#2.3.0');
     
     var bootstrap = true;
     
@@ -1723,8 +1722,9 @@ require.register('src/lib/history.js', function(require, module, exports) {
         // Only navigate if not same as current
         if (url != urlUtils.getCurrent()) {
           if (this.running) {
-            // Will throw if malformed
+            // Will return empty if malformed
             url = urlUtils.encode(url);
+            if (!url) return;
     
             debug('navigate to: %s', url);
     
@@ -1799,12 +1799,9 @@ require.register('src/lib/history.js', function(require, module, exports) {
             req = void 0,
             res = void 0;
     
-        try {
-          url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
-        } catch (err) {
-          // Error encoding url
-          return this.redirectTo(url);
-        }
+        url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
+        // Error encoding url
+        if (!url) return this.redirectTo(url);
     
         // Do nothing if current url is the same
         if (this.current && this.current === url) return;

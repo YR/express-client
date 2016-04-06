@@ -83,8 +83,9 @@ class History {
     // Only navigate if not same as current
     if (url != urlUtils.getCurrent()) {
       if (this.running) {
-        // Will throw if malformed
+        // Will return empty if malformed
         url = urlUtils.encode(url);
+        if (!url) return;
 
         debug('navigate to: %s', url);
 
@@ -148,14 +149,11 @@ class History {
     let ctx = {}
       , req, res;
 
-    try {
-      url = url
-        ? urlUtils.encode(url)
-        : urlUtils.getCurrent();
-    } catch (err) {
-      // Error encoding url
-      return this.redirectTo(url);
-    }
+    url = url
+      ? urlUtils.encode(url)
+      : urlUtils.getCurrent();
+    // Error encoding url
+    if (!url) return this.redirectTo(url);
 
     // Do nothing if current url is the same
     if (this.current && this.current === url) return;
