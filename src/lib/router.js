@@ -5,16 +5,18 @@
  * Can be isolated under a specific mount path.
  */
 
-const assign = require('object-assign')
-  , debug = require('debug')('express:router')
-  , layer = require('./layer')
-  , urlUtils = require('@yr/url-utils')
+const assign = require('object-assign');
+const Debug = require('debug');
+const layer = require('./layer');
+const urlUtils = require('@yr/url-utils');
 
-  , DEFAULTS = {
-      mergeParams: true,
-      caseSensitive: false,
-      strict: false
-    };
+const DEFAULT_OPTIONS = {
+  mergeParams: true,
+  caseSensitive: false,
+  strict: false
+};
+
+const debug = Debug('express:router');
 
 /**
  * Instance factory
@@ -31,7 +33,7 @@ class Router {
    * @param {Object} [options]
    */
   constructor (options) {
-    options = assign({}, DEFAULTS, options);
+    options = assign({}, DEFAULT_OPTIONS, options);
 
     const boundMethod = this.method.bind(this);
 
@@ -67,46 +69,42 @@ class Router {
 
   /**
    * Add one or more 'fn' to middleware pipeline at optional 'path'
-   * @param {Function} fn
    */
-  use (/* path, */ fn /* ...fn */) {
-    let offset = 0
-      , path = '/'
-      , fns;
+  use (...fns) {
+    let offset = 0;
+    let path = '/';
 
-    if ('string' == typeof fn) {
+    if ('string' == typeof fns[0]) {
       offset = 1;
-      path = fn;
+      path = fns[0];
     }
 
-    fns = Array.prototype.slice.call(arguments, offset);
+    fns
+      .slice(offset)
+      .forEach((fn) => {
+        if (fn instanceof Router) {
+          fn = fn.handle;
+        }
+        const lyr = layer(path, fn, this.matcherOpts);
 
-    fns.forEach(function (fn) {
-      if (fn instanceof Router) {
-        fn = fn.handle;
-      }
-      const lyr = layer(path, fn, this.matcherOpts);
-
-      debug('adding router middleware %s with path %s', lyr.name, path);
-      this.stack.push(lyr);
-    }, this);
+        debug('adding router middleware %s with path %s', lyr.name, path);
+        this.stack.push(lyr);
+      });
   }
 
   /**
    * Register method at 'path'
    * @param {String} path
    */
-  method (path) {
-    const fns = Array.prototype.slice.call(arguments, 1);
-
-    fns.forEach(function (fn) {
+  method (path, ...fns) {
+    fns.forEach((fn) => {
       let lyr = layer(path, fn, this.strictMatcherOpts);
 
       lyr.route = true;
 
       debug('adding router route %s with path %s', lyr.name, path);
       this.stack.push(lyr);
-    }, this);
+    });
   }
 
   /**
@@ -116,12 +114,11 @@ class Router {
    * @param {Function} done
    */
   handle (req, res, done) {
-    const self = this
-      , parentUrl = req.baseUrl || '';
-
-    let idx = 0
-      , processedParams = {}
-      , removed = '';
+    const self = this;
+    const parentUrl = req.baseUrl || '';
+    let idx = 0;
+    let processedParams = {};
+    let removed = '';
 
     // Update done to restore req props
     done = restore(done, req, 'baseUrl', 'next', 'params');
@@ -133,8 +130,8 @@ class Router {
     next();
 
     function next (err) {
-      var lyr = self.stack[idx++]
-        , layerErr = err;
+      const lyr = self.stack[idx++];
+      const layerErr = err;
 
       if (removed.length != 0) {
         debug('untrim %s from url %s', removed, req.path);
@@ -192,7 +189,6 @@ class Router {
    */
   _processParams (processedParams, params, keys, req, res, done) {
     const self = this;
-
     let idx = 0;
 
     function next (err) {
@@ -201,8 +197,8 @@ class Router {
 
       if (idx >= keys.length) return done();
 
-      const name = keys[idx++]
-        , fn = self.params[name];
+      const name = keys[idx++];
+      const fn = self.params[name];
 
       // Process if match and not already processed
       if (fn && !processedParams[name]) {
@@ -228,8 +224,8 @@ class Router {
  * @returns {Function}
  */
 function restore (fn, obj) {
-  let props = new Array(arguments.length - 2)
-    , vals = new Array(arguments.length - 2);
+  let props = new Array(arguments.length - 2);
+  let vals = new Array(arguments.length - 2);
 
   for (let i = 0; i < props.length; i++) {
     props[i] = arguments[i + 2];

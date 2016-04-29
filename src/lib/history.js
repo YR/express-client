@@ -6,9 +6,10 @@
  * and responds to changes to state via History API.
  */
 
-const debug = require('debug')('express:history')
-  , urlUtils = require('@yr/url-utils');
+const Debug = require('debug');
+const urlUtils = require('@yr/url-utils');
 
+const debug = Debug('express:history');
 let bootstrap = true;
 
 /**
@@ -146,8 +147,8 @@ class History {
    * @returns {Object}
    */
   handle (url, noScroll) {
-    let ctx = {}
-      , req, res;
+    let ctx = {};
+    let req, res;
 
     url = url
       ? urlUtils.encode(url)
@@ -216,7 +217,6 @@ class History {
    */
   onClick (evt) {
     const which = (null == evt.which) ? evt.button : evt.which;
-
     let el = evt.target;
 
     // Modifiers present
@@ -237,8 +237,8 @@ class History {
     if (!sameOrigin(el.href)) return this.fn(el.href);
 
     // IE11 prefixes extra slash on absolute links
-    const path = (el.pathname + el.search).replace(/\/\//, '/')
-      , isSameAsCurrent = (path == urlUtils.getCurrent());
+    const path = (el.pathname + el.search).replace(/\/\//, '/');
+    const isSameAsCurrent = (path == urlUtils.getCurrent());
 
     // Anchor target on same page
     if (isSameAsCurrent && 'string' == typeof el.hash && el.hash) return;

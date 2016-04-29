@@ -4,12 +4,14 @@
  * Browser application
  */
 
-const debug = require('debug')('express:application')
-  , Emitter = require('eventemitter3')
-  , history = require('./history')
-  , request = require('./request')
-  , response = require('./response')
-  , router = require('./router');
+const Debug = require('debug');
+const Emitter = require('eventemitter3');
+const history = require('./history');
+const request = require('./request');
+const response = require('./response');
+const router = require('./router');
+
+const debug = Debug('express:application');
 
 /**
  * Instance factory
@@ -46,17 +48,19 @@ class Application extends Emitter {
     this.refresh = this.refresh.bind(this);
 
     // Create request/response factories
-    const app = this
-      , req = function (url, bootstrap) {
-          let req = request(url, bootstrap);
-          req.app = app;
-          return req;
-        }
-      , res = function () {
-          var res = response();
-          res.app = app;
-          return res;
-        };
+    const app = this;
+    const req = function (url, bootstrap) {
+      let req = request(url, bootstrap);
+
+      req.app = app;
+      return req;
+    };
+    const res = function () {
+      let res = response();
+
+      res.app = app;
+      return res;
+    };
 
     this.history = history(req, res, this.handle);
 
@@ -80,43 +84,41 @@ class Application extends Emitter {
 
   /**
    * Add one or more 'fn' to middleware pipeline at optional 'path'
-   * @param {Function} fn(req, res, next)
    */
-  use (/* path, */ fn /* ...fn */) {
-    let offset = 0
-      , path = '/'
-      , fns;
+  use (...fns) {
+    let offset = 0;
+    let path = '/';
 
-    if ('string' == typeof fn) {
+    if ('string' == typeof fns[0]) {
       offset = 1;
-      path = fn;
+      path = fns[0];
     }
 
-    fns = Array.prototype.slice.call(arguments, offset);
+    fns
+      .slice(offset)
+      .forEach((fn) => {
+        if (fn instanceof Application) {
+          const app = fn;
+          const handler = app.handle;
 
-    fns.forEach(function (fn) {
-      if (fn instanceof Application) {
-        let app = fn
-          , handler = app.handle;
+          app.mountpath = path;
+          app.parent = this;
+          fn = function mounted_app (req, res, next) {
+            // Change app reference to mounted
+            const orig = req.app;
 
-        app.mountpath = path;
-        app.parent = this;
-        fn = function mounted_app (req, res, next) {
-          // Change app reference to mounted
-          const orig = req.app;
+            req.app = res.app = app;
+            handler(req, res, function (err) {
+              // Restore app reference when done
+              req.app = res.app = orig;
+              next(err);
+            });
+          };
+        }
 
-          req.app = res.app = app;
-          handler(req, res, function (err) {
-            // Restore app reference when done
-            req.app = res.app = orig;
-            next(err);
-          });
-        };
-      }
-
-      debug('adding application middleware layer with path %s', path);
-      this._router.use(path, fn);
-    }, this);
+        debug('adding application middleware layer with path %s', path);
+        this._router.use(path, fn);
+      });
   }
 
   /**
@@ -124,11 +126,11 @@ class Application extends Emitter {
    * @param {String} path
    * @returns {Object}
    */
-  get (path) {
+  get (path, ...args) {
     // Not verb, only get/set
-    if (arguments.length == 1) return this.set(path);
+    if (!args.length) return this.set(path);
 
-    this._router.get.apply(this._router, Array.prototype.slice.call(arguments));
+    this._router.get(path, ...args);
 
     return this;
   }
@@ -159,7 +161,7 @@ class Application extends Emitter {
   handle (req, res, done) {
     // Handle external link
     if ('string' == typeof req) {
-      super.emit('link:external', req);
+      this.emit('link:external', req);
     } else {
       this._router.handle(req, res, done || function () { });
     }

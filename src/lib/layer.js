@@ -4,8 +4,8 @@
  * Router layer object
  */
 
-const matcher = require('path-to-regexp')
-  , urlUtils = require('@yr/url-utils');
+const matcher = require('path-to-regexp');
+const urlUtils = require('@yr/url-utils');
 
 /**
  * Instance Factory
@@ -59,8 +59,8 @@ class Layer {
     this.params = {};
     this.path = mtch[0];
 
-    let n = 0
-      , key, val;
+    let n = 0;
+    let key, val;
 
     for (let i = 1, len = mtch.length; i < len; ++i) {
       key = this.keys[i - 1];

@@ -4,12 +4,12 @@
  * Browser request object
  */
 
-const cookie = require('cookie')
-  , Emitter = require('eventemitter3')
-  , qsParse = require('query-string').parse
-  , urlUtils = require('@yr/url-utils')
+const cookie = require('cookie');
+const Emitter = require('eventemitter3');
+const qsParse = require('query-string').parse;
+const urlUtils = require('@yr/url-utils');
 
-  , RE_SPLIT = /[?#]/;
+const RE_SPLIT = /[?#]/;
 
 /**
  * Instance factory
@@ -34,9 +34,9 @@ class Request extends Emitter {
       ? urlUtils.encode(url)
       : urlUtils.getCurrent();
 
-    const path = url.split(RE_SPLIT)
-      , qs = (~url.indexOf('?') && path[1]) || ''
-      , hash = (~url.indexOf('#') && path[path.length - 1]) || '';
+    const path = url.split(RE_SPLIT);
+    const qs = (~url.indexOf('?') && path[1]) || '';
+    const hash = (~url.indexOf('#') && path[path.length - 1]) || '';
 
     this.app = null;
     this.cookies = cookie.parse(document.cookie);

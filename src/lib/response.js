@@ -4,9 +4,9 @@
  * Browser response object
  */
 
-const assign = require('object-assign')
-  , cookie = require('cookie')
-  , Emitter = require('eventemitter3');
+const assign = require('object-assign');
+const cookie = require('cookie');
+const Emitter = require('eventemitter3');
 
 /**
  * Instance factory
@@ -76,6 +76,7 @@ class Response extends Emitter {
    * @returns {Response}
    */
   cookie (name, val, options) {
+    // Clone
     options = assign({}, options);
 
     if ('number' == typeof val) val = val.toString();

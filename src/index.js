@@ -7,18 +7,16 @@
  * @license MIT
  */
 
-const application = require('./lib/application')
-  , Router = require('./lib/router');
-
-module.exports = createApplication;
+const application = require('./lib/application');
+const Router = require('./lib/router');
 
 /**
  * Application factory
  * @returns {Application}
  */
-function createApplication () {
+module.exports = function createApplication () {
   return application();
-}
+};
 
 /**
  * Expose
