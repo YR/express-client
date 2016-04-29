@@ -10,10 +10,10 @@
     "debug": "2.2.x",
     "object-assign": "4.0.x",
     "path-to-regexp": "1.2.x",
-    "query-string": "4.0.x"
+    "query-string": "4.1.x"
   },
   "devDependencies": {
-    "buddy": "4.1.x",
+    "buddy": "5.0.x",
     "buddy-plugin-babel": "6.7.x",
     "expect.js": "*",
     "mocha": "*",
@@ -36,9 +36,7 @@
         },
         {
           "input": "src/index.js",
-          "output": "test/lib.js",
-          "boilerplate": true,
-          "bootstrap": true
+          "output": "test/lib.js"
         }
       ]
     }
