@@ -1,14 +1,14 @@
 {
   "name": "@yr/express-client",
   "description": "An express.js framework for the browser",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/url-utils": "2.3.x",
     "cookie": "0.2.x",
     "eventemitter3": "1.2.x",
     "debug": "2.2.x",
-    "object-assign": "4.0.x",
+    "object-assign": "4.1.x",
     "path-to-regexp": "1.2.x",
     "query-string": "4.1.x"
   },
