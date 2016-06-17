@@ -9,12 +9,12 @@
     "eventemitter3": "1.2.x",
     "debug": "2.2.x",
     "object-assign": "4.1.x",
-    "path-to-regexp": "1.2.x",
+    "path-to-regexp": "1.5.x",
     "query-string": "4.1.x"
   },
   "devDependencies": {
-    "buddy": "5.0.x",
-    "buddy-plugin-babel": "6.7.x",
+    "buddy": "5.1.x",
+    "buddy-plugin-babel": "6.9.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*"
