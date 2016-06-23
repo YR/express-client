@@ -185,13 +185,14 @@ class History {
       this.cache[this.current].res.reset();
     }
 
-    // Store reference to current
-    this.current = url;
-
     // Set scroll position to top if not bootstrap or overridden
     if (!bootstrap && !noScroll) window.scrollTo(0, 0);
 
     this.fn(req, res);
+
+    // Store reference to current
+    // Do after calling fn so previous ctx available with getCurrentContext
+    this.current = url;
 
     // Make sure only first request flagged as bootstrap
     bootstrap = false;
