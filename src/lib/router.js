@@ -141,10 +141,10 @@ class Router {
       }
 
       // Exit
-      if (!lyr) return done(err);
+      if (!lyr) return done(layerErr);
 
-      // Skip if no match
-      if (!lyr.match(req.path)) return next(err);
+      // Skip if no match or err and route layer
+      if (!lyr.match(req.path) || layerErr && !lyr.fastmatch) return next(layerErr);
 
       debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
 
@@ -156,13 +156,15 @@ class Router {
         req.params = lyr.params;
       }
 
-      const keys = Object.keys(lyr.params);
-
       // Process params if necessary
-      self._processParams(processedParams, req.params, keys, req, res, (err) => {
+      self._processParams(processedParams, req.params, Object.keys(lyr.params), req, res, (err) => {
         if (err) return next(layerErr || err);
         if (!lyr.route) trim(lyr);
-        return lyr.handle(layerErr, req, res, next);
+        if (layerErr) {
+          lyr.handleError(layerErr, req, res, next);
+        } else {
+          lyr.handleRequest(req, res, next);
+        }
       });
     }
 

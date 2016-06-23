@@ -77,24 +77,39 @@ class Layer {
   }
 
   /**
-   * Handle
+   * Handle error
    * @param {Error} err
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
    * @returns {null}
    */
-  handle (err, req, res, next) {
-    if (err) {
-      // Only call if it handles errors
-      return (this.fn.length > 3)
-        ? this.fn(err, req, res, next)
-        : next(err);
-    }
+  handleError (err, req, res, next) {
+    // Only call if it handles errors
+    if (this.fn.length !== 4) return next(err);
 
+    try {
+      this.fn(err, req, res, next);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * Handle
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} next
+   * @returns {null}
+   */
+  handleRequest (req, res, next) {
     // Skip if error handler
-    return (this.fn.length < 4)
-      ? this.fn(req, res, next)
-      : next();
+    if (this.fn.length > 3) return next();
+
+    try {
+      this.fn(req, res, next)
+    } catch (err) {
+      next(err);
+    }
   }
 }

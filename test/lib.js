@@ -832,7 +832,7 @@ _m_['src/lib/layer.js']=(function(module,exports){
     };
   
     /**
-     * Handle
+     * Handle error
      * @param {Error} err
      * @param {Request} req
      * @param {Response} res
@@ -841,14 +841,35 @@ _m_['src/lib/layer.js']=(function(module,exports){
      */
   
   
-    Layer.prototype.handle = function handle(err, req, res, next) {
-      if (err) {
-        // Only call if it handles errors
-        return this.fn.length > 3 ? this.fn(err, req, res, next) : next(err);
-      }
+    Layer.prototype.handleError = function handleError(err, req, res, next) {
+      // Only call if it handles errors
+      if (this.fn.length !== 4) return next(err);
   
+      try {
+        this.fn(err, req, res, next);
+      } catch (err) {
+        next(err);
+      }
+    };
+  
+    /**
+     * Handle
+     * @param {Request} req
+     * @param {Response} res
+     * @param {Function} next
+     * @returns {null}
+     */
+  
+  
+    Layer.prototype.handleRequest = function handleRequest(req, res, next) {
       // Skip if error handler
-      return this.fn.length < 4 ? this.fn(req, res, next) : next();
+      if (this.fn.length > 3) return next();
+  
+      try {
+        this.fn(req, res, next);
+      } catch (err) {
+        next(err);
+      }
     };
   
     return Layer;
@@ -1624,10 +1645,10 @@ _m_['src/lib/router.js']=(function(module,exports){
         }
   
         // Exit
-        if (!lyr) return done(err);
+        if (!lyr) return done(layerErr);
   
-        // Skip if no match
-        if (!lyr.match(req.path)) return next(err);
+        // Skip if no match or err and route layer
+        if (!lyr.match(req.path) || layerErr && !lyr.fastmatch) return next(layerErr);
   
         debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
   
@@ -1639,13 +1660,15 @@ _m_['src/lib/router.js']=(function(module,exports){
           req.params = lyr.params;
         }
   
-        var keys = Object.keys(lyr.params);
-  
         // Process params if necessary
-        self._processParams(processedParams, req.params, keys, req, res, function (err) {
+        self._processParams(processedParams, req.params, Object.keys(lyr.params), req, res, function (err) {
           if (err) return next(layerErr || err);
           if (!lyr.route) trim(lyr);
-          return lyr.handle(layerErr, req, res, next);
+          if (layerErr) {
+            lyr.handleError(layerErr, req, res, next);
+          } else {
+            lyr.handleRequest(req, res, next);
+          }
         });
       }
   
@@ -3042,6 +3065,7 @@ _m_['src/lib/application.js']=(function(module,exports){
       if ('string' == typeof req) {
         this.emit('link:external', req);
       } else {
+        this.emit('connect', req);
         this._router.handle(req, res, done || function () {});
       }
     };
