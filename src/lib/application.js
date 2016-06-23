@@ -163,6 +163,7 @@ class Application extends Emitter {
     if ('string' == typeof req) {
       this.emit('link:external', req);
     } else {
+      this.emit('connect', req);
       this._router.handle(req, res, done || function () { });
     }
   }
