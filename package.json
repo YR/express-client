@@ -5,16 +5,16 @@
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/url-utils": "2.3.x",
-    "cookie": "0.2.x",
-    "eventemitter3": "1.2.x",
+    "cookie": "0.3.x",
+    "eventemitter3": "2.0.x",
     "debug": "2.2.x",
     "object-assign": "4.1.x",
     "path-to-regexp": "1.5.x",
-    "query-string": "4.1.x"
+    "query-string": "4.2.x"
   },
   "devDependencies": {
     "buddy": "5.1.x",
-    "buddy-plugin-babel": "6.9.x",
+    "buddy-plugin-babel": "6.14.x",
     "expect.js": "*",
     "mocha": "*",
     "mocha-phantomjs": "*"
