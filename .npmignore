@@ -2,3 +2,5 @@
 .git*
 src
 test
+docs
+yarn.lock
