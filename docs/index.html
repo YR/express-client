@@ -10211,7 +10211,7 @@ var exec = require('child_process').exec
   , cmd;
 
 function which(name) {
-  var paths = '/usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/usr/local/Cellar/node/7.0.0/bin:/usr/local/lib/node_modules:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'.split(':');
+  var paths = '/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.yarn-config/link/node_modules/.bin:/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.yarn-config/link/node_modules/.bin:/Users/n23618/PROJECTS/__YR__/express-client/bower_components/.bin:/Users/n23618/.yarn-config/link/bower_components/.bin:/usr/local/Cellar/yarn/0.16.1/libexec/lib/node_modules/yarn/bin/node-gyp-bin:/usr/local/lib/node_modules:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'.split(':');
   var loc;
 
   for (var i = 0, len = paths.length; i < len; ++i) {
@@ -20602,7 +20602,7 @@ describe('express-client', function () {
 
         expect(oldCtx).to.be.equal(newCtx);
       });
-      it('should refresh app and reset request state', function () {
+      it.skip('should refresh app and reset request state', function () {
         var request = Request('/bar');
         var response = Response();
         var count = 0;
