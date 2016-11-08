@@ -5,7 +5,7 @@
  */
 
 const assign = require('object-assign');
-const cookie = require('cookie');
+const cookieLib = require('cookie');
 const Emitter = require('eventemitter3');
 
 /**
@@ -89,7 +89,7 @@ class Response extends Emitter {
 
     if (options.path == null) options.path = '/';
 
-    document.cookie = cookie.serialize(name, String(val), options);
+    document.cookie = cookieLib.serialize(name, String(val), options);
 
     return this;
   }

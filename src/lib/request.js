@@ -4,7 +4,7 @@
  * Browser request object
  */
 
-const cookie = require('cookie');
+const cookieLib = require('cookie');
 const Emitter = require('eventemitter3');
 const qsParse = require('query-string').parse;
 const urlUtils = require('@yr/url-utils');
@@ -39,7 +39,7 @@ class Request extends Emitter {
     const hash = (~url.indexOf('#') && path[path.length - 1]) || '';
 
     this.app = null;
-    this.cookies = cookie.parse(document.cookie);
+    this.cookies = cookieLib.parse(document.cookie);
     this.path = urlUtils.sanitize(path[0]);
     this.hash = qsParse(hash);
     this.query = qsParse(qs);

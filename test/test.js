@@ -1,17 +1,17 @@
 'use strict';
 
-var Application = require('src/lib/application.js')
-  , expect = window.expect
-  , express = require('src/index.js')
-  , Request = require('src/lib/request.js')
-  , Response = require('src/lib/response.js')
-  , Router = require('src/lib/router.js');
+var Application = require('src/lib/application');
+var expect = window.expect;
+var express = require('src/index');
+var Request = require('src/lib/request');
+var Response = require('src/lib/response');
+var Router = require('src/lib/router');
 
 describe('express-client', function () {
   describe('application factory', function () {
     it('should store the app instance on the Request/Response instance', function () {
-      var app = express()
-        , req = app.history.request();
+      var app = express();
+      var req = app.history.request();
 
       expect(req.app).to.be(app);
     });
@@ -20,26 +20,26 @@ describe('express-client', function () {
   describe('Router', function () {
     describe('use()', function () {
       it('should register a simple middleware function', function () {
-        var router = Router()
-          , fn = function (req, res, next) { };
+        var router = Router();
+        var fn = function (req, res, next) { };
 
         router.use(fn);
         expect(router.stack[0]).to.have.property('fn', fn);
       });
       it('should register a simple middleware function at a specified path', function () {
-        var router = Router()
-          , fn = function (req, res, next) { }
-          , path = '/foo';
+        var router = Router();
+        var fn = function (req, res, next) { };
+        var path = '/foo';
 
         router.use(path, fn);
         expect(router.stack[0]).to.have.property('fn', fn);
         expect(router.stack[0].regexp.exec(path)).to.be.ok();
       });
       it('should register multiple middleware functions at a specified path', function () {
-        var router = Router()
-          , fn1 = function (req, res, next) { }
-          , fn2 = function (req, res, next) { }
-          , path = '/foo';
+        var router = Router();
+        var fn1 = function (req, res, next) { };
+        var fn2 = function (req, res, next) { };
+        var path = '/foo';
 
         router.use(path, fn1, fn2);
         expect(router.stack[0].regexp.exec(path)).to.be.ok();
@@ -51,14 +51,14 @@ describe('express-client', function () {
 
     describe('handle()', function () {
       it('should cylcle through added middleware', function () {
-        var router = Router()
-          , request = Request('/')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              next();
-            };
+        var router = Router();
+        var request = Request('/');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          next();
+        };
 
         router.use(fn, fn);
         router.handle(request, response, function (err) {
@@ -66,14 +66,14 @@ describe('express-client', function () {
         });
       });
       it('should always match root mounted middleware', function () {
-        var router = Router()
-          , request = Request('/foo')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              next();
-            };
+        var router = Router();
+        var request = Request('/foo');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          next();
+        };
 
         router.use(fn, fn);
         router.handle(request, response, function (err) {
@@ -81,14 +81,14 @@ describe('express-client', function () {
         });
       });
       it('should only trigger middleware matching the current path', function () {
-        var router = Router()
-          , request = Request('/foo')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              next();
-            };
+        var router = Router();
+        var request = Request('/foo');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          next();
+        };
 
         router.use(fn);
         router.use('/bar', fn);
@@ -97,15 +97,15 @@ describe('express-client', function () {
         });
       });
       it('should allow middleware to be mounted under a specific path', function () {
-        var router = Router()
-          , request = Request('/foo/bar')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              expect(req.path).to.be('/bar');
-              next();
-            };
+        var router = Router();
+        var request = Request('/foo/bar');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          expect(req.path).to.be('/bar');
+          next();
+        };
 
         router.use('/:bar', fn);
         router.handle(request, response, function (err) {
@@ -114,10 +114,10 @@ describe('express-client', function () {
         });
       });
       it('should allow middleware to handle errors', function () {
-        var router = Router()
-          , request = Request('/')
-          , response = Response()
-          , count = 0;
+        var router = Router();
+        var request = Request('/');
+        var response = Response();
+        var count = 0;
 
         router.use(function (req, res, next) {
           count++;
@@ -137,16 +137,16 @@ describe('express-client', function () {
         });
       });
       it('should allow mounting of sub routers', function () {
-        var router1 = Router()
-          , router2 = Router()
-          , request = Request('/foo/bar')
-          , response = Response()
-          , count = 0
-          , fn1 = function (req, res, next) { next(); }
-          , fn2 = function (req, res, next) {
-              count++;
-              next();
-            };
+        var router1 = Router();
+        var router2 = Router();
+        var request = Request('/foo/bar');
+        var response = Response();
+        var count = 0;
+        var fn1 = function (req, res, next) { next(); };
+        var fn2 = function (req, res, next) {
+          count++;
+          next();
+        };
 
         router1.use(fn1);
         router2.use('/bar', fn2);
@@ -158,14 +158,14 @@ describe('express-client', function () {
         });
       });
       it('should strictly match VERB routes', function () {
-        var router = Router()
-          , request = Request('/foo/bar')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              next();
-            };
+        var router = Router();
+        var request = Request('/foo/bar');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          next();
+        };
 
         router.use('/foo', fn);
         router.get('/foo', fn);
@@ -175,14 +175,14 @@ describe('express-client', function () {
         });
       });
       it('should match everything with wildcard * route', function () {
-        var router = Router()
-          , request = Request('/foo/bar')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              next();
-            };
+        var router = Router();
+        var request = Request('/foo/bar');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          next();
+        };
 
         router.get('*', fn);
         router.handle(request, response, function (err) {
@@ -193,10 +193,10 @@ describe('express-client', function () {
 
     describe('param()', function () {
       it('should register simple param processing', function () {
-        var router = Router()
-          , request = Request('/bar')
-          , response = Response()
-          , param = '';
+        var router = Router();
+        var request = Request('/bar');
+        var response = Response();
+        var param = '';
 
         router.param('foo', function (req, res, next, foo) {
           param = foo;
@@ -212,11 +212,11 @@ describe('express-client', function () {
         });
       });
       it('should not process a param more than once', function () {
-        var router = Router()
-          , request = Request('/bar')
-          , response = Response()
-          , fn = function (req, res, next) { next(); }
-          , count = 0;
+        var router = Router();
+        var request = Request('/bar');
+        var response = Response();
+        var fn = function (req, res, next) { next(); };
+        var count = 0;
 
         router.param('foo', function (req, res, next, foo) {
           count++;
@@ -229,9 +229,9 @@ describe('express-client', function () {
         });
       });
       it('should handle error in param processing', function () {
-        var router = Router()
-          , request = Request('/bar')
-          , response = Response();
+        var router = Router();
+        var request = Request('/bar');
+        var response = Response();
 
         router.param('foo', function (req, res, next, foo) {
           next(new Error('foo'));
@@ -247,9 +247,9 @@ describe('express-client', function () {
     describe('set/get', function () {
       it('should allow storage/retrieval of objects by key', function () {
         var app = express()
-          , foo = {
-              foo: 'bar'
-            };
+        var foo = {
+          foo: 'bar'
+        };
 
         app.set('foo', 'bar');
         app.set('fooObj', foo);
@@ -260,27 +260,27 @@ describe('express-client', function () {
 
     describe('use()', function () {
       it('should register a simple middleware function', function () {
-        var app = express()
-          , fn = function (req, res, next) { };
+        var app = express();
+        var fn = function (req, res, next) { };
 
         app.use(fn);
         expect(app._router.stack[0].regexp.exec('/')).to.be.ok();
         expect(app._router.stack[0]).to.have.property('fn', fn);
       });
       it('should register a simple middleware function at a specified path', function () {
-        var app = express()
-          , fn = function (req, res, next) { }
-          , path = '/foo';
+        var app = express();
+        var fn = function (req, res, next) { };
+        var path = '/foo';
 
         app.use(path, fn);
         expect(app._router.stack[0].regexp.exec(path)).to.be.ok();
         expect(app._router.stack[0]).to.have.property('fn', fn);
       });
       it('should register multiple middleware functions at a specified path', function () {
-        var app = express()
-          , fn1 = function (req, res, next) { }
-          , fn2 = function (req, res, next) { }
-          , path = '/foo';
+        var app = express();
+        var fn1 = function (req, res, next) { };
+        var fn2 = function (req, res, next) { };
+        var path = '/foo';
 
         app.use(path, fn1, fn2);
         expect(app._router.stack[0].regexp.exec(path)).to.be.ok();
@@ -292,14 +292,14 @@ describe('express-client', function () {
 
     describe('handle()', function () {
       it('should cylcle through added middleware', function () {
-        var app = express()
-          , request = Request('/')
-          , response = Response()
-          , count = 0
-          , fn = function (req, res, next) {
-              count++;
-              next();
-            };
+        var app = express();
+        var request = Request('/');
+        var response = Response();
+        var count = 0;
+        var fn = function (req, res, next) {
+          count++;
+          next();
+        };
 
         app.use(fn, fn);
         app.handle(request, response, function (err) {
@@ -307,16 +307,16 @@ describe('express-client', function () {
         });
       });
       it('should allow mounting of sub applications', function () {
-        var app1 = express()
-          , app2 = express()
-          , request = Request('/foo/bar')
-          , response = Response()
-          , count = 0
-          , fn1 = function (req, res, next) { next(); }
-          , fn2 = function (req, res, next) {
-              count++;
-              next();
-            };
+        var app1 = express();
+        var app2 = express();
+        var request = Request('/foo/bar');
+        var response = Response();
+        var count = 0;
+        var fn1 = function (req, res, next) { next(); };
+        var fn2 = function (req, res, next) {
+          count++;
+          next();
+        };
 
         app1.use(fn1);
         app2.use('/bar', fn2);
@@ -348,10 +348,10 @@ describe('express-client', function () {
 
         expect(oldCtx).to.be.equal(newCtx);
       });
-      it('should refresh app and reset request state', function () {
-        var request = Request('/bar')
-          , response = Response()
-          , count = 0;
+      it.skip('should refresh app and reset request state', function () {
+        var request = Request('/bar');
+        var response = Response();
+        var count = 0;
 
         this.app.param('foo', function (req, res, next, foo) {
           res.foo = foo;
@@ -410,31 +410,31 @@ describe('express-client', function () {
       });
     });
   });
+
   describe('Response', function () {
-    describe('cookie()', function () {
+    describe.skip('cookie()', function () {
       it('should set single cookie', function () {
         var response = Response();
-        response.cookie('foo', 'bar', {maxAge: 1000});
+
+        response.cookie('foo', 'bar');
         expect(document.cookie).to.eql('foo=bar');
       });
       it('should set multiple cookies', function () {
         var response = Response();
-        response.cookie('foo', 'bar', {maxAge: 1000});
+
+        response.cookie('foo', 'bar', { maxAge: 1000 });
         response.cookie('boo', 'bat');
         expect(document.cookie).to.eql('foo=bar; boo=bat');
       });
     });
   });
-  describe('Request', function () {
-    describe('cookies()', function () {
-      beforeEach(function (done) {
-        var response = Response();
 
-        // Set on document
-        response.cookie('foo', 'bar');
-        response.cookie('boo', 'bat');
-        done();
+  describe('Request', function () {
+    describe.skip('cookies()', function () {
+      beforeEach(function () {
+        document.cookie = 'foo=bar;boo=bat';
       });
+
       it('should get cookies', function () {
         var request = Request();
 
