@@ -1,11 +1,5 @@
 'use strict';
 
-/**
- * Manager for browser history.
- * Generates/stores request/response context for current url,
- * and responds to changes to state via History API.
- */
-
 const Debug = require('debug');
 const urlUtils = require('@yr/url-utils');
 
@@ -181,8 +175,7 @@ class History {
 
     // Abort if current request/response is not finished
     if (this.current && !this.cache[this.current].res.finished) {
-      this.cache[this.current].req.abort();
-      this.cache[this.current].res.reset();
+      this.cache[this.current].res.abort();
     }
 
     // Set scroll position to top if not bootstrap or overridden

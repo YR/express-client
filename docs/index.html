@@ -335,7 +335,6 @@ body {
 	<div id="mocha"></div>
 	<script>(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (process,global){
-'use strict';
 
 /* eslint no-unused-vars: off */
 /* eslint-env commonjs */
@@ -525,7 +524,6 @@ module.exports = global;
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./lib/mocha":14,"_process":67,"browser-stdout":41}],2:[function(require,module,exports){
-'use strict';
 
 function noop () {}
 
@@ -534,7 +532,6 @@ module.exports = function () {
 };
 
 },{}],3:[function(require,module,exports){
-'use strict';
 
 /**
  * Module exports.
@@ -731,7 +728,6 @@ EventEmitter.prototype.emit = function (name) {
 };
 
 },{}],4:[function(require,module,exports){
-'use strict';
 
 /**
  * Expose `Progress`.
@@ -853,7 +849,6 @@ Progress.prototype.draw = function (ctx) {
 
 },{}],5:[function(require,module,exports){
 (function (global){
-'use strict';
 
 exports.isatty = function isatty () {
   return true;
@@ -869,7 +864,6 @@ exports.getWindowSize = function getWindowSize () {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],6:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -983,7 +977,6 @@ Context.prototype.inspect = function () {
 };
 
 },{"json3":54}],7:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -1033,7 +1026,6 @@ Hook.prototype.error = function (err) {
 };
 
 },{"./runnable":33,"./utils":38}],8:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -1150,7 +1142,6 @@ module.exports = function (suite) {
 };
 
 },{"../test":36,"./common":9}],9:[function(require,module,exports){
-'use strict';
 
 var Suite = require('../suite');
 
@@ -1168,7 +1159,7 @@ module.exports = function (suites, context, mocha) {
      * This is only present if flag --delay is passed into Mocha. It triggers
      * root suite execution.
      *
-     * @param {Suite} suite The root wuite.
+     * @param {Suite} suite The root suite.
      * @return {Function} A function which runs the root suite
      */
     runWithSuite: function runWithSuite (suite) {
@@ -1310,7 +1301,6 @@ module.exports = function (suites, context, mocha) {
 };
 
 },{"../suite":35}],10:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -1375,7 +1365,6 @@ module.exports = function (suite) {
 };
 
 },{"../suite":35,"../test":36}],11:[function(require,module,exports){
-'use strict';
 
 exports.bdd = require('./bdd');
 exports.tdd = require('./tdd');
@@ -1383,7 +1372,6 @@ exports.qunit = require('./qunit');
 exports.exports = require('./exports');
 
 },{"./bdd":8,"./exports":10,"./qunit":12,"./tdd":13}],12:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -1484,7 +1472,6 @@ module.exports = function (suite) {
 };
 
 },{"../test":36,"./common":9}],13:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -1593,7 +1580,6 @@ module.exports = function (suite) {
 
 },{"../test":36,"./common":9}],14:[function(require,module,exports){
 (function (process,global,__dirname){
-'use strict';
 
 /*!
  * mocha
@@ -2118,7 +2104,6 @@ Mocha.prototype.run = function (fn) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},"/lib")
 },{"./context":6,"./hook":7,"./interfaces":11,"./reporters":21,"./runnable":33,"./runner":34,"./suite":35,"./test":36,"./utils":38,"_process":67,"escape-string-regexp":47,"growl":49,"path":42}],15:[function(require,module,exports){
-'use strict';
 
 /**
  * Helpers.
@@ -2250,7 +2235,6 @@ function plural (ms, n, name) {
 }
 
 },{}],16:[function(require,module,exports){
-'use strict';
 
 /**
  * Expose `Pending`.
@@ -2269,7 +2253,6 @@ function Pending (message) {
 
 },{}],17:[function(require,module,exports){
 (function (process,global){
-'use strict';
 
 /**
  * Module dependencies.
@@ -2763,7 +2746,6 @@ function sameType (a, b) {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../ms":15,"../utils":38,"_process":67,"diff":46,"supports-color":42,"tty":5}],18:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -2830,7 +2812,6 @@ function Doc (runner) {
 
 },{"../utils":38,"./base":17}],19:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -2902,7 +2883,6 @@ inherits(Dot, Base);
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],20:[function(require,module,exports){
 (function (global){
-'use strict';
 
 /* eslint-env browser */
 
@@ -3251,7 +3231,6 @@ function on (el, event, fn) {
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../browser/progress":4,"../utils":38,"./base":17,"escape-string-regexp":47}],21:[function(require,module,exports){
-'use strict';
 
 // Alias exports to a their normalized format Mocha#reporter to prevent a need
 // for dynamic (try/catch) requires, which Browserify doesn't handle.
@@ -3273,7 +3252,6 @@ exports.JSONStream = exports['json-stream'] = require('./json-stream');
 
 },{"./base":17,"./doc":18,"./dot":19,"./html":20,"./json":23,"./json-stream":22,"./landing":24,"./list":25,"./markdown":26,"./min":27,"./nyan":28,"./progress":29,"./spec":30,"./tap":31,"./xunit":32}],22:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -3340,7 +3318,6 @@ function clean (test) {
 }).call(this,require('_process'))
 },{"./base":17,"_process":67,"json3":54}],23:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -3436,7 +3413,6 @@ function errorJSON (err) {
 }).call(this,require('_process'))
 },{"./base":17,"_process":67}],24:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -3534,7 +3510,6 @@ inherits(Landing, Base);
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],25:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -3578,7 +3553,7 @@ function List (runner) {
   });
 
   runner.on('pass', function (test) {
-    var fmt = color('checkmark', '  ' + Base.symbols.dot) +
+    var fmt = color('checkmark', '  ' + Base.symbols.ok) +
       color('pass', ' %s: ') +
       color(test.speed, '%dms');
     cursor.CR();
@@ -3601,7 +3576,6 @@ inherits(List, Base);
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],26:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -3704,7 +3678,6 @@ function Markdown (runner) {
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],27:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -3746,7 +3719,6 @@ inherits(Min, Base);
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],28:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -4013,7 +3985,6 @@ function write (string) {
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],29:[function(require,module,exports){
 (function (process){
-'use strict';
 
 /**
  * Module dependencies.
@@ -4107,7 +4078,6 @@ inherits(Progress, Base);
 
 }).call(this,require('_process'))
 },{"../utils":38,"./base":17,"_process":67}],30:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -4190,7 +4160,6 @@ function Spec (runner) {
 inherits(Spec, Base);
 
 },{"../utils":38,"./base":17}],31:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -4263,7 +4232,6 @@ function title (test) {
 
 },{"./base":17}],32:[function(require,module,exports){
 (function (process,global){
-'use strict';
 
 /**
  * Module dependencies.
@@ -4308,7 +4276,7 @@ function XUnit (runner, options) {
   var tests = [];
   var self = this;
 
-  if (options.reporterOptions && options.reporterOptions.output) {
+  if (options && options.reporterOptions && options.reporterOptions.output) {
     if (!fs.createWriteStream) {
       throw new Error('file output not supported in browser');
     }
@@ -4435,7 +4403,6 @@ function tag (name, attrs, close, content) {
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../utils":38,"./base":17,"_process":67,"fs":42,"mkdirp":64,"path":42}],33:[function(require,module,exports){
 (function (global){
-'use strict';
 
 /**
  * Module dependencies.
@@ -4666,7 +4633,8 @@ Runnable.prototype.resetTimeout = function () {
     if (!self._enableTimeouts) {
       return;
     }
-    self.callback(new Error('timeout of ' + ms + 'ms exceeded. Ensure the done() callback is being called in this test.'));
+    self.callback(new Error('Timeout of ' + ms +
+      'ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.'));
     self.timedOut = true;
   }, ms);
 };
@@ -4725,7 +4693,8 @@ Runnable.prototype.run = function (fn) {
     self.duration = new Date() - start;
     finished = true;
     if (!err && self.duration > ms && self._enableTimeouts) {
-      err = new Error('timeout of ' + ms + 'ms exceeded. Ensure the done() callback is being called in this test.');
+      err = new Error('Timeout of ' + ms +
+      'ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.');
     }
     fn(err);
   }
@@ -4823,7 +4792,6 @@ Runnable.prototype.run = function (fn) {
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./ms":15,"./pending":16,"./utils":38,"debug":2,"events":3,"json3":54,"lodash.create":60}],34:[function(require,module,exports){
 (function (process,global){
-'use strict';
 
 /**
  * Module dependencies.
@@ -5789,7 +5757,6 @@ function extraGlobals () {
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./pending":16,"./runnable":33,"./utils":38,"_process":67,"debug":2,"events":3}],35:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -6193,7 +6160,6 @@ Suite.prototype.run = function run () {
 };
 
 },{"./hook":7,"./ms":15,"./utils":38,"debug":2,"events":3}],36:[function(require,module,exports){
-'use strict';
 
 /**
  * Module dependencies.
@@ -6247,7 +6213,6 @@ Test.prototype.clone = function () {
 };
 
 },{"./runnable":33,"./utils":38,"lodash.create":60}],37:[function(require,module,exports){
-'use strict';
 
 /**
  * Pad a `number` with a ten's place zero.
@@ -6287,7 +6252,6 @@ module.exports = toISOString;
 
 },{}],38:[function(require,module,exports){
 (function (process,Buffer){
-'use strict';
 
 /* eslint-env browser */
 
@@ -6305,6 +6269,7 @@ var join = path.join;
 var readdirSync = require('fs').readdirSync;
 var statSync = require('fs').statSync;
 var watchFile = require('fs').watchFile;
+var lstatSync = require('fs').lstatSync;
 var toISOString = require('./to-iso-string');
 
 /**
@@ -6541,7 +6506,7 @@ exports.files = function (dir, ext, ret) {
     .filter(ignored)
     .forEach(function (path) {
       path = join(dir, path);
-      if (statSync(path).isDirectory()) {
+      if (lstatSync(path).isDirectory()) {
         exports.files(path, ext, ret);
       } else if (path.match(re)) {
         ret.push(path);
@@ -7092,7 +7057,6 @@ exports.noop = function () {};
 
 }).call(this,require('_process'),require("buffer").Buffer)
 },{"./to-iso-string":37,"_process":67,"buffer":44,"debug":2,"fs":42,"glob":42,"json3":54,"path":42,"util":84}],39:[function(require,module,exports){
-'use strict'
 
 exports.byteLength = byteLength
 exports.toByteArray = toByteArray
@@ -7242,7 +7206,6 @@ BrowserStdout.prototype._write = function(chunks, encoding, cb) {
 arguments[4][40][0].apply(exports,arguments)
 },{"dup":40}],43:[function(require,module,exports){
 (function (global){
-'use strict';
 
 var buffer = require('buffer');
 var Buffer = buffer.Buffer;
@@ -7362,7 +7325,6 @@ exports.allocUnsafeSlow = function allocUnsafeSlow(size) {
  */
 /* eslint-disable no-proto */
 
-'use strict'
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
@@ -9878,7 +9840,6 @@ function objectToString(o) {
 }(this));
 
 },{}],47:[function(require,module,exports){
-'use strict';
 
 var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
 
@@ -10211,7 +10172,7 @@ var exec = require('child_process').exec
   , cmd;
 
 function which(name) {
-  var paths = '/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.yarn-config/link/node_modules/.bin:/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.yarn-config/link/node_modules/.bin:/Users/n23618/PROJECTS/__YR__/express-client/bower_components/.bin:/Users/n23618/.yarn-config/link/bower_components/.bin:/usr/local/Cellar/yarn/0.16.1/libexec/lib/node_modules/yarn/bin/node-gyp-bin:/usr/local/lib/node_modules:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'.split(':');
+  var paths = '/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.config/yarn/link/node_modules/.bin:/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.config/yarn/link/node_modules/.bin:/usr/local/Cellar/yarn/0.18.1/libexec/lib/node_modules/yarn/bin/node-gyp-bin:/usr/local/lib/node_modules:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'.split(':');
   var loc;
 
   for (var i = 0, len = paths.length; i < len; ++i) {
@@ -12789,7 +12750,6 @@ exports.EOL = '\n';
 
 },{}],66:[function(require,module,exports){
 (function (process){
-'use strict';
 
 if (!process.version ||
     process.version.indexOf('v0.') === 0 ||
@@ -13025,7 +12985,6 @@ module.exports = require("./lib/_stream_duplex.js")
 // prototypally inherits from Readable, and then parasitically from
 // Writable.
 
-'use strict';
 
 /*<replacement>*/
 
@@ -13100,7 +13059,6 @@ function forEach(xs, f) {
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
 
-'use strict';
 
 module.exports = PassThrough;
 
@@ -13124,7 +13082,6 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 };
 },{"./_stream_transform":72,"core-util-is":45,"inherits":51}],71:[function(require,module,exports){
 (function (process){
-'use strict';
 
 module.exports = Readable;
 
@@ -14105,7 +14062,6 @@ function indexOf(xs, x) {
 // would be consumed, and then the rest would wait (un-transformed) until
 // the results of the previous transformed chunk were consumed.
 
-'use strict';
 
 module.exports = Transform;
 
@@ -14249,7 +14205,6 @@ function done(stream, er) {
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
 // the drain event emission and buffering.
 
-'use strict';
 
 module.exports = Writable;
 
@@ -14773,7 +14728,6 @@ function CorkedRequest(state) {
 }
 }).call(this,require('_process'))
 },{"./_stream_duplex":69,"_process":67,"buffer":44,"buffer-shims":43,"core-util-is":45,"events":48,"inherits":51,"process-nextick-args":66,"util-deprecate":81}],74:[function(require,module,exports){
-'use strict';
 
 var Buffer = require('buffer').Buffer;
 /*<replacement>*/
@@ -17179,24 +17133,32 @@ function hasOwnProperty(obj, prop) {
 		mocha.ui('bdd');
 		mocha.reporter('html');
 	</script>
-	<script>'use strict';
-
+	<script>
 /** BUDDY BUILT **/
+
 if ('undefined' === typeof self) var self = this;
 if ('undefined' === typeof global) var global = self;
 if ('undefined' === typeof process) var process = { env: {} };
 var $m = self.$m = self.$m || {};
-var require = self.require || function require (id) {
-  if ($m[id]) {
+if ('browser' != 'browser') {
+  var $req = require;
+  require = function buddyRequire (id) {
+    if (!$m[id]) return $req(id);
     if ('function' == typeof $m[id]) $m[id]();
     return $m[id].exports;
-  }
+  };
+} else {
+  self.require = self.require || function buddyRequire (id) {
+    if ($m[id]) {
+      if ('function' == typeof $m[id]) $m[id]();
+      return $m[id].exports;
+    }
 
-  if (process.env.NODE_ENV == 'development') {
-    console.warn('module ' + id + ' not found');
-  }
-};
-
+    if (process.env.NODE_ENV == 'development') {
+      console.warn('module ' + id + ' not found');
+    }
+  };
+}
 (function (global) {
   var babelHelpers = global.babelHelpers = {};
 
@@ -17250,15 +17212,16 @@ $m['@yr/runtime'].exports.isBrowser = !yrruntime__isServer && yrruntime__isBrows
 $m['@yr/runtime'].exports.isWorker = !yrruntime__isServer && !yrruntime__isBrowser;
 /*≠≠ node_modules/@yr/runtime/index.js ≠≠*/
 
+
 /*== node_modules/strict-uri-encode/index.js ==*/
 $m['strict-uri-encode'] = { exports: {} };
-
 $m['strict-uri-encode'].exports = function (str) {
 	return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
 		return '%' + c.charCodeAt(0).toString(16).toUpperCase();
 	});
 };
 /*≠≠ node_modules/strict-uri-encode/index.js ≠≠*/
+
 
 /*== node_modules/cookie/index.js ==*/
 $m['cookie'] = { exports: {} };
@@ -17268,7 +17231,6 @@ $m['cookie'] = { exports: {} };
  * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-
 
 /**
  * Module exports.
@@ -17456,6 +17418,7 @@ function cookie__tryDecode(str, decode) {
   }
 }
 /*≠≠ node_modules/cookie/index.js ≠≠*/
+
 
 /*== node_modules/eventemitter3/index.js ==*/
 $m['eventemitter3'] = { exports: {} };
@@ -17764,9 +17727,9 @@ if ('undefined' !== typeof $m['eventemitter3']) {
 }
 /*≠≠ node_modules/eventemitter3/index.js ≠≠*/
 
+
 /*== node_modules/ms/index.js ==*/
 $m['ms'] = { exports: {} };
-
 /**
  * Helpers.
  */
@@ -17912,10 +17875,10 @@ function ms__plural(ms, n, name) {
 }
 /*≠≠ node_modules/ms/index.js ≠≠*/
 
+
 /*== node_modules/object-assign/index.js ==*/
 $m['object-assign'] = { exports: {} };
 /* eslint-disable no-unused-vars */
-
 var objectassign__hasOwnProperty = Object.prototype.hasOwnProperty;
 var objectassign__propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
@@ -17998,13 +17961,14 @@ $m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : 
 };
 /*≠≠ node_modules/object-assign/index.js ≠≠*/
 
+
 /*== node_modules/isarray/index.js ==*/
 $m['isarray'] = { exports: {} };
-
 $m['isarray'].exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 /*≠≠ node_modules/isarray/index.js ≠≠*/
+
 
 /*== node_modules/@yr/url-utils/index.js ==*/
 $m['@yr/url-utils'] = { exports: {} };
@@ -18174,6 +18138,7 @@ $m['@yr/url-utils'].exports.template = function (str, data) {
   return $m['@yr/url-utils'].exports.sanitize(str);
 };
 /*≠≠ node_modules/@yr/url-utils/index.js ≠≠*/
+
 
 /*== node_modules/path-to-regexp/index.js ==*/
 $m['path-to-regexp'] = { exports: {} };
@@ -18519,8 +18484,6 @@ function pathtoregexp__tokensToRegExp(tokens, keys, options) {
   var strict = options.strict;
   var end = options.end !== false;
   var route = '';
-  var lastToken = tokens[tokens.length - 1];
-  var endsWithSlash = typeof lastToken === 'string' && /\/$/.test(lastToken);
 
   // Iterate over the tokens and create our regexp string.
   for (var i = 0; i < tokens.length; i++) {
@@ -18552,12 +18515,15 @@ function pathtoregexp__tokensToRegExp(tokens, keys, options) {
     }
   }
 
+  var delimiter = pathtoregexp__escapeString(options.delimiter || '/');
+  var endsWithDelimiter = route.slice(-delimiter.length) === delimiter;
+
   // In non-strict mode we allow a slash at the end of match. If the path to
   // match already ends with a slash, we remove it for consistency. The slash
   // is valid at the end of a path match, not in the middle. This is important
   // in non-ending mode, where "/test/" shouldn't match "/test//route".
   if (!strict) {
-    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
+    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + '(?:' + delimiter + '(?=$))?';
   }
 
   if (end) {
@@ -18565,7 +18531,7 @@ function pathtoregexp__tokensToRegExp(tokens, keys, options) {
   } else {
     // In non-ending mode, we need the capturing groups to match as much as
     // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithSlash ? '' : '(?=\\/|$)';
+    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)';
   }
 
   return pathtoregexp__attachKeys(new RegExp('^' + route, pathtoregexp__flags(options)), keys);
@@ -18603,12 +18569,9 @@ function pathtoregexp__pathToRegexp(path, keys, options) {
 }
 /*≠≠ node_modules/path-to-regexp/index.js ≠≠*/
 
+
 /*== src/lib/layer.js ==*/
 $m['src/lib/layer'] = { exports: {} };
-
-/**
- * Router layer object
- */
 
 var srcliblayer__matcher = $m['path-to-regexp'].exports;
 var srcliblayer__urlUtils = $m['@yr/url-utils'].exports;
@@ -18732,6 +18695,7 @@ var srcliblayer__Layer = function () {
 }();
 /*≠≠ src/lib/layer.js ≠≠*/
 
+
 /*== node_modules/debug/debug.js ==*/
 $m['debug/debug'] = { exports: {} };
 
@@ -18818,7 +18782,10 @@ function debugdebug__debug(namespace) {
     if (null == self.useColors) self.useColors = $m['debug/debug'].exports.useColors();
     if (null == self.color && self.useColors) self.color = debugdebug__selectColor();
 
-    var args = Array.prototype.slice.call(arguments);
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
 
     args[0] = $m['debug/debug'].exports.coerce(args[0]);
 
@@ -18845,9 +18812,9 @@ function debugdebug__debug(namespace) {
       return match;
     });
 
-    if ('function' === typeof $m['debug/debug'].exports.formatArgs) {
-      args = $m['debug/debug'].exports.formatArgs.apply(self, args);
-    }
+    // apply env-specific formatting
+    args = $m['debug/debug'].exports.formatArgs.apply(self, args);
+
     var logFn = enabled.log || $m['debug/debug'].exports.log || console.log.bind(console);
     logFn.apply(self, args);
   }
@@ -18932,6 +18899,7 @@ function debugdebug__coerce(val) {
 }
 /*≠≠ node_modules/debug/debug.js ≠≠*/
 
+
 /*== node_modules/debug/browser.js ==*/
 $m['debug'] = { exports: {} };
 
@@ -18979,7 +18947,11 @@ function debug__useColors() {
  */
 
 $m['debug'].exports.formatters.j = function (v) {
-  return JSON.stringify(v);
+  try {
+    return JSON.stringify(v);
+  } catch (err) {
+    return '[UnexpectedJSONParseError]: ' + err.message;
+  }
 };
 
 /**
@@ -19058,9 +19030,13 @@ function debug__save(namespaces) {
 function debug__load() {
   var r;
   try {
-    r = $m['debug'].exports.storage.debug;
+    return $m['debug'].exports.storage.debug;
   } catch (e) {}
-  return r;
+
+  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+  if (typeof process !== 'undefined' && 'env' in process) {
+    return process.env.DEBUG;
+  }
 }
 
 /**
@@ -19087,13 +19063,9 @@ function debug__localstorage() {
 }
 /*≠≠ node_modules/debug/browser.js ≠≠*/
 
+
 /*== src/lib/router.js ==*/
 $m['src/lib/router'] = { exports: {} };
-
-/**
- * Router for handling middleware pipeline.
- * Can be isolated under a specific mount path.
- */
 
 var srclibrouter__assign = $m['object-assign'].exports;
 var srclibrouter__Debug = $m['debug'].exports;
@@ -19361,24 +19333,13 @@ function srclibrouter__restore(fn, obj) {
 }
 /*≠≠ src/lib/router.js ≠≠*/
 
+
 /*== src/lib/response.js ==*/
 $m['src/lib/response'] = { exports: {} };
-
-/**
- * Browser response object
- */
 
 var srclibresponse__assign = $m['object-assign'].exports;
 var srclibresponse__cookieLib = $m['cookie'].exports;
 var srclibresponse__Emitter = $m['eventemitter3'].exports;
-
-/**
- * Instance factory
- * @returns {Response}
- */
-$m['src/lib/response'].exports = function () {
-  return new srclibresponse__Response();
-};
 
 var srclibresponse__Response = function (_srclibresponse__Emit) {
   babelHelpers.inherits(srclibresponse__Response, _srclibresponse__Emit);
@@ -19392,8 +19353,11 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     var _this = babelHelpers.possibleConstructorReturn(this, _srclibresponse__Emit.call(this));
 
     _this.app = null;
+    _this.cached = false;
+    _this.finished = false;
+    _this.locals = {};
     _this.req = null;
-    _this.reset();
+    _this.statusCode = 404;
     return _this;
   }
 
@@ -19406,6 +19370,7 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     this.cached = false;
     this.finished = false;
     this.locals = {};
+    this.req = null;
     this.statusCode = 404;
   };
 
@@ -19433,6 +19398,13 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     this.finished = true;
     this.emit('finish');
   };
+
+  /**
+   * Partial response (noop)
+   */
+
+
+  srclibresponse__Response.prototype.write = function write() {};
 
   /**
    * Redirect to 'url'
@@ -19475,11 +19447,22 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
   return srclibresponse__Response;
 }(srclibresponse__Emitter);
+
+/**
+ * Instance factory
+ * @returns {Response}
+ */
+
+
+$m['src/lib/response'].exports = function () {
+  return new srclibresponse__Response();
+};
+$m['src/lib/response'].exports.Response = srclibresponse__Response;
 /*≠≠ src/lib/response.js ≠≠*/
+
 
 /*== node_modules/query-string/index.js ==*/
 $m['query-string'] = { exports: {} };
-
 var querystring__strictUriEncode = $m['strict-uri-encode'].exports;
 var querystring__objectAssign = $m['object-assign'].exports;
 
@@ -19579,12 +19562,9 @@ $m['query-string'].exports.stringify = function (obj, opts) {
 };
 /*≠≠ node_modules/query-string/index.js ≠≠*/
 
+
 /*== src/lib/request.js ==*/
 $m['src/lib/request'] = { exports: {} };
-
-/**
- * Browser request object
- */
 
 var srclibrequest__cookieLib = $m['cookie'].exports;
 var srclibrequest__Emitter = $m['eventemitter3'].exports;
@@ -19592,16 +19572,6 @@ var srclibrequest__qsParse = $m['query-string'].exports.parse;
 var srclibrequest__urlUtils = $m['@yr/url-utils'].exports;
 
 var srclibrequest__RE_SPLIT = /[?#]/;
-
-/**
- * Instance factory
- * @param {String} url
- * @param {Boolean} bootstrap
- * @returns {Request}
- */
-$m['src/lib/request'].exports = function (url, bootstrap) {
-  return new srclibrequest__Request(url, bootstrap);
-};
 
 var srclibrequest__Request = function (_srclibrequest__Emitt) {
   babelHelpers.inherits(srclibrequest__Request, _srclibrequest__Emitt);
@@ -19623,15 +19593,18 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
     var hash = ~url.indexOf('#') && path[path.length - 1] || '';
 
     _this.app = null;
+    _this.baseUrl = '';
+    _this.bootstrap = bootstrap || false;
+    _this.cached = false;
     _this.cookies = srclibrequest__cookieLib.parse(document.cookie);
-    _this.path = srclibrequest__urlUtils.sanitize(path[0]);
     _this.hash = srclibrequest__qsParse(hash);
+    _this.params = null;
+    _this.path = srclibrequest__urlUtils.sanitize(path[0]);
     _this.query = srclibrequest__qsParse(qs);
     _this.querystring = qs;
     _this.search = qs ? '?' + qs : '';
     // Ignore hash
     _this.url = _this.originalUrl = url.split('#')[0];
-    _this.reset(bootstrap);
     return _this;
   }
 
@@ -19661,16 +19634,24 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
 
   return srclibrequest__Request;
 }(srclibrequest__Emitter);
+
+/**
+ * Instance factory
+ * @param {String} url
+ * @param {Boolean} bootstrap
+ * @returns {Request}
+ */
+
+
+$m['src/lib/request'].exports = function (url, bootstrap) {
+  return new srclibrequest__Request(url, bootstrap);
+};
+$m['src/lib/request'].exports.Request = srclibrequest__Request;
 /*≠≠ src/lib/request.js ≠≠*/
+
 
 /*== src/lib/history.js ==*/
 $m['src/lib/history'] = { exports: {} };
-
-/**
- * Manager for browser history.
- * Generates/stores request/response context for current url,
- * and responds to changes to state via History API.
- */
 
 var srclibhistory__Debug = $m['debug'].exports;
 var srclibhistory__urlUtils = $m['@yr/url-utils'].exports;
@@ -19979,12 +19960,9 @@ function srclibhistory__sameOrigin(url) {
 }
 /*≠≠ src/lib/history.js ≠≠*/
 
+
 /*== src/lib/application.js ==*/
 $m['src/lib/application'] = { exports: {} };
-
-/**
- * Browser application
- */
 
 var srclibapplication__Debug = $m['debug'].exports;
 var srclibapplication__Emitter = $m['eventemitter3'].exports;
@@ -19994,14 +19972,6 @@ var srclibapplication__response = $m['src/lib/response'].exports;
 var srclibapplication__router = $m['src/lib/router'].exports;
 
 var srclibapplication__debug = srclibapplication__Debug('express:application');
-
-/**
- * Instance factory
- * @returns {Application}
- */
-$m['src/lib/application'].exports = function () {
-  return new srclibapplication__Application();
-};
 
 var srclibapplication__Application = function (_srclibapplication__E) {
   babelHelpers.inherits(srclibapplication__Application, _srclibapplication__E);
@@ -20035,20 +20005,20 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
     // Create request/response factories
     var app = _this;
-    var req = function req(url, bootstrap) {
+    var requestFactory = function requestFactory(url, bootstrap) {
       var req = srclibapplication__request(url, bootstrap);
 
       req.app = app;
       return req;
     };
-    var res = function res() {
+    var responseFactory = function responseFactory() {
       var res = srclibapplication__response();
 
       res.app = app;
       return res;
     };
 
-    _this.history = srclibapplication__history(req, res, _this.handle);
+    _this.history = srclibapplication__history(requestFactory, responseFactory, _this.handle);
 
     // Route ALL/POST methods to router
     _this.all = _this._router.all.bind(_this._router);
@@ -20223,7 +20193,18 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
   return srclibapplication__Application;
 }(srclibapplication__Emitter);
+
+/**
+ * Instance factory
+ * @returns {Application}
+ */
+
+
+$m['src/lib/application'].exports = function () {
+  return new srclibapplication__Application();
+};
 /*≠≠ src/lib/application.js ≠≠*/
+
 
 /*== src/index.js ==*/
 $m['src/index'] = { exports: {} };
@@ -20234,6 +20215,12 @@ $m['src/index'] = { exports: {} };
  * @copyright Yr
  * @license MIT
  */
+
+var srcindex___require = $m['src/lib/request'].exports,
+    srcindex__Request = srcindex___require.Request;
+
+var srcindex___require2 = $m['src/lib/response'].exports,
+    srcindex__Response = srcindex___require2.Response;
 
 var srcindex__application = $m['src/lib/application'].exports;
 var srcindex__Router = $m['src/lib/router'].exports;
@@ -20246,14 +20233,14 @@ $m['src/index'].exports = function createApplication() {
   return srcindex__application();
 };
 
-/**
- * Expose
- */
+// Expose constructor
 $m['src/index'].exports.Router = srcindex__Router;
+// Expose prototypes
+$m['src/index'].exports.request = srcindex__Request.prototype;
+$m['src/index'].exports.response = srcindex__Response.prototype;
 /*≠≠ src/index.js ≠≠*/
 })()</script>
-	<script>'use strict';
-
+	<script>
 var Application = require('src/lib/application');
 var expect = window.expect;
 var express = require('src/index');

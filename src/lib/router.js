@@ -1,10 +1,5 @@
 'use strict';
 
-/**
- * Router for handling middleware pipeline.
- * Can be isolated under a specific mount path.
- */
-
 const assign = require('object-assign');
 const Debug = require('debug');
 const layer = require('./layer');

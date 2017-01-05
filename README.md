@@ -190,6 +190,3 @@ app.get('/', function (req, res, next) {
   res.render('home', {title: 'home'});
 });
 ```
-
-#### flush(view, [options])
-Partially render `view` with (optional) `options` data. Same as `render()` except that response is not completed.

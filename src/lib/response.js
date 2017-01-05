@@ -1,20 +1,8 @@
 'use strict';
 
-/**
- * Browser response object
- */
-
 const assign = require('object-assign');
 const cookieLib = require('cookie');
 const Emitter = require('eventemitter3');
-
-/**
- * Instance factory
- * @returns {Response}
- */
-module.exports = function () {
-  return new Response();
-};
 
 class Response extends Emitter {
   /**
@@ -24,8 +12,11 @@ class Response extends Emitter {
     super();
 
     this.app = null;
+    this.cached = false;
+    this.finished = false;
+    this.locals = {};
     this.req = null;
-    this.reset();
+    this.statusCode = 404;
   }
 
   /**
@@ -35,6 +26,7 @@ class Response extends Emitter {
     this.cached = false;
     this.finished = false;
     this.locals = {};
+    this.req = null;
     this.statusCode = 404;
   }
 
@@ -57,6 +49,21 @@ class Response extends Emitter {
     this.status(200);
     this.finished = true;
     this.emit('finish');
+  }
+
+  /**
+   * Partial response (noop)
+   */
+  write () {
+  }
+
+  /**
+   * Abort response
+   */
+  abort () {
+    this.req.abort();
+    this.reset();
+    this.emit('close');
   }
 
   /**
@@ -94,3 +101,12 @@ class Response extends Emitter {
     return this;
   }
 }
+
+/**
+ * Instance factory
+ * @returns {Response}
+ */
+module.exports = function () {
+  return new Response();
+};
+module.exports.Response = Response;

@@ -7,6 +7,8 @@
  * @license MIT
  */
 
+const { Request } = require('./lib/request');
+const { Response } = require('./lib/response');
 const application = require('./lib/application');
 const Router = require('./lib/router');
 
@@ -18,7 +20,8 @@ module.exports = function createApplication () {
   return application();
 };
 
-/**
- * Expose
- */
+// Expose constructor
 module.exports.Router = Router;
+// Expose prototypes
+module.exports.request = Request.prototype;
+module.exports.response = Response.prototype;

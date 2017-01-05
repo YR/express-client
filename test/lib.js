@@ -1,21 +1,30 @@
 'use strict';
 
 /** BUDDY BUILT **/
+
 if ('undefined' === typeof self) var self = this;
 if ('undefined' === typeof global) var global = self;
 if ('undefined' === typeof process) var process = { env: {} };
 var $m = self.$m = self.$m || {};
-var require = self.require || function require (id) {
-  if ($m[id]) {
+if ('browser' != 'browser') {
+  var $req = require;
+  require = function buddyRequire (id) {
+    if (!$m[id]) return $req(id);
     if ('function' == typeof $m[id]) $m[id]();
     return $m[id].exports;
-  }
+  };
+} else {
+  self.require = self.require || function buddyRequire (id) {
+    if ($m[id]) {
+      if ('function' == typeof $m[id]) $m[id]();
+      return $m[id].exports;
+    }
 
-  if (process.env.NODE_ENV == 'development') {
-    console.warn('module ' + id + ' not found');
-  }
-};
-
+    if (process.env.NODE_ENV == 'development') {
+      console.warn('module ' + id + ' not found');
+    }
+  };
+}
 (function (global) {
   var babelHelpers = global.babelHelpers = {};
 
@@ -69,15 +78,16 @@ $m['@yr/runtime'].exports.isBrowser = !yrruntime__isServer && yrruntime__isBrows
 $m['@yr/runtime'].exports.isWorker = !yrruntime__isServer && !yrruntime__isBrowser;
 /*≠≠ node_modules/@yr/runtime/index.js ≠≠*/
 
+
 /*== node_modules/strict-uri-encode/index.js ==*/
 $m['strict-uri-encode'] = { exports: {} };
-
 $m['strict-uri-encode'].exports = function (str) {
 	return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
 		return '%' + c.charCodeAt(0).toString(16).toUpperCase();
 	});
 };
 /*≠≠ node_modules/strict-uri-encode/index.js ≠≠*/
+
 
 /*== node_modules/cookie/index.js ==*/
 $m['cookie'] = { exports: {} };
@@ -87,7 +97,6 @@ $m['cookie'] = { exports: {} };
  * Copyright(c) 2015 Douglas Christopher Wilson
  * MIT Licensed
  */
-
 
 /**
  * Module exports.
@@ -275,6 +284,7 @@ function cookie__tryDecode(str, decode) {
   }
 }
 /*≠≠ node_modules/cookie/index.js ≠≠*/
+
 
 /*== node_modules/eventemitter3/index.js ==*/
 $m['eventemitter3'] = { exports: {} };
@@ -583,9 +593,9 @@ if ('undefined' !== typeof $m['eventemitter3']) {
 }
 /*≠≠ node_modules/eventemitter3/index.js ≠≠*/
 
+
 /*== node_modules/ms/index.js ==*/
 $m['ms'] = { exports: {} };
-
 /**
  * Helpers.
  */
@@ -731,10 +741,10 @@ function ms__plural(ms, n, name) {
 }
 /*≠≠ node_modules/ms/index.js ≠≠*/
 
+
 /*== node_modules/object-assign/index.js ==*/
 $m['object-assign'] = { exports: {} };
 /* eslint-disable no-unused-vars */
-
 var objectassign__hasOwnProperty = Object.prototype.hasOwnProperty;
 var objectassign__propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
@@ -817,13 +827,14 @@ $m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : 
 };
 /*≠≠ node_modules/object-assign/index.js ≠≠*/
 
+
 /*== node_modules/isarray/index.js ==*/
 $m['isarray'] = { exports: {} };
-
 $m['isarray'].exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 /*≠≠ node_modules/isarray/index.js ≠≠*/
+
 
 /*== node_modules/@yr/url-utils/index.js ==*/
 $m['@yr/url-utils'] = { exports: {} };
@@ -993,6 +1004,7 @@ $m['@yr/url-utils'].exports.template = function (str, data) {
   return $m['@yr/url-utils'].exports.sanitize(str);
 };
 /*≠≠ node_modules/@yr/url-utils/index.js ≠≠*/
+
 
 /*== node_modules/path-to-regexp/index.js ==*/
 $m['path-to-regexp'] = { exports: {} };
@@ -1338,8 +1350,6 @@ function pathtoregexp__tokensToRegExp(tokens, keys, options) {
   var strict = options.strict;
   var end = options.end !== false;
   var route = '';
-  var lastToken = tokens[tokens.length - 1];
-  var endsWithSlash = typeof lastToken === 'string' && /\/$/.test(lastToken);
 
   // Iterate over the tokens and create our regexp string.
   for (var i = 0; i < tokens.length; i++) {
@@ -1371,12 +1381,15 @@ function pathtoregexp__tokensToRegExp(tokens, keys, options) {
     }
   }
 
+  var delimiter = pathtoregexp__escapeString(options.delimiter || '/');
+  var endsWithDelimiter = route.slice(-delimiter.length) === delimiter;
+
   // In non-strict mode we allow a slash at the end of match. If the path to
   // match already ends with a slash, we remove it for consistency. The slash
   // is valid at the end of a path match, not in the middle. This is important
   // in non-ending mode, where "/test/" shouldn't match "/test//route".
   if (!strict) {
-    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
+    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + '(?:' + delimiter + '(?=$))?';
   }
 
   if (end) {
@@ -1384,7 +1397,7 @@ function pathtoregexp__tokensToRegExp(tokens, keys, options) {
   } else {
     // In non-ending mode, we need the capturing groups to match as much as
     // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithSlash ? '' : '(?=\\/|$)';
+    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)';
   }
 
   return pathtoregexp__attachKeys(new RegExp('^' + route, pathtoregexp__flags(options)), keys);
@@ -1422,12 +1435,9 @@ function pathtoregexp__pathToRegexp(path, keys, options) {
 }
 /*≠≠ node_modules/path-to-regexp/index.js ≠≠*/
 
+
 /*== src/lib/layer.js ==*/
 $m['src/lib/layer'] = { exports: {} };
-
-/**
- * Router layer object
- */
 
 var srcliblayer__matcher = $m['path-to-regexp'].exports;
 var srcliblayer__urlUtils = $m['@yr/url-utils'].exports;
@@ -1551,6 +1561,7 @@ var srcliblayer__Layer = function () {
 }();
 /*≠≠ src/lib/layer.js ≠≠*/
 
+
 /*== node_modules/debug/debug.js ==*/
 $m['debug/debug'] = { exports: {} };
 
@@ -1637,7 +1648,10 @@ function debugdebug__debug(namespace) {
     if (null == self.useColors) self.useColors = $m['debug/debug'].exports.useColors();
     if (null == self.color && self.useColors) self.color = debugdebug__selectColor();
 
-    var args = Array.prototype.slice.call(arguments);
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
 
     args[0] = $m['debug/debug'].exports.coerce(args[0]);
 
@@ -1664,9 +1678,9 @@ function debugdebug__debug(namespace) {
       return match;
     });
 
-    if ('function' === typeof $m['debug/debug'].exports.formatArgs) {
-      args = $m['debug/debug'].exports.formatArgs.apply(self, args);
-    }
+    // apply env-specific formatting
+    args = $m['debug/debug'].exports.formatArgs.apply(self, args);
+
     var logFn = enabled.log || $m['debug/debug'].exports.log || console.log.bind(console);
     logFn.apply(self, args);
   }
@@ -1751,6 +1765,7 @@ function debugdebug__coerce(val) {
 }
 /*≠≠ node_modules/debug/debug.js ≠≠*/
 
+
 /*== node_modules/debug/browser.js ==*/
 $m['debug'] = { exports: {} };
 
@@ -1798,7 +1813,11 @@ function debug__useColors() {
  */
 
 $m['debug'].exports.formatters.j = function (v) {
-  return JSON.stringify(v);
+  try {
+    return JSON.stringify(v);
+  } catch (err) {
+    return '[UnexpectedJSONParseError]: ' + err.message;
+  }
 };
 
 /**
@@ -1877,9 +1896,13 @@ function debug__save(namespaces) {
 function debug__load() {
   var r;
   try {
-    r = $m['debug'].exports.storage.debug;
+    return $m['debug'].exports.storage.debug;
   } catch (e) {}
-  return r;
+
+  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+  if (typeof process !== 'undefined' && 'env' in process) {
+    return process.env.DEBUG;
+  }
 }
 
 /**
@@ -1906,13 +1929,9 @@ function debug__localstorage() {
 }
 /*≠≠ node_modules/debug/browser.js ≠≠*/
 
+
 /*== src/lib/router.js ==*/
 $m['src/lib/router'] = { exports: {} };
-
-/**
- * Router for handling middleware pipeline.
- * Can be isolated under a specific mount path.
- */
 
 var srclibrouter__assign = $m['object-assign'].exports;
 var srclibrouter__Debug = $m['debug'].exports;
@@ -2180,24 +2199,13 @@ function srclibrouter__restore(fn, obj) {
 }
 /*≠≠ src/lib/router.js ≠≠*/
 
+
 /*== src/lib/response.js ==*/
 $m['src/lib/response'] = { exports: {} };
-
-/**
- * Browser response object
- */
 
 var srclibresponse__assign = $m['object-assign'].exports;
 var srclibresponse__cookieLib = $m['cookie'].exports;
 var srclibresponse__Emitter = $m['eventemitter3'].exports;
-
-/**
- * Instance factory
- * @returns {Response}
- */
-$m['src/lib/response'].exports = function () {
-  return new srclibresponse__Response();
-};
 
 var srclibresponse__Response = function (_srclibresponse__Emit) {
   babelHelpers.inherits(srclibresponse__Response, _srclibresponse__Emit);
@@ -2211,8 +2219,11 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     var _this = babelHelpers.possibleConstructorReturn(this, _srclibresponse__Emit.call(this));
 
     _this.app = null;
+    _this.cached = false;
+    _this.finished = false;
+    _this.locals = {};
     _this.req = null;
-    _this.reset();
+    _this.statusCode = 404;
     return _this;
   }
 
@@ -2225,6 +2236,7 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     this.cached = false;
     this.finished = false;
     this.locals = {};
+    this.req = null;
     this.statusCode = 404;
   };
 
@@ -2252,6 +2264,13 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     this.finished = true;
     this.emit('finish');
   };
+
+  /**
+   * Partial response (noop)
+   */
+
+
+  srclibresponse__Response.prototype.write = function write() {};
 
   /**
    * Redirect to 'url'
@@ -2294,11 +2313,22 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
   return srclibresponse__Response;
 }(srclibresponse__Emitter);
+
+/**
+ * Instance factory
+ * @returns {Response}
+ */
+
+
+$m['src/lib/response'].exports = function () {
+  return new srclibresponse__Response();
+};
+$m['src/lib/response'].exports.Response = srclibresponse__Response;
 /*≠≠ src/lib/response.js ≠≠*/
+
 
 /*== node_modules/query-string/index.js ==*/
 $m['query-string'] = { exports: {} };
-
 var querystring__strictUriEncode = $m['strict-uri-encode'].exports;
 var querystring__objectAssign = $m['object-assign'].exports;
 
@@ -2398,12 +2428,9 @@ $m['query-string'].exports.stringify = function (obj, opts) {
 };
 /*≠≠ node_modules/query-string/index.js ≠≠*/
 
+
 /*== src/lib/request.js ==*/
 $m['src/lib/request'] = { exports: {} };
-
-/**
- * Browser request object
- */
 
 var srclibrequest__cookieLib = $m['cookie'].exports;
 var srclibrequest__Emitter = $m['eventemitter3'].exports;
@@ -2411,16 +2438,6 @@ var srclibrequest__qsParse = $m['query-string'].exports.parse;
 var srclibrequest__urlUtils = $m['@yr/url-utils'].exports;
 
 var srclibrequest__RE_SPLIT = /[?#]/;
-
-/**
- * Instance factory
- * @param {String} url
- * @param {Boolean} bootstrap
- * @returns {Request}
- */
-$m['src/lib/request'].exports = function (url, bootstrap) {
-  return new srclibrequest__Request(url, bootstrap);
-};
 
 var srclibrequest__Request = function (_srclibrequest__Emitt) {
   babelHelpers.inherits(srclibrequest__Request, _srclibrequest__Emitt);
@@ -2442,15 +2459,18 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
     var hash = ~url.indexOf('#') && path[path.length - 1] || '';
 
     _this.app = null;
+    _this.baseUrl = '';
+    _this.bootstrap = bootstrap || false;
+    _this.cached = false;
     _this.cookies = srclibrequest__cookieLib.parse(document.cookie);
-    _this.path = srclibrequest__urlUtils.sanitize(path[0]);
     _this.hash = srclibrequest__qsParse(hash);
+    _this.params = null;
+    _this.path = srclibrequest__urlUtils.sanitize(path[0]);
     _this.query = srclibrequest__qsParse(qs);
     _this.querystring = qs;
     _this.search = qs ? '?' + qs : '';
     // Ignore hash
     _this.url = _this.originalUrl = url.split('#')[0];
-    _this.reset(bootstrap);
     return _this;
   }
 
@@ -2480,16 +2500,24 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
 
   return srclibrequest__Request;
 }(srclibrequest__Emitter);
+
+/**
+ * Instance factory
+ * @param {String} url
+ * @param {Boolean} bootstrap
+ * @returns {Request}
+ */
+
+
+$m['src/lib/request'].exports = function (url, bootstrap) {
+  return new srclibrequest__Request(url, bootstrap);
+};
+$m['src/lib/request'].exports.Request = srclibrequest__Request;
 /*≠≠ src/lib/request.js ≠≠*/
+
 
 /*== src/lib/history.js ==*/
 $m['src/lib/history'] = { exports: {} };
-
-/**
- * Manager for browser history.
- * Generates/stores request/response context for current url,
- * and responds to changes to state via History API.
- */
 
 var srclibhistory__Debug = $m['debug'].exports;
 var srclibhistory__urlUtils = $m['@yr/url-utils'].exports;
@@ -2798,12 +2826,9 @@ function srclibhistory__sameOrigin(url) {
 }
 /*≠≠ src/lib/history.js ≠≠*/
 
+
 /*== src/lib/application.js ==*/
 $m['src/lib/application'] = { exports: {} };
-
-/**
- * Browser application
- */
 
 var srclibapplication__Debug = $m['debug'].exports;
 var srclibapplication__Emitter = $m['eventemitter3'].exports;
@@ -2813,14 +2838,6 @@ var srclibapplication__response = $m['src/lib/response'].exports;
 var srclibapplication__router = $m['src/lib/router'].exports;
 
 var srclibapplication__debug = srclibapplication__Debug('express:application');
-
-/**
- * Instance factory
- * @returns {Application}
- */
-$m['src/lib/application'].exports = function () {
-  return new srclibapplication__Application();
-};
 
 var srclibapplication__Application = function (_srclibapplication__E) {
   babelHelpers.inherits(srclibapplication__Application, _srclibapplication__E);
@@ -2854,20 +2871,20 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
     // Create request/response factories
     var app = _this;
-    var req = function req(url, bootstrap) {
+    var requestFactory = function requestFactory(url, bootstrap) {
       var req = srclibapplication__request(url, bootstrap);
 
       req.app = app;
       return req;
     };
-    var res = function res() {
+    var responseFactory = function responseFactory() {
       var res = srclibapplication__response();
 
       res.app = app;
       return res;
     };
 
-    _this.history = srclibapplication__history(req, res, _this.handle);
+    _this.history = srclibapplication__history(requestFactory, responseFactory, _this.handle);
 
     // Route ALL/POST methods to router
     _this.all = _this._router.all.bind(_this._router);
@@ -3042,7 +3059,18 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
   return srclibapplication__Application;
 }(srclibapplication__Emitter);
+
+/**
+ * Instance factory
+ * @returns {Application}
+ */
+
+
+$m['src/lib/application'].exports = function () {
+  return new srclibapplication__Application();
+};
 /*≠≠ src/lib/application.js ≠≠*/
+
 
 /*== src/index.js ==*/
 $m['src/index'] = { exports: {} };
@@ -3053,6 +3081,12 @@ $m['src/index'] = { exports: {} };
  * @copyright Yr
  * @license MIT
  */
+
+var srcindex___require = $m['src/lib/request'].exports,
+    srcindex__Request = srcindex___require.Request;
+
+var srcindex___require2 = $m['src/lib/response'].exports,
+    srcindex__Response = srcindex___require2.Response;
 
 var srcindex__application = $m['src/lib/application'].exports;
 var srcindex__Router = $m['src/lib/router'].exports;
@@ -3065,9 +3099,10 @@ $m['src/index'].exports = function createApplication() {
   return srcindex__application();
 };
 
-/**
- * Expose
- */
+// Expose constructor
 $m['src/index'].exports.Router = srcindex__Router;
+// Expose prototypes
+$m['src/index'].exports.request = srcindex__Request.prototype;
+$m['src/index'].exports.response = srcindex__Response.prototype;
 /*≠≠ src/index.js ≠≠*/
 })()

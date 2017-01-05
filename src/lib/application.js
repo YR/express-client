@@ -1,9 +1,5 @@
 'use strict';
 
-/**
- * Browser application
- */
-
 const Debug = require('debug');
 const Emitter = require('eventemitter3');
 const history = require('./history');
@@ -12,14 +8,6 @@ const response = require('./response');
 const router = require('./router');
 
 const debug = Debug('express:application');
-
-/**
- * Instance factory
- * @returns {Application}
- */
-module.exports = function () {
-  return new Application();
-};
 
 class Application extends Emitter {
   /**
@@ -49,20 +37,20 @@ class Application extends Emitter {
 
     // Create request/response factories
     const app = this;
-    const req = function (url, bootstrap) {
+    const requestFactory = function requestFactory (url, bootstrap) {
       let req = request(url, bootstrap);
 
       req.app = app;
       return req;
     };
-    const res = function () {
+    const responseFactory = function responseFactory () {
       let res = response();
 
       res.app = app;
       return res;
     };
 
-    this.history = history(req, res, this.handle);
+    this.history = history(requestFactory, responseFactory, this.handle);
 
     // Route ALL/POST methods to router
     this.all = this._router.all.bind(this._router);
@@ -203,3 +191,11 @@ class Application extends Emitter {
     this[this.parent ? 'parent' : 'history'].refresh();
   }
 }
+
+/**
+ * Instance factory
+ * @returns {Application}
+ */
+module.exports = function () {
+  return new Application();
+};

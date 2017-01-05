@@ -1,25 +1,11 @@
 'use strict';
 
-/**
- * Browser request object
- */
-
 const cookieLib = require('cookie');
 const Emitter = require('eventemitter3');
 const qsParse = require('query-string').parse;
 const urlUtils = require('@yr/url-utils');
 
 const RE_SPLIT = /[?#]/;
-
-/**
- * Instance factory
- * @param {String} url
- * @param {Boolean} bootstrap
- * @returns {Request}
- */
-module.exports = function (url, bootstrap) {
-  return new Request(url, bootstrap);
-};
 
 class Request extends Emitter {
   /**
@@ -39,15 +25,18 @@ class Request extends Emitter {
     const hash = (~url.indexOf('#') && path[path.length - 1]) || '';
 
     this.app = null;
+    this.baseUrl = '';
+    this.bootstrap = bootstrap || false;
+    this.cached = false;
     this.cookies = cookieLib.parse(document.cookie);
-    this.path = urlUtils.sanitize(path[0]);
     this.hash = qsParse(hash);
+    this.params = null;
+    this.path = urlUtils.sanitize(path[0]);
     this.query = qsParse(qs);
     this.querystring = qs;
     this.search = qs ? `?${qs}` : '';
     // Ignore hash
     this.url = this.originalUrl = url.split('#')[0];
-    this.reset(bootstrap);
   }
 
   /**
@@ -70,3 +59,14 @@ class Request extends Emitter {
     this.params = null;
   }
 }
+
+/**
+ * Instance factory
+ * @param {String} url
+ * @param {Boolean} bootstrap
+ * @returns {Request}
+ */
+module.exports = function (url, bootstrap) {
+  return new Request(url, bootstrap);
+};
+module.exports.Request = Request;

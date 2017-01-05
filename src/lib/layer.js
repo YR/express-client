@@ -1,9 +1,5 @@
 'use strict';
 
-/**
- * Router layer object
- */
-
 const matcher = require('path-to-regexp');
 const urlUtils = require('@yr/url-utils');
 
