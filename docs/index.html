@@ -10172,7 +10172,7 @@ var exec = require('child_process').exec
   , cmd;
 
 function which(name) {
-  var paths = '/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.config/yarn/link/node_modules/.bin:/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/Users/n23618/.config/yarn/link/node_modules/.bin:/usr/local/Cellar/yarn/0.18.1/libexec/lib/node_modules/yarn/bin/node-gyp-bin:/usr/local/lib/node_modules:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'.split(':');
+  var paths = '/usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/n23618/PROJECTS/__YR__/express-client/node_modules/.bin:/usr/local/lib/node_modules:/usr/local/opt/gnu-tar/libexec/gnubin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'.split(':');
   var loc;
 
   for (var i = 0, len = paths.length; i < len; ++i) {
