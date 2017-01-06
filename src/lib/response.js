@@ -41,9 +41,16 @@ class Response extends Emitter {
   }
 
   /**
-   * Send response (last method called in pipeline)
+   * Send response
    */
   send () {
+    this.end();
+  }
+
+  /**
+   * End response (last method called in pipeline)
+   */
+  end () {
     // Reset state
     this.req.reset();
     this.status(200);

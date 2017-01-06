@@ -19389,11 +19389,20 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
   };
 
   /**
-   * Send response (last method called in pipeline)
+   * Send response
    */
 
 
   srclibresponse__Response.prototype.send = function send() {
+    this.end();
+  };
+
+  /**
+   * End response (last method called in pipeline)
+   */
+
+
+  srclibresponse__Response.prototype.end = function end() {
     // Reset state
     this.req.reset();
     this.status(200);
