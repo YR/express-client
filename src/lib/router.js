@@ -13,15 +13,6 @@ const DEFAULT_OPTIONS = {
 
 const debug = Debug('express:router');
 
-/**
- * Instance factory
- * @param {Object} [options]
- * @returns {Router}
- */
-module.exports = function (options) {
-  return new Router(options);
-};
-
 class Router {
   /**
    * Constructor
@@ -238,3 +229,12 @@ function restore (fn, obj) {
     return fn.apply(this, arguments);
   };
 }
+
+/**
+ * Instance factory
+ * @param {Object} [options]
+ * @returns {Router}
+ */
+module.exports = function (options) {
+  return new Router(options);
+};

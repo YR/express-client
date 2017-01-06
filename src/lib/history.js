@@ -6,17 +6,6 @@ const urlUtils = require('@yr/url-utils');
 const debug = Debug('express:history');
 let bootstrap = true;
 
-/**
- * Instance factory
- * @param {Function} request
- * @param {Function} response
- * @param {Function} fn(req, res)
- * @returns {History}
- */
-module.exports = function (request, response, fn) {
-  return new History(request, response, fn);
-};
-
 class History {
   /**
    * Constructor
@@ -282,3 +271,14 @@ function sameOrigin (url) {
   if (location.port) origin += ':' + location.port;
   return (url && (url.indexOf(origin) == 0));
 }
+
+/**
+ * Instance factory
+ * @param {Function} request
+ * @param {Function} response
+ * @param {Function} fn(req, res)
+ * @returns {History}
+ */
+module.exports = function (request, response, fn) {
+  return new History(request, response, fn);
+};

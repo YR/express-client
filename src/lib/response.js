@@ -54,8 +54,7 @@ class Response extends Emitter {
   /**
    * Partial response (noop)
    */
-  write () {
-  }
+  write () { }
 
   /**
    * Abort response

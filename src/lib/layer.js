@@ -3,17 +3,6 @@
 const matcher = require('path-to-regexp');
 const urlUtils = require('@yr/url-utils');
 
-/**
- * Instance Factory
- * @param {String} path
- * @param {Function} fn
- * @param {Object} options
- * @returns {Layer}
- */
-module.exports = function (path, fn, options) {
-  return new Layer(path, fn, options);
-};
-
 class Layer {
   /**
    * Constructor
@@ -103,9 +92,20 @@ class Layer {
     if (this.fn.length > 3) return next();
 
     try {
-      this.fn(req, res, next)
+      this.fn(req, res, next);
     } catch (err) {
       next(err);
     }
   }
 }
+
+/**
+ * Instance Factory
+ * @param {String} path
+ * @param {Function} fn
+ * @param {Object} options
+ * @returns {Layer}
+ */
+module.exports = function (path, fn, options) {
+  return new Layer(path, fn, options);
+};

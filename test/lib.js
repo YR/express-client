@@ -1442,17 +1442,6 @@ $m['src/lib/layer'] = { exports: {} };
 var srcliblayer__matcher = $m['path-to-regexp'].exports;
 var srcliblayer__urlUtils = $m['@yr/url-utils'].exports;
 
-/**
- * Instance Factory
- * @param {String} path
- * @param {Function} fn
- * @param {Object} options
- * @returns {Layer}
- */
-$m['src/lib/layer'].exports = function (path, fn, options) {
-  return new srcliblayer__Layer(path, fn, options);
-};
-
 var srcliblayer__Layer = function () {
   /**
    * Constructor
@@ -1559,6 +1548,19 @@ var srcliblayer__Layer = function () {
 
   return srcliblayer__Layer;
 }();
+
+/**
+ * Instance Factory
+ * @param {String} path
+ * @param {Function} fn
+ * @param {Object} options
+ * @returns {Layer}
+ */
+
+
+$m['src/lib/layer'].exports = function (path, fn, options) {
+  return new srcliblayer__Layer(path, fn, options);
+};
 /*≠≠ src/lib/layer.js ≠≠*/
 
 
@@ -1946,15 +1948,6 @@ var srclibrouter__DEFAULT_OPTIONS = {
 
 var srclibrouter__debug = srclibrouter__Debug('express:router');
 
-/**
- * Instance factory
- * @param {Object} [options]
- * @returns {Router}
- */
-$m['src/lib/router'].exports = function (options) {
-  return new srclibrouter__Router(options);
-};
-
 var srclibrouter__Router = function () {
   /**
    * Constructor
@@ -2197,6 +2190,15 @@ function srclibrouter__restore(fn, obj) {
     return fn.apply(this, arguments);
   };
 }
+
+/**
+ * Instance factory
+ * @param {Object} [options]
+ * @returns {Router}
+ */
+$m['src/lib/router'].exports = function (options) {
+  return new srclibrouter__Router(options);
+};
 /*≠≠ src/lib/router.js ≠≠*/
 
 
@@ -2271,6 +2273,17 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
 
   srclibresponse__Response.prototype.write = function write() {};
+
+  /**
+   * Abort response
+   */
+
+
+  srclibresponse__Response.prototype.abort = function abort() {
+    this.req.abort();
+    this.reset();
+    this.emit('close');
+  };
 
   /**
    * Redirect to 'url'
@@ -2525,17 +2538,6 @@ var srclibhistory__urlUtils = $m['@yr/url-utils'].exports;
 var srclibhistory__debug = srclibhistory__Debug('express:history');
 var srclibhistory__bootstrap = true;
 
-/**
- * Instance factory
- * @param {Function} request
- * @param {Function} response
- * @param {Function} fn(req, res)
- * @returns {History}
- */
-$m['src/lib/history'].exports = function (request, response, fn) {
-  return new srclibhistory__History(request, response, fn);
-};
-
 var srclibhistory__History = function () {
   /**
    * Constructor
@@ -2711,8 +2713,7 @@ var srclibhistory__History = function () {
 
     // Abort if current request/response is not finished
     if (this.current && !this.cache[this.current].res.finished) {
-      this.cache[this.current].req.abort();
-      this.cache[this.current].res.reset();
+      this.cache[this.current].res.abort();
     }
 
     // Set scroll position to top if not bootstrap or overridden
@@ -2824,6 +2825,17 @@ function srclibhistory__sameOrigin(url) {
   if (location.port) origin += ':' + location.port;
   return url && url.indexOf(origin) == 0;
 }
+
+/**
+ * Instance factory
+ * @param {Function} request
+ * @param {Function} response
+ * @param {Function} fn(req, res)
+ * @returns {History}
+ */
+$m['src/lib/history'].exports = function (request, response, fn) {
+  return new srclibhistory__History(request, response, fn);
+};
 /*≠≠ src/lib/history.js ≠≠*/
 
 
