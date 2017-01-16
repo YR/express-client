@@ -4,7 +4,6 @@
 
 if ('undefined' === typeof self) var self = this;
 if ('undefined' === typeof global) var global = self;
-if ('undefined' === typeof process) var process = { env: {} };
 var $m = self.$m = self.$m || {};
 if ('browser' != 'browser') {
   var $req = require;
@@ -14,13 +13,14 @@ if ('browser' != 'browser') {
     return $m[id].exports;
   };
 } else {
+  if ('undefined' === typeof process) var process = {browser:true, env:{NODE_ENV:'development'}};
   self.require = self.require || function buddyRequire (id) {
     if ($m[id]) {
       if ('function' == typeof $m[id]) $m[id]();
       return $m[id].exports;
     }
 
-    if (process.env.NODE_ENV == 'development') {
+    if ('development' == 'development') {
       console.warn('module ' + id + ' not found');
     }
   };
@@ -1564,8 +1564,8 @@ $m['src/lib/layer'].exports = function (path, fn, options) {
 /*≠≠ src/lib/layer.js ≠≠*/
 
 
-/*== node_modules/debug/debug.js ==*/
-$m['debug/debug'] = { exports: {} };
+/*== node_modules/debug/src/debug.js ==*/
+$m['debug/src/debug'] = { exports: {} };
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -1574,49 +1574,51 @@ $m['debug/debug'] = { exports: {} };
  * Expose `debug()` as the module.
  */
 
-$m['debug/debug'].exports = $m['debug/debug'].exports = debugdebug__debug.debug = debugdebug__debug;
-$m['debug/debug'].exports.coerce = debugdebug__coerce;
-$m['debug/debug'].exports.disable = debugdebug__disable;
-$m['debug/debug'].exports.enable = debugdebug__enable;
-$m['debug/debug'].exports.enabled = debugdebug__enabled;
-$m['debug/debug'].exports.humanize = $m['ms'].exports;
+$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug.default = debugsrcdebug__createDebug;
+$m['debug/src/debug'].exports.coerce = debugsrcdebug__coerce;
+$m['debug/src/debug'].exports.disable = debugsrcdebug__disable;
+$m['debug/src/debug'].exports.enable = debugsrcdebug__enable;
+$m['debug/src/debug'].exports.enabled = debugsrcdebug__enabled;
+$m['debug/src/debug'].exports.humanize = $m['ms'].exports;
 
 /**
  * The currently active debug mode names, and names to skip.
  */
 
-$m['debug/debug'].exports.names = [];
-$m['debug/debug'].exports.skips = [];
+$m['debug/src/debug'].exports.names = [];
+$m['debug/src/debug'].exports.skips = [];
 
 /**
  * Map of special "%n" handling functions, for the debug "format" argument.
  *
- * Valid key names are a single, lowercased letter, i.e. "n".
+ * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
  */
 
-$m['debug/debug'].exports.formatters = {};
-
-/**
- * Previously assigned color.
- */
-
-var debugdebug__prevColor = 0;
+$m['debug/src/debug'].exports.formatters = {};
 
 /**
  * Previous log timestamp.
  */
 
-var debugdebug__prevTime;
+var debugsrcdebug__prevTime;
 
 /**
  * Select a color.
- *
+ * @param {String} namespace
  * @return {Number}
  * @api private
  */
 
-function debugdebug__selectColor() {
-  return $m['debug/debug'].exports.colors[debugdebug__prevColor++ % $m['debug/debug'].exports.colors.length];
+function debugsrcdebug__selectColor(namespace) {
+  var hash = 0,
+      i;
+
+  for (i in namespace) {
+    hash = (hash << 5) - hash + namespace.charCodeAt(i);
+    hash |= 0; // Convert to 32bit integer
+  }
+
+  return $m['debug/src/debug'].exports.colors[Math.abs(hash) % $m['debug/src/debug'].exports.colors.length];
 }
 
 /**
@@ -1627,48 +1629,42 @@ function debugdebug__selectColor() {
  * @api public
  */
 
-function debugdebug__debug(namespace) {
+function debugsrcdebug__createDebug(namespace) {
 
-  // define the `disabled` version
-  function disabled() {}
-  disabled.enabled = false;
+  function debug() {
+    // disabled?
+    if (!debug.enabled) return;
 
-  // define the `enabled` version
-  function enabled() {
-
-    var self = enabled;
+    var self = debug;
 
     // set `diff` timestamp
     var curr = +new Date();
-    var ms = curr - (debugdebug__prevTime || curr);
+    var ms = curr - (debugsrcdebug__prevTime || curr);
     self.diff = ms;
-    self.prev = debugdebug__prevTime;
+    self.prev = debugsrcdebug__prevTime;
     self.curr = curr;
-    debugdebug__prevTime = curr;
+    debugsrcdebug__prevTime = curr;
 
-    // add the `color` if not set
-    if (null == self.useColors) self.useColors = $m['debug/debug'].exports.useColors();
-    if (null == self.color && self.useColors) self.color = debugdebug__selectColor();
-
+    // turn the `arguments` into a proper Array
     var args = new Array(arguments.length);
     for (var i = 0; i < args.length; i++) {
       args[i] = arguments[i];
     }
 
-    args[0] = $m['debug/debug'].exports.coerce(args[0]);
+    args[0] = $m['debug/src/debug'].exports.coerce(args[0]);
 
     if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %o
-      args = ['%o'].concat(args);
+      // anything else let's inspect with %O
+      args.unshift('%O');
     }
 
     // apply any `formatters` transformations
     var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function (match, format) {
+    args[0] = args[0].replace(/%([a-zA-Z%])/g, function (match, format) {
       // if we encounter an escaped % then don't increase the array index
       if (match === '%%') return match;
       index++;
-      var formatter = $m['debug/debug'].exports.formatters[format];
+      var formatter = $m['debug/src/debug'].exports.formatters[format];
       if ('function' === typeof formatter) {
         var val = args[index];
         match = formatter.call(self, val);
@@ -1680,19 +1676,24 @@ function debugdebug__debug(namespace) {
       return match;
     });
 
-    // apply env-specific formatting
-    args = $m['debug/debug'].exports.formatArgs.apply(self, args);
+    // apply env-specific formatting (colors, etc.)
+    $m['debug/src/debug'].exports.formatArgs.call(self, args);
 
-    var logFn = enabled.log || $m['debug/debug'].exports.log || console.log.bind(console);
+    var logFn = debug.log || $m['debug/src/debug'].exports.log || console.log.bind(console);
     logFn.apply(self, args);
   }
-  enabled.enabled = true;
 
-  var fn = $m['debug/debug'].exports.enabled(namespace) ? enabled : disabled;
+  debug.namespace = namespace;
+  debug.enabled = $m['debug/src/debug'].exports.enabled(namespace);
+  debug.useColors = $m['debug/src/debug'].exports.useColors();
+  debug.color = debugsrcdebug__selectColor(namespace);
 
-  fn.namespace = namespace;
+  // env-specific initialization logic for debug instances
+  if ('function' === typeof $m['debug/src/debug'].exports.init) {
+    $m['debug/src/debug'].exports.init(debug);
+  }
 
-  return fn;
+  return debug;
 }
 
 /**
@@ -1703,19 +1704,19 @@ function debugdebug__debug(namespace) {
  * @api public
  */
 
-function debugdebug__enable(namespaces) {
-  $m['debug/debug'].exports.save(namespaces);
+function debugsrcdebug__enable(namespaces) {
+  $m['debug/src/debug'].exports.save(namespaces);
 
   var split = (namespaces || '').split(/[\s,]+/);
   var len = split.length;
 
   for (var i = 0; i < len; i++) {
     if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/[\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '.*?');
+    namespaces = split[i].replace(/\*/g, '.*?');
     if (namespaces[0] === '-') {
-      $m['debug/debug'].exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+      $m['debug/src/debug'].exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
     } else {
-      $m['debug/debug'].exports.names.push(new RegExp('^' + namespaces + '$'));
+      $m['debug/src/debug'].exports.names.push(new RegExp('^' + namespaces + '$'));
     }
   }
 }
@@ -1726,8 +1727,8 @@ function debugdebug__enable(namespaces) {
  * @api public
  */
 
-function debugdebug__disable() {
-  $m['debug/debug'].exports.enable('');
+function debugsrcdebug__disable() {
+  $m['debug/src/debug'].exports.enable('');
 }
 
 /**
@@ -1738,15 +1739,15 @@ function debugdebug__disable() {
  * @api public
  */
 
-function debugdebug__enabled(name) {
+function debugsrcdebug__enabled(name) {
   var i, len;
-  for (i = 0, len = $m['debug/debug'].exports.skips.length; i < len; i++) {
-    if ($m['debug/debug'].exports.skips[i].test(name)) {
+  for (i = 0, len = $m['debug/src/debug'].exports.skips.length; i < len; i++) {
+    if ($m['debug/src/debug'].exports.skips[i].test(name)) {
       return false;
     }
   }
-  for (i = 0, len = $m['debug/debug'].exports.names.length; i < len; i++) {
-    if ($m['debug/debug'].exports.names[i].test(name)) {
+  for (i = 0, len = $m['debug/src/debug'].exports.names.length; i < len; i++) {
+    if ($m['debug/src/debug'].exports.names[i].test(name)) {
       return true;
     }
   }
@@ -1761,23 +1762,22 @@ function debugdebug__enabled(name) {
  * @api private
  */
 
-function debugdebug__coerce(val) {
+function debugsrcdebug__coerce(val) {
   if (val instanceof Error) return val.stack || val.message;
   return val;
 }
-/*≠≠ node_modules/debug/debug.js ≠≠*/
+/*≠≠ node_modules/debug/src/debug.js ≠≠*/
 
 
-/*== node_modules/debug/browser.js ==*/
+/*== node_modules/debug/src/browser.js ==*/
 $m['debug'] = { exports: {} };
-
 /**
  * This is the web browser implementation of `debug()`.
  *
  * Expose `debug()` as the module.
  */
 
-$m['debug'].exports = $m['debug'].exports = $m['debug/debug'].exports;
+$m['debug'].exports = $m['debug'].exports = $m['debug/src/debug'].exports;
 $m['debug'].exports.log = debug__log;
 $m['debug'].exports.formatArgs = debug__formatArgs;
 $m['debug'].exports.save = debug__save;
@@ -1800,14 +1800,23 @@ $m['debug'].exports.colors = ['lightseagreen', 'forestgreen', 'goldenrod', 'dodg
  */
 
 function debug__useColors() {
+  // NB: In an Electron preload script, document will be defined but not fully
+  // initialized. Since we know we're in Chrome, we'll just detect this case
+  // explicitly
+  if (typeof window !== 'undefined' && window && typeof window.process !== 'undefined' && window.process.type === 'renderer') {
+    return true;
+  }
+
   // is webkit? http://stackoverflow.com/a/16459606/376773
   // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-  return typeof document !== 'undefined' && 'WebkitAppearance' in document.documentElement.style ||
+  return typeof document !== 'undefined' && document && 'WebkitAppearance' in document.documentElement.style ||
   // is firebug? http://stackoverflow.com/a/398120/376773
-  window.console && (console.firebug || console.exception && console.table) ||
+  typeof window !== 'undefined' && window && window.console && (console.firebug || console.exception && console.table) ||
   // is firefox >= v31?
   // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-  navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31;
+  typeof navigator !== 'undefined' && navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 ||
+  // double check webkit in userAgent just in case we are in a worker
+  typeof navigator !== 'undefined' && navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
 }
 
 /**
@@ -1828,23 +1837,22 @@ $m['debug'].exports.formatters.j = function (v) {
  * @api public
  */
 
-function debug__formatArgs() {
-  var args = arguments;
+function debug__formatArgs(args) {
   var useColors = this.useColors;
 
   args[0] = (useColors ? '%c' : '') + this.namespace + (useColors ? ' %c' : ' ') + args[0] + (useColors ? '%c ' : ' ') + '+' + $m['debug'].exports.humanize(this.diff);
 
-  if (!useColors) return args;
+  if (!useColors) return;
 
   var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
+  args.splice(1, 0, c, 'color: inherit');
 
   // the final "%c" is somewhat tricky, because there could be other
   // arguments passed either before or after the %c, so we need to
   // figure out the correct index to insert the CSS into
   var index = 0;
   var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function (match) {
+  args[0].replace(/%[a-zA-Z%]/g, function (match) {
     if ('%%' === match) return;
     index++;
     if ('%c' === match) {
@@ -1855,7 +1863,6 @@ function debug__formatArgs() {
   });
 
   args.splice(lastC, 0, c);
-  return args;
 }
 
 /**
@@ -1896,7 +1903,6 @@ function debug__save(namespaces) {
  */
 
 function debug__load() {
-  var r;
   try {
     return $m['debug'].exports.storage.debug;
   } catch (e) {}
@@ -1929,7 +1935,7 @@ function debug__localstorage() {
     return window.localStorage;
   } catch (e) {}
 }
-/*≠≠ node_modules/debug/browser.js ≠≠*/
+/*≠≠ node_modules/debug/src/browser.js ≠≠*/
 
 
 /*== src/lib/router.js ==*/
@@ -2354,6 +2360,73 @@ $m['query-string'] = { exports: {} };
 var querystring__strictUriEncode = $m['strict-uri-encode'].exports;
 var querystring__objectAssign = $m['object-assign'].exports;
 
+function querystring__encoderForArrayFormat(opts) {
+	switch (opts.arrayFormat) {
+		case 'index':
+			return function (key, value, index) {
+				return value === null ? [querystring__encode(key, opts), '[', index, ']'].join('') : [querystring__encode(key, opts), '[', querystring__encode(index, opts), ']=', querystring__encode(value, opts)].join('');
+			};
+
+		case 'bracket':
+			return function (key, value) {
+				return value === null ? querystring__encode(key, opts) : [querystring__encode(key, opts), '[]=', querystring__encode(value, opts)].join('');
+			};
+
+		default:
+			return function (key, value) {
+				return value === null ? querystring__encode(key, opts) : [querystring__encode(key, opts), '=', querystring__encode(value, opts)].join('');
+			};
+	}
+}
+
+function querystring__parserForArrayFormat(opts) {
+	var result;
+
+	switch (opts.arrayFormat) {
+		case 'index':
+			return function (key, value, accumulator) {
+				result = /\[(\d*)]$/.exec(key);
+
+				key = key.replace(/\[\d*]$/, '');
+
+				if (!result) {
+					accumulator[key] = value;
+					return;
+				}
+
+				if (accumulator[key] === undefined) {
+					accumulator[key] = {};
+				}
+
+				accumulator[key][result[1]] = value;
+			};
+
+		case 'bracket':
+			return function (key, value, accumulator) {
+				result = /(\[])$/.exec(key);
+
+				key = key.replace(/\[]$/, '');
+
+				if (!result || accumulator[key] === undefined) {
+					accumulator[key] = value;
+					return;
+				}
+
+				accumulator[key] = [].concat(accumulator[key], value);
+			};
+
+		default:
+			return function (key, value, accumulator) {
+				if (accumulator[key] === undefined) {
+					accumulator[key] = value;
+					return;
+				}
+
+				accumulator[key] = [].concat(accumulator[key], value);
+			};
+	}
+}
+
 function querystring__encode(value, opts) {
 	if (opts.encode) {
 		return opts.strict ? querystring__strictUriEncode(value) : encodeURIComponent(value);
@@ -2362,11 +2435,29 @@ function querystring__encode(value, opts) {
 	return value;
 }
 
+function querystring__keysSorter(input) {
+	if (Array.isArray(input)) {
+		return input.sort();
+	} else if (typeof input === 'object') {
+		return querystring__keysSorter(Object.keys(input)).sort(function (a, b) {
+			return Number(a) - Number(b);
+		}).map(function (key) {
+			return input[key];
+		});
+	}
+
+	return input;
+}
+
 $m['query-string'].exports.extract = function (str) {
 	return str.split('?')[1] || '';
 };
 
-$m['query-string'].exports.parse = function (str) {
+$m['query-string'].exports.parse = function (str, opts) {
+	opts = querystring__objectAssign({ arrayFormat: 'none' }, opts);
+
+	var formatter = querystring__parserForArrayFormat(opts);
+
 	// Create an object with no prototype
 	// https://github.com/sindresorhus/query-string/issues/47
 	var ret = Object.create(null);
@@ -2388,31 +2479,36 @@ $m['query-string'].exports.parse = function (str) {
 		var key = parts.shift();
 		var val = parts.length > 0 ? parts.join('=') : undefined;
 
-		key = decodeURIComponent(key);
-
 		// missing `=` should be `null`:
 		// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
 		val = val === undefined ? null : decodeURIComponent(val);
 
-		if (ret[key] === undefined) {
-			ret[key] = val;
-		} else if (Array.isArray(ret[key])) {
-			ret[key].push(val);
-		} else {
-			ret[key] = [ret[key], val];
-		}
+		formatter(decodeURIComponent(key), val, ret);
 	});
 
-	return ret;
+	return Object.keys(ret).sort().reduce(function (result, key) {
+		var val = ret[key];
+		if (Boolean(val) && typeof val === 'object' && !Array.isArray(val)) {
+			// Sort object keys, not values
+			result[key] = querystring__keysSorter(val);
+		} else {
+			result[key] = val;
+		}
+
+		return result;
+	}, Object.create(null));
 };
 
 $m['query-string'].exports.stringify = function (obj, opts) {
 	var defaults = {
 		encode: true,
-		strict: true
+		strict: true,
+		arrayFormat: 'none'
 	};
 
 	opts = querystring__objectAssign(defaults, opts);
+
+	var formatter = querystring__encoderForArrayFormat(opts);
 
 	return obj ? Object.keys(obj).sort().map(function (key) {
 		var val = obj[key];
@@ -2433,11 +2529,7 @@ $m['query-string'].exports.stringify = function (obj, opts) {
 					return;
 				}
 
-				if (val2 === null) {
-					result.push(querystring__encode(key, opts));
-				} else {
-					result.push(querystring__encode(key, opts) + '=' + querystring__encode(val2, opts));
-				}
+				result.push(formatter(key, val2, result.length));
 			});
 
 			return result.join('&');
@@ -2872,7 +2964,7 @@ var srclibapplication__Application = function (_srclibapplication__E) {
     var _this = babelHelpers.possibleConstructorReturn(this, _srclibapplication__E.call(this));
 
     _this.settings = {
-      env: process.env.NODE_ENV || 'development'
+      env: 'development' || 'development'
     };
     _this.cache = {};
     _this.locals = {};

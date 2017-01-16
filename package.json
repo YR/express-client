@@ -6,11 +6,11 @@
   "dependencies": {
     "@yr/url-utils": "2.3.x",
     "cookie": "0.3.x",
-    "debug": "2.3.x",
+    "debug": "2.x.x",
     "eventemitter3": "2.0.x",
     "object-assign": "4.1.x",
     "path-to-regexp": "1.7.x",
-    "query-string": "4.2.x"
+    "query-string": "4.3.x"
   },
   "devDependencies": {
     "babel-plugin-syntax-trailing-function-commas": "6.20.0",
@@ -51,7 +51,7 @@
   "buddy": {
     "build": [
       {
-        "input": "src",
+        "input": "src/",
         "output": ".",
         "bundle": false,
         "version": "es5"
