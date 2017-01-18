@@ -2276,7 +2276,7 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
   srclibresponse__Response.prototype.end = function end() {
     // Reset state
-    this.req.reset();
+    this.req && this.req.reset();
     this.status(200);
     this.finished = true;
     this.emit('finish');

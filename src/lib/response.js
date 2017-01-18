@@ -52,7 +52,7 @@ class Response extends Emitter {
    */
   end () {
     // Reset state
-    this.req.reset();
+    this.req && this.req.reset();
     this.status(200);
     this.finished = true;
     this.emit('finish');
