@@ -2220,8 +2220,9 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
   /**
    * Constructor
+   * @param {Request} req
    */
-  function srclibresponse__Response() {
+  function srclibresponse__Response(req) {
     babelHelpers.classCallCheck(this, srclibresponse__Response);
 
     var _this = babelHelpers.possibleConstructorReturn(this, _srclibresponse__Emit.call(this));
@@ -2230,7 +2231,7 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     _this.cached = false;
     _this.finished = false;
     _this.locals = {};
-    _this.req = null;
+    _this.req = req;
     _this.statusCode = 404;
     return _this;
   }
@@ -2295,7 +2296,7 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
 
   srclibresponse__Response.prototype.abort = function abort() {
-    this.req.abort();
+    this.req && this.req.abort();
     this.reset();
     this.emit('close');
   };
@@ -2804,7 +2805,7 @@ var srclibhistory__History = function () {
       srclibhistory__debug('context retrieved from cache: %s', url);
     } else {
       req = this.request(url, srclibhistory__bootstrap);
-      res = this.response();
+      res = this.response(req);
       srclibhistory__debug('generating new context: %s', url);
     }
     res.req = req;

@@ -7,15 +7,16 @@ const Emitter = require('eventemitter3');
 class Response extends Emitter {
   /**
    * Constructor
+   * @param {Request} req
    */
-  constructor () {
+  constructor (req) {
     super();
 
     this.app = null;
     this.cached = false;
     this.finished = false;
     this.locals = {};
-    this.req = null;
+    this.req = req;
     this.statusCode = 404;
   }
 
@@ -67,7 +68,7 @@ class Response extends Emitter {
    * Abort response
    */
   abort () {
-    this.req.abort();
+    this.req && this.req.abort();
     this.reset();
     this.emit('close');
   }

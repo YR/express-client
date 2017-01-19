@@ -154,7 +154,7 @@ class History {
       debug('context retrieved from cache: %s', url);
     } else {
       req = this.request(url, bootstrap);
-      res = this.response();
+      res = this.response(req);
       debug('generating new context: %s', url);
     }
     res.req = req;
