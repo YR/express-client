@@ -100,6 +100,7 @@ class History {
     // Undo pipeline modifications
     ctx.req.reset();
     ctx.res.reset();
+    ctx.req.refreshed = true;
     this.fn(ctx.req, ctx.res);
   }
 
@@ -151,6 +152,7 @@ class History {
       res.reset();
       // Set flag for use downstream
       req.cached = res.cached = true;
+      req.refreshed = false;
       debug('context retrieved from cache: %s', url);
     } else {
       req = this.request(url, bootstrap);
@@ -195,6 +197,7 @@ class History {
 
   /**
    * Handle click event
+   * from https://github.com/visionmedia/page.js/
    * @param {Object} evt
    * @returns {null}
    */

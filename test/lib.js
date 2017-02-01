@@ -2244,16 +2244,31 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
   }
 
   /**
-   * Reset state
+   * Set cookie
+   * @param {String} name
+   * @param {String|Object} val
+   * @param {Object} options
+   * @returns {Response}
    */
 
 
-  srclibresponse__Response.prototype.reset = function reset() {
-    this.cached = false;
-    this.finished = false;
-    this.locals = {};
-    this.req = null;
-    this.statusCode = 404;
+  srclibresponse__Response.prototype.cookie = function cookie(name, val, options) {
+    // Clone
+    options = srclibresponse__assign({}, options);
+
+    if ('number' == typeof val) val = val.toString();
+    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
+
+    if ('maxAge' in options) {
+      options.expires = new Date(Date.now() + options.maxAge);
+      options.maxAge /= 1000;
+    }
+
+    if (options.path == null) options.path = '/';
+
+    document.cookie = srclibresponse__cookieLib.serialize(name, String(val), options);
+
+    return this;
   };
 
   /**
@@ -2298,17 +2313,6 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
   srclibresponse__Response.prototype.write = function write() {};
 
   /**
-   * Abort response
-   */
-
-
-  srclibresponse__Response.prototype.abort = function abort() {
-    this.req && this.req.abort();
-    this.reset();
-    this.emit('close');
-  };
-
-  /**
    * Redirect to 'url'
    * @param {Number} statusCode
    * @param {String} url
@@ -2320,31 +2324,27 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
   };
 
   /**
-   * Set cookie
-   * @param {String} name
-   * @param {String|Object} val
-   * @param {Object} options
-   * @returns {Response}
+   * Reset state
    */
 
 
-  srclibresponse__Response.prototype.cookie = function cookie(name, val, options) {
-    // Clone
-    options = srclibresponse__assign({}, options);
+  srclibresponse__Response.prototype.reset = function reset() {
+    this.cached = false;
+    this.finished = false;
+    this.locals = {};
+    this.req = null;
+    this.statusCode = 404;
+  };
 
-    if ('number' == typeof val) val = val.toString();
-    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
+  /**
+   * Abort response
+   */
 
-    if ('maxAge' in options) {
-      options.expires = new Date(Date.now() + options.maxAge);
-      options.maxAge /= 1000;
-    }
 
-    if (options.path == null) options.path = '/';
-
-    document.cookie = srclibresponse__cookieLib.serialize(name, String(val), options);
-
-    return this;
+  srclibresponse__Response.prototype.abort = function abort() {
+    this.req && this.req.abort();
+    this.reset();
+    this.emit('close');
   };
 
   return srclibresponse__Response;
@@ -2590,6 +2590,7 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
     _this.path = srclibrequest__urlUtils.sanitize(path[0]);
     _this.query = srclibrequest__qsParse(qs);
     _this.querystring = qs;
+    _this.refreshed = false;
     _this.search = qs ? '?' + qs : '';
     // Ignore hash
     _this.url = _this.originalUrl = url.split('#')[0];
@@ -2618,6 +2619,7 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
     this.cached = false;
     this.path = srclibrequest__urlUtils.sanitize(this.originalUrl.split('?')[0]);
     this.params = null;
+    this.refreshed = false;
   };
 
   return srclibrequest__Request;
@@ -2753,6 +2755,7 @@ var srclibhistory__History = function () {
     // Undo pipeline modifications
     ctx.req.reset();
     ctx.res.reset();
+    ctx.req.refreshed = true;
     this.fn(ctx.req, ctx.res);
   };
 
@@ -2809,6 +2812,7 @@ var srclibhistory__History = function () {
       res.reset();
       // Set flag for use downstream
       req.cached = res.cached = true;
+      req.refreshed = false;
       srclibhistory__debug('context retrieved from cache: %s', url);
     } else {
       req = this.request(url, srclibhistory__bootstrap);
@@ -2855,6 +2859,7 @@ var srclibhistory__History = function () {
 
   /**
    * Handle click event
+   * from https://github.com/visionmedia/page.js/
    * @param {Object} evt
    * @returns {null}
    */

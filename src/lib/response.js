@@ -21,14 +21,29 @@ class Response extends Emitter {
   }
 
   /**
-   * Reset state
+   * Set cookie
+   * @param {String} name
+   * @param {String|Object} val
+   * @param {Object} options
+   * @returns {Response}
    */
-  reset () {
-    this.cached = false;
-    this.finished = false;
-    this.locals = {};
-    this.req = null;
-    this.statusCode = 404;
+  cookie (name, val, options) {
+    // Clone
+    options = assign({}, options);
+
+    if ('number' == typeof val) val = val.toString();
+    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
+
+    if ('maxAge' in options) {
+      options.expires = new Date(Date.now() + options.maxAge);
+      options.maxAge /= 1000;
+    }
+
+    if (options.path == null) options.path = '/';
+
+    document.cookie = cookieLib.serialize(name, String(val), options);
+
+    return this;
   }
 
   /**
@@ -65,15 +80,6 @@ class Response extends Emitter {
   write () { }
 
   /**
-   * Abort response
-   */
-  abort () {
-    this.req && this.req.abort();
-    this.reset();
-    this.emit('close');
-  }
-
-  /**
    * Redirect to 'url'
    * @param {Number} statusCode
    * @param {String} url
@@ -83,29 +89,23 @@ class Response extends Emitter {
   }
 
   /**
-   * Set cookie
-   * @param {String} name
-   * @param {String|Object} val
-   * @param {Object} options
-   * @returns {Response}
+   * Reset state
    */
-  cookie (name, val, options) {
-    // Clone
-    options = assign({}, options);
+  reset () {
+    this.cached = false;
+    this.finished = false;
+    this.locals = {};
+    this.req = null;
+    this.statusCode = 404;
+  }
 
-    if ('number' == typeof val) val = val.toString();
-    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
-
-    if ('maxAge' in options) {
-      options.expires = new Date(Date.now() + options.maxAge);
-      options.maxAge /= 1000;
-    }
-
-    if (options.path == null) options.path = '/';
-
-    document.cookie = cookieLib.serialize(name, String(val), options);
-
-    return this;
+  /**
+   * Abort response
+   */
+  abort () {
+    this.req && this.req.abort();
+    this.reset();
+    this.emit('close');
   }
 }
 

@@ -34,6 +34,7 @@ class Request extends Emitter {
     this.path = urlUtils.sanitize(path[0]);
     this.query = qsParse(qs);
     this.querystring = qs;
+    this.refreshed = false;
     this.search = qs ? `?${qs}` : '';
     // Ignore hash
     this.url = this.originalUrl = url.split('#')[0];
@@ -57,6 +58,7 @@ class Request extends Emitter {
     this.cached = false;
     this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
     this.params = null;
+    this.refreshed = false;
   }
 }
 
