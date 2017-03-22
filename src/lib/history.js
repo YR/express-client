@@ -1,9 +1,9 @@
 'use strict';
 
-const Debug = require('debug');
+const debugFactory = require('debug');
 const urlUtils = require('@yr/url-utils');
 
-const debug = Debug('express:history');
+const debug = debugFactory('express:history');
 let bootstrap = true;
 
 class History {
@@ -13,7 +13,7 @@ class History {
    * @param {Function} response
    * @param {Function} fn(req, res)
    */
-  constructor (request, response, fn) {
+  constructor(request, response, fn) {
     this.cache = {};
     this.current = '';
     this.running = false;
@@ -32,7 +32,7 @@ class History {
    * and begin listening for history changes
    * @returns {History}
    */
-  listen () {
+  listen() {
     // Handle current history state (triggers notification)
     const ctx = this.handle();
 
@@ -40,11 +40,14 @@ class History {
       // Test History API availability
       if (hasHistory()) {
         // Delay to prevent premature trigger when navigating back from nothing
-        setTimeout(() => {
-          window.addEventListener('click', this.onClick, false);
-          window.addEventListener('popstate', this.onPopstate, false);
-          this.running = true;
-        }, 500);
+        setTimeout(
+          () => {
+            window.addEventListener('click', this.onClick, false);
+            window.addEventListener('popstate', this.onPopstate, false);
+            this.running = true;
+          },
+          500
+        );
 
         // Update so that popstate will trigger for this route
         window.history.replaceState({}, document.title);
@@ -63,18 +66,22 @@ class History {
    * @param {Boolean} isUpdate
    * @param {Boolean} noScroll
    */
-  navigateTo (url, title, isUpdate, noScroll) {
+  navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
-    if (url != urlUtils.getCurrent()) {
+    if (url !== urlUtils.getCurrent()) {
       if (this.running) {
         // Will return empty if malformed
         url = urlUtils.encode(url);
-        if (!url) return;
+        if (!url) {
+          return;
+        }
 
         debug('navigate to: %s', url);
 
         window.history[isUpdate ? 'replaceState' : 'pushState']({}, title, url);
-        if (title) document.title = title;
+        if (title) {
+          document.title = title;
+        }
         this.handle(url, noScroll);
       } else {
         this.redirectTo(url);
@@ -86,7 +93,7 @@ class History {
    * Stop history management by redirecting to 'url'
    * @param {String} url
    */
-  redirectTo (url) {
+  redirectTo(url) {
     this.destroy();
     window.location = urlUtils.encode(url);
   }
@@ -94,13 +101,13 @@ class History {
   /**
    * Force a re-handle of current context
    */
-  refresh () {
-    let ctx = this.getCurrentContext();
+  reload() {
+    const ctx = this.getCurrentContext();
 
     // Undo pipeline modifications
     ctx.req.reset();
     ctx.res.reset();
-    ctx.req.refreshed = true;
+    ctx.req.reloaded = true;
     this.fn(ctx.req, ctx.res);
   }
 
@@ -108,14 +115,14 @@ class History {
    * Retrieve current context
    * @returns {Object}
    */
-  getCurrentContext () {
+  getCurrentContext() {
     return this.cache[this.current];
   }
 
   /**
    * Stop listening for history updates
    */
-  destroy () {
+  destroy() {
     if (this.running) {
       window.removeEventListener('click', this.onClick, false);
       window.removeEventListener('popstate', this.onPopstate, false);
@@ -130,18 +137,20 @@ class History {
    * @param {Boolean} [noScroll]
    * @returns {Object}
    */
-  handle (url, noScroll) {
+  handle(url, noScroll) {
     let ctx = {};
     let req, res;
 
-    url = url
-      ? urlUtils.encode(url)
-      : urlUtils.getCurrent();
+    url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
     // Error encoding url
-    if (!url) return this.redirectTo(url);
+    if (!url) {
+      return this.redirectTo(url);
+    }
 
     // Do nothing if current url is the same
-    if (this.current && this.current === url) return;
+    if (this.current && this.current === url) {
+      return this.cache[this.current];
+    }
 
     if (this.cache[url]) {
       ctx = this.cache[url];
@@ -151,7 +160,7 @@ class History {
       req.reset();
       res.reset();
       // Set flag for use downstream
-      req.cached = res.cached = true;
+      req.cached = (res.cached = true);
       req.refreshed = false;
       debug('context retrieved from cache: %s', url);
     } else {
@@ -170,7 +179,9 @@ class History {
     }
 
     // Set scroll position to top if not bootstrap or overridden
-    if (!bootstrap && !noScroll) window.scrollTo(0, 0);
+    if (!bootstrap && !noScroll) {
+      window.scrollTo(0, 0);
+    }
 
     this.fn(req, res);
 
@@ -188,7 +199,7 @@ class History {
    * Handle history change via 'popstate' event
    * @param {Object} evt
    */
-  onPopstate (evt) {
+  onPopstate(evt) {
     // Prevent initial page load from triggering on some platforms when no state
     if (evt.state && this.running) {
       this.handle();
@@ -201,38 +212,46 @@ class History {
    * @param {Object} evt
    * @returns {null}
    */
-  onClick (evt) {
-    const which = (null == evt.which) ? evt.button : evt.which;
+  onClick(evt) {
+    const which = evt.which == null ? evt.button : evt.which;
     let el = evt.target;
 
     // Modifiers present
-    if (which != 1) return;
-    if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
-    if (evt.defaultPrevented) return;
+    if (which !== 1 || evt.metaKey || evt.ctrlKey || evt.shiftKey || evt.defaultPrevented) {
+      return;
+    }
 
     // Find anchor
     // svg elements on some platforms don't have nodeNames
-    while (el && (el.nodeName == null || 'A' != el.nodeName.toUpperCase())) {
+    while (el && (el.nodeName == null || el.nodeName.toUpperCase() !== 'A')) {
       el = el.parentNode;
     }
 
     // Anchor not found
-    if (!el || 'A' != el.nodeName.toUpperCase()) return;
+    if (!el || el.nodeName.toUpperCase() !== 'A') {
+      return;
+    }
 
     // Cross origin
-    if (!sameOrigin(el.href)) return this.fn(el.href);
+    if (!sameOrigin(el.href)) {
+      return void this.fn(el.href);
+    }
 
     // IE11 prefixes extra slash on absolute links
     const path = (el.pathname + el.search).replace(/\/\//, '/');
-    const isSameAsCurrent = (path == urlUtils.getCurrent());
+    const isSameAsCurrent = path === urlUtils.getCurrent();
 
     // Anchor target on same page
-    if (isSameAsCurrent && 'string' == typeof el.hash && el.hash) return;
+    if (isSameAsCurrent && typeof el.hash === 'string' && el.hash) {
+      return;
+    }
 
     evt.preventDefault();
 
     // Same as current
-    if (isSameAsCurrent) return;
+    if (isSameAsCurrent) {
+      return;
+    }
 
     // Blur focus
     el.blur();
@@ -246,21 +265,22 @@ class History {
  * Test for history API (Modernizr)
  * @returns {Boolean}
  */
-function hasHistory () {
+function hasHistory() {
   const ua = navigator.userAgent;
 
   // Stock android browser 2.2 & 2.3 & 4.0.x are buggy, ignore
-  if ((ua.indexOf('Android 2.') !== -1
-    || (ua.indexOf('Android 4.0') !== -1))
+  if (
+    (ua.indexOf('Android 2.') !== -1 || ua.indexOf('Android 4.0') !== -1) &&
     // Chrome identifies itself as 'Mobile Safari'
-    && ua.indexOf('Mobile Safari') !== -1
-    && ua.indexOf('Chrome') === -1
-    && ua.indexOf('Windows Phone') === -1) {
-      return false;
+    ua.indexOf('Mobile Safari') !== -1 &&
+    ua.indexOf('Chrome') === -1 &&
+    ua.indexOf('Windows Phone') === -1
+  ) {
+    return false;
   }
 
   // Usual test
-  return (window.history && 'pushState' in window.history);
+  return window.history && 'pushState' in window.history;
 }
 
 /**
@@ -268,11 +288,13 @@ function hasHistory () {
  * @param {String} url
  * @returns {Boolean}
  */
-function sameOrigin (url) {
-  let origin = location.protocol + '//' + location.hostname;
+function sameOrigin(url) {
+  let origin = `${location.protocol}//${location.hostname}`;
 
-  if (location.port) origin += ':' + location.port;
-  return (url && (url.indexOf(origin) == 0));
+  if (location.port) {
+    origin += `:${location.port}`;
+  }
+  return url && url.indexOf(origin) === 0;
 }
 
 /**
@@ -282,6 +304,6 @@ function sameOrigin (url) {
  * @param {Function} fn(req, res)
  * @returns {History}
  */
-module.exports = function (request, response, fn) {
+module.exports = function(request, response, fn) {
   return new History(request, response, fn);
 };

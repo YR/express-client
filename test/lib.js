@@ -835,12 +835,12 @@ $m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : 
 /*≠≠ node_modules/object-assign/index.js ≠≠*/
 
 
-/*== node_modules/isarray/index.js ==*/
+/*== node_modules/path-to-regexp/node_modules/isarray/index.js ==*/
 $m['isarray'] = { exports: {} };
 $m['isarray'].exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
-/*≠≠ node_modules/isarray/index.js ≠≠*/
+/*≠≠ node_modules/path-to-regexp/node_modules/isarray/index.js ≠≠*/
 
 
 /*== node_modules/@yr/url-utils/index.js ==*/
@@ -1465,7 +1465,7 @@ var srcliblayer__Layer = function () {
     this.params = null;
     this.fn = fn;
     this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
-    this.fastmatch = path == '/' && !options.end;
+    this.fastmatch = path === '/' && !options.end;
     this.regexp = srcliblayer__matcher(path, this.keys, options);
   }
 
@@ -1518,18 +1518,20 @@ var srcliblayer__Layer = function () {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @returns {null}
+   * @returns {void}
    */
 
 
   srcliblayer__Layer.prototype.handleError = function handleError(err, req, res, next) {
     // Only call if it handles errors
-    if (this.fn.length !== 4) return next(err);
+    if (this.fn.length !== 4) {
+      return void next(err);
+    }
 
     try {
       this.fn(err, req, res, next);
-    } catch (err) {
-      next(err);
+    } catch (error) {
+      return void next(error);
     }
   };
 
@@ -1538,18 +1540,20 @@ var srcliblayer__Layer = function () {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @returns {null}
+   * @returns {void}
    */
 
 
   srcliblayer__Layer.prototype.handleRequest = function handleRequest(req, res, next) {
     // Skip if error handler
-    if (this.fn.length > 3) return next();
+    if (this.fn.length > 3) {
+      return void next();
+    }
 
     try {
       this.fn(req, res, next);
-    } catch (err) {
-      next(err);
+    } catch (error) {
+      return void next(error);
     }
   };
 
@@ -1581,7 +1585,7 @@ $m['debug/src/debug'] = { exports: {} };
  * Expose `debug()` as the module.
  */
 
-$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug.default = debugsrcdebug__createDebug;
+$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug['default'] = debugsrcdebug__createDebug;
 $m['debug/src/debug'].exports.coerce = debugsrcdebug__coerce;
 $m['debug/src/debug'].exports.disable = debugsrcdebug__disable;
 $m['debug/src/debug'].exports.enable = debugsrcdebug__enable;
@@ -1713,6 +1717,9 @@ function debugsrcdebug__createDebug(namespace) {
 
 function debugsrcdebug__enable(namespaces) {
   $m['debug/src/debug'].exports.save(namespaces);
+
+  $m['debug/src/debug'].exports.names = [];
+  $m['debug/src/debug'].exports.skips = [];
 
   var split = (namespaces || '').split(/[\s,]+/);
   var len = split.length;
@@ -1910,14 +1917,17 @@ function debug__save(namespaces) {
  */
 
 function debug__load() {
+  var r;
   try {
-    return $m['debug'].exports.storage.debug;
+    r = $m['debug'].exports.storage.debug;
   } catch (e) {}
 
   // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (typeof process !== 'undefined' && 'env' in process) {
-    return process.env.DEBUG;
+  if (!r && typeof process !== 'undefined' && 'env' in process) {
+    r = process.env.DEBUG;
   }
+
+  return r;
 }
 
 /**
@@ -2256,15 +2266,23 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
     // Clone
     options = srclibresponse__assign({}, options);
 
-    if ('number' == typeof val) val = val.toString();
-    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
+    var type = typeof val;
+
+    if (type === 'number') {
+      val = val.toString();
+    }
+    if (type === 'object') {
+      val = 'j:' + JSON.stringify(val);
+    }
 
     if ('maxAge' in options) {
       options.expires = new Date(Date.now() + options.maxAge);
       options.maxAge /= 1000;
     }
 
-    if (options.path == null) options.path = '/';
+    if (options.path == null) {
+      options.path = '/';
+    }
 
     document.cookie = srclibresponse__cookieLib.serialize(name, String(val), options);
 
@@ -2393,9 +2411,9 @@ function querystring__parserForArrayFormat(opts) {
 	switch (opts.arrayFormat) {
 		case 'index':
 			return function (key, value, accumulator) {
-				result = /\[(\d*)]$/.exec(key);
+				result = /\[(\d*)\]$/.exec(key);
 
-				key = key.replace(/\[\d*]$/, '');
+				key = key.replace(/\[\d*\]$/, '');
 
 				if (!result) {
 					accumulator[key] = value;
@@ -2411,9 +2429,9 @@ function querystring__parserForArrayFormat(opts) {
 
 		case 'bracket':
 			return function (key, value, accumulator) {
-				result = /(\[])$/.exec(key);
+				result = /(\[\])$/.exec(key);
 
-				key = key.replace(/\[]$/, '');
+				key = key.replace(/\[\]$/, '');
 
 				if (!result || accumulator[key] === undefined) {
 					accumulator[key] = value;
@@ -2590,7 +2608,7 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
     _this.path = srclibrequest__urlUtils.sanitize(path[0]);
     _this.query = srclibrequest__qsParse(qs);
     _this.querystring = qs;
-    _this.refreshed = false;
+    _this.reloaded = false;
     _this.search = qs ? '?' + qs : '';
     // Ignore hash
     _this.url = _this.originalUrl = url.split('#')[0];
@@ -2619,7 +2637,7 @@ var srclibrequest__Request = function (_srclibrequest__Emitt) {
     this.cached = false;
     this.path = srclibrequest__urlUtils.sanitize(this.originalUrl.split('?')[0]);
     this.params = null;
-    this.refreshed = false;
+    this.reloaded = false;
   };
 
   return srclibrequest__Request;
@@ -2643,10 +2661,10 @@ $m['src/lib/request'].exports.Request = srclibrequest__Request;
 /*== src/lib/history.js ==*/
 $m['src/lib/history'] = { exports: {} };
 
-var srclibhistory__Debug = $m['debug'].exports;
+var srclibhistory__debugFactory = $m['debug'].exports;
 var srclibhistory__urlUtils = $m['@yr/url-utils'].exports;
 
-var srclibhistory__debug = srclibhistory__Debug('express:history');
+var srclibhistory__debug = srclibhistory__debugFactory('express:history');
 var srclibhistory__bootstrap = true;
 
 var srclibhistory__History = function () {
@@ -2716,16 +2734,20 @@ var srclibhistory__History = function () {
 
   srclibhistory__History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
-    if (url != srclibhistory__urlUtils.getCurrent()) {
+    if (url !== srclibhistory__urlUtils.getCurrent()) {
       if (this.running) {
         // Will return empty if malformed
         url = srclibhistory__urlUtils.encode(url);
-        if (!url) return;
+        if (!url) {
+          return;
+        }
 
         srclibhistory__debug('navigate to: %s', url);
 
         window.history[isUpdate ? 'replaceState' : 'pushState']({}, title, url);
-        if (title) document.title = title;
+        if (title) {
+          document.title = title;
+        }
         this.handle(url, noScroll);
       } else {
         this.redirectTo(url);
@@ -2749,13 +2771,13 @@ var srclibhistory__History = function () {
    */
 
 
-  srclibhistory__History.prototype.refresh = function refresh() {
+  srclibhistory__History.prototype.reload = function reload() {
     var ctx = this.getCurrentContext();
 
     // Undo pipeline modifications
     ctx.req.reset();
     ctx.res.reset();
-    ctx.req.refreshed = true;
+    ctx.req.reloaded = true;
     this.fn(ctx.req, ctx.res);
   };
 
@@ -2798,10 +2820,14 @@ var srclibhistory__History = function () {
 
     url = url ? srclibhistory__urlUtils.encode(url) : srclibhistory__urlUtils.getCurrent();
     // Error encoding url
-    if (!url) return this.redirectTo(url);
+    if (!url) {
+      return this.redirectTo(url);
+    }
 
     // Do nothing if current url is the same
-    if (this.current && this.current === url) return;
+    if (this.current && this.current === url) {
+      return this.cache[this.current];
+    }
 
     if (this.cache[url]) {
       ctx = this.cache[url];
@@ -2830,7 +2856,9 @@ var srclibhistory__History = function () {
     }
 
     // Set scroll position to top if not bootstrap or overridden
-    if (!srclibhistory__bootstrap && !noScroll) window.scrollTo(0, 0);
+    if (!srclibhistory__bootstrap && !noScroll) {
+      window.scrollTo(0, 0);
+    }
 
     this.fn(req, res);
 
@@ -2866,37 +2894,45 @@ var srclibhistory__History = function () {
 
 
   srclibhistory__History.prototype.onClick = function onClick(evt) {
-    var which = null == evt.which ? evt.button : evt.which;
+    var which = evt.which == null ? evt.button : evt.which;
     var el = evt.target;
 
     // Modifiers present
-    if (which != 1) return;
-    if (evt.metaKey || evt.ctrlKey || evt.shiftKey) return;
-    if (evt.defaultPrevented) return;
+    if (which !== 1 || evt.metaKey || evt.ctrlKey || evt.shiftKey || evt.defaultPrevented) {
+      return;
+    }
 
     // Find anchor
     // svg elements on some platforms don't have nodeNames
-    while (el && (el.nodeName == null || 'A' != el.nodeName.toUpperCase())) {
+    while (el && (el.nodeName == null || el.nodeName.toUpperCase() !== 'A')) {
       el = el.parentNode;
     }
 
     // Anchor not found
-    if (!el || 'A' != el.nodeName.toUpperCase()) return;
+    if (!el || el.nodeName.toUpperCase() !== 'A') {
+      return;
+    }
 
     // Cross origin
-    if (!srclibhistory__sameOrigin(el.href)) return this.fn(el.href);
+    if (!srclibhistory__sameOrigin(el.href)) {
+      return void this.fn(el.href);
+    }
 
     // IE11 prefixes extra slash on absolute links
     var path = (el.pathname + el.search).replace(/\/\//, '/');
-    var isSameAsCurrent = path == srclibhistory__urlUtils.getCurrent();
+    var isSameAsCurrent = path === srclibhistory__urlUtils.getCurrent();
 
     // Anchor target on same page
-    if (isSameAsCurrent && 'string' == typeof el.hash && el.hash) return;
+    if (isSameAsCurrent && typeof el.hash === 'string' && el.hash) {
+      return;
+    }
 
     evt.preventDefault();
 
     // Same as current
-    if (isSameAsCurrent) return;
+    if (isSameAsCurrent) {
+      return;
+    }
 
     // Blur focus
     el.blur();
@@ -2936,8 +2972,10 @@ function srclibhistory__hasHistory() {
 function srclibhistory__sameOrigin(url) {
   var origin = location.protocol + '//' + location.hostname;
 
-  if (location.port) origin += ':' + location.port;
-  return url && url.indexOf(origin) == 0;
+  if (location.port) {
+    origin += ':' + location.port;
+  }
+  return url && url.indexOf(origin) === 0;
 }
 
 /**
@@ -2956,14 +2994,14 @@ $m['src/lib/history'].exports = function (request, response, fn) {
 /*== src/lib/application.js ==*/
 $m['src/lib/application'] = { exports: {} };
 
-var srclibapplication__Debug = $m['debug'].exports;
+var srclibapplication__debugFactory = $m['debug'].exports;
 var srclibapplication__Emitter = $m['eventemitter3'].exports;
 var srclibapplication__history = $m['src/lib/history'].exports;
 var srclibapplication__request = $m['src/lib/request'].exports;
 var srclibapplication__response = $m['src/lib/response'].exports;
 var srclibapplication__router = $m['src/lib/router'].exports;
 
-var srclibapplication__debug = srclibapplication__Debug('express:application');
+var srclibapplication__debug = srclibapplication__debugFactory('express:application');
 
 var srclibapplication__Application = function (_srclibapplication__E) {
   babelHelpers.inherits(srclibapplication__Application, _srclibapplication__E);
@@ -2993,7 +3031,7 @@ var srclibapplication__Application = function (_srclibapplication__E) {
     _this.navigateTo = _this.navigateTo.bind(_this);
     _this.redirectTo = _this.redirectTo.bind(_this);
     _this.getCurrentContext = _this.getCurrentContext.bind(_this);
-    _this.refresh = _this.refresh.bind(_this);
+    _this.reload = _this.reload.bind(_this);
 
     // Create request/response factories
     var app = _this;
@@ -3021,14 +3059,16 @@ var srclibapplication__Application = function (_srclibapplication__E) {
   /**
    * Store 'value' for 'key'
    * @param {String} key
-   * @param {Object} value
-   * @returns {Object}
+   * @param {Object} [value]
+   * @returns {*}
    */
 
 
   srclibapplication__Application.prototype.set = function set(key, value) {
     // get()
-    if (arguments.length == 1) return this.settings[key];
+    if (arguments.length === 1) {
+      return this.settings[key];
+    }
 
     this.settings[key] = value;
   };
@@ -3048,31 +3088,29 @@ var srclibapplication__Application = function (_srclibapplication__E) {
       fns[_key] = arguments[_key];
     }
 
-    if ('string' == typeof fns[0]) {
+    if (typeof fns[0] === 'string') {
       offset = 1;
       path = fns[0];
     }
 
     fns.slice(offset).forEach(function (fn) {
       if (fn instanceof srclibapplication__Application) {
-        (function () {
-          var app = fn;
-          var handler = app.handle;
+        var app = fn;
+        var handler = app.handle;
 
-          app.mountpath = path;
-          app.parent = _this2;
-          fn = function mounted_app(req, res, next) {
-            // Change app reference to mounted
-            var orig = req.app;
+        app.mountpath = path;
+        app.parent = _this2;
+        fn = function mounted_app(req, res, next) {
+          // Change app reference to mounted
+          var orig = req.app;
 
-            req.app = res.app = app;
-            handler(req, res, function (err) {
-              // Restore app reference when done
-              req.app = res.app = orig;
-              next(err);
-            });
-          };
-        })();
+          req.app = res.app = app;
+          handler(req, res, function (err) {
+            // Restore app reference when done
+            req.app = res.app = orig;
+            next(err);
+          });
+        };
       }
 
       srclibapplication__debug('adding application middleware layer with path %s', path);
@@ -3095,7 +3133,9 @@ var srclibapplication__Application = function (_srclibapplication__E) {
     }
 
     // Not verb, only get/set
-    if (!args.length) return this.set(path);
+    if (!args.length) {
+      return this.set(path);
+    }
 
     (_router = this._router).get.apply(_router, [path].concat(args));
 
@@ -3119,7 +3159,9 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
 
   srclibapplication__Application.prototype.listen = function listen() {
-    if (!this.parent) this.history.listen();
+    if (!this.parent) {
+      this.history.listen();
+    }
   };
 
   /**
@@ -3132,7 +3174,7 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
   srclibapplication__Application.prototype.handle = function handle(req, res, done) {
     // Handle external link
-    if ('string' == typeof req) {
+    if (typeof req === 'string') {
       this.emit('link:external', req);
     } else {
       this.emit('connect', req);
@@ -3175,12 +3217,12 @@ var srclibapplication__Application = function (_srclibapplication__E) {
   };
 
   /**
-   * Refresh current location
+   * Reload current location
    */
 
 
-  srclibapplication__Application.prototype.refresh = function refresh() {
-    this[this.parent ? 'parent' : 'history'].refresh();
+  srclibapplication__Application.prototype.reload = function reload() {
+    this[this.parent ? 'parent' : 'history'].reload();
   };
 
   return srclibapplication__Application;

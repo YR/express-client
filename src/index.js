@@ -16,7 +16,7 @@ const Router = require('./lib/router');
  * Application factory
  * @returns {Application}
  */
-module.exports = function createApplication () {
+module.exports = function createApplication() {
   return application();
 };
 

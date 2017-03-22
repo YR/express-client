@@ -1,19 +1,19 @@
 'use strict';
 
-const Debug = require('debug');
+const debugFactory = require('debug');
 const Emitter = require('eventemitter3');
 const history = require('./history');
 const request = require('./request');
 const response = require('./response');
 const router = require('./router');
 
-const debug = Debug('express:application');
+const debug = debugFactory('express:application');
 
 class Application extends Emitter {
   /**
    * Constructor
    */
-  constructor () {
+  constructor() {
     super();
 
     this.settings = {
@@ -33,18 +33,18 @@ class Application extends Emitter {
     this.navigateTo = this.navigateTo.bind(this);
     this.redirectTo = this.redirectTo.bind(this);
     this.getCurrentContext = this.getCurrentContext.bind(this);
-    this.refresh = this.refresh.bind(this);
+    this.reload = this.reload.bind(this);
 
     // Create request/response factories
     const app = this;
-    const requestFactory = function requestFactory (url, bootstrap) {
-      let req = request(url, bootstrap);
+    const requestFactory = function requestFactory(url, bootstrap) {
+      const req = request(url, bootstrap);
 
       req.app = app;
       return req;
     };
-    const responseFactory = function responseFactory () {
-      let res = response();
+    const responseFactory = function responseFactory() {
+      const res = response();
 
       res.app = app;
       return res;
@@ -60,12 +60,14 @@ class Application extends Emitter {
   /**
    * Store 'value' for 'key'
    * @param {String} key
-   * @param {Object} value
-   * @returns {Object}
+   * @param {Object} [value]
+   * @returns {*}
    */
-  set (key, value) {
+  set(key, value) {
     // get()
-    if (arguments.length == 1) return this.settings[key];
+    if (arguments.length === 1) {
+      return this.settings[key];
+    }
 
     this.settings[key] = value;
   }
@@ -73,40 +75,38 @@ class Application extends Emitter {
   /**
    * Add one or more 'fn' to middleware pipeline at optional 'path'
    */
-  use (...fns) {
+  use(...fns) {
     let offset = 0;
     let path = '/';
 
-    if ('string' == typeof fns[0]) {
+    if (typeof fns[0] === 'string') {
       offset = 1;
       path = fns[0];
     }
 
-    fns
-      .slice(offset)
-      .forEach((fn) => {
-        if (fn instanceof Application) {
-          const app = fn;
-          const handler = app.handle;
+    fns.slice(offset).forEach(fn => {
+      if (fn instanceof Application) {
+        const app = fn;
+        const handler = app.handle;
 
-          app.mountpath = path;
-          app.parent = this;
-          fn = function mounted_app (req, res, next) {
-            // Change app reference to mounted
-            const orig = req.app;
+        app.mountpath = path;
+        app.parent = this;
+        fn = function mounted_app(req, res, next) {
+          // Change app reference to mounted
+          const orig = req.app;
 
-            req.app = res.app = app;
-            handler(req, res, function (err) {
-              // Restore app reference when done
-              req.app = res.app = orig;
-              next(err);
-            });
-          };
-        }
+          req.app = (res.app = app);
+          handler(req, res, function(err) {
+            // Restore app reference when done
+            req.app = (res.app = orig);
+            next(err);
+          });
+        };
+      }
 
-        debug('adding application middleware layer with path %s', path);
-        this._router.use(path, fn);
-      });
+      debug('adding application middleware layer with path %s', path);
+      this._router.use(path, fn);
+    });
   }
 
   /**
@@ -114,9 +114,11 @@ class Application extends Emitter {
    * @param {String} path
    * @returns {Object}
    */
-  get (path, ...args) {
+  get(path, ...args) {
     // Not verb, only get/set
-    if (!args.length) return this.set(path);
+    if (!args.length) {
+      return this.set(path);
+    }
 
     this._router.get(path, ...args);
 
@@ -128,16 +130,17 @@ class Application extends Emitter {
    * @param {String} name
    * @param {Function} fn(req, res, next, value)
    */
-  param (name, fn) {
+  param(name, fn) {
     this._router.param(name, fn);
   }
-
 
   /**
    * Start listening for requests
    */
-  listen () {
-    if (!this.parent) this.history.listen();
+  listen() {
+    if (!this.parent) {
+      this.history.listen();
+    }
   }
 
   /**
@@ -146,13 +149,13 @@ class Application extends Emitter {
    * @param {Response} res
    * @param {Function} done
    */
-  handle (req, res, done) {
+  handle(req, res, done) {
     // Handle external link
-    if ('string' == typeof req) {
+    if (typeof req === 'string') {
       this.emit('link:external', req);
     } else {
       this.emit('connect', req);
-      this._router.handle(req, res, done || function () { });
+      this._router.handle(req, res, done || function() {});
     }
   }
 
@@ -163,7 +166,7 @@ class Application extends Emitter {
    * @param {Boolean} isUpdate
    * @param {Boolean} noScroll
    */
-  navigateTo (url, title, isUpdate, noScroll) {
+  navigateTo(url, title, isUpdate, noScroll) {
     this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
   }
 
@@ -172,7 +175,7 @@ class Application extends Emitter {
    * @param {String} url
    * @param {String} title
    */
-  redirectTo (url) {
+  redirectTo(url) {
     this[this.parent ? 'parent' : 'history'].redirectTo(url);
   }
 
@@ -180,15 +183,15 @@ class Application extends Emitter {
    * Retrieve current context
    * @returns {Object}
    */
-  getCurrentContext () {
+  getCurrentContext() {
     return this[this.parent ? 'parent' : 'history'].getCurrentContext();
   }
 
   /**
-   * Refresh current location
+   * Reload current location
    */
-  refresh () {
-    this[this.parent ? 'parent' : 'history'].refresh();
+  reload() {
+    this[this.parent ? 'parent' : 'history'].reload();
   }
 }
 
@@ -196,6 +199,6 @@ class Application extends Emitter {
  * Instance factory
  * @returns {Application}
  */
-module.exports = function () {
+module.exports = function() {
   return new Application();
 };

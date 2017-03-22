@@ -13,12 +13,10 @@ class Request extends Emitter {
    * @param {String} url
    * @param {Boolean} bootstrap
    */
-  constructor (url, bootstrap) {
+  constructor(url, bootstrap) {
     super();
 
-    url = url
-      ? urlUtils.encode(url)
-      : urlUtils.getCurrent();
+    url = url ? urlUtils.encode(url) : urlUtils.getCurrent();
 
     const path = url.split(RE_SPLIT);
     const qs = (~url.indexOf('?') && path[1]) || '';
@@ -34,16 +32,16 @@ class Request extends Emitter {
     this.path = urlUtils.sanitize(path[0]);
     this.query = qsParse(qs);
     this.querystring = qs;
-    this.refreshed = false;
+    this.reloaded = false;
     this.search = qs ? `?${qs}` : '';
     // Ignore hash
-    this.url = this.originalUrl = url.split('#')[0];
+    this.url = (this.originalUrl = url.split('#')[0]);
   }
 
   /**
    * Abort response
    */
-  abort () {
+  abort() {
     this.reset();
     this.emit('close');
   }
@@ -52,13 +50,13 @@ class Request extends Emitter {
    * Reset state
    * @param {Boolean} bootstrap
    */
-  reset (bootstrap) {
+  reset(bootstrap) {
     this.baseUrl = '';
     this.bootstrap = bootstrap || false;
     this.cached = false;
     this.path = urlUtils.sanitize(this.originalUrl.split('?')[0]);
     this.params = null;
-    this.refreshed = false;
+    this.reloaded = false;
   }
 }
 
@@ -68,7 +66,7 @@ class Request extends Emitter {
  * @param {Boolean} bootstrap
  * @returns {Request}
  */
-module.exports = function (url, bootstrap) {
+module.exports = function(url, bootstrap) {
   return new Request(url, bootstrap);
 };
 module.exports.Request = Request;

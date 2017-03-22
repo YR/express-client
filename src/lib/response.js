@@ -9,7 +9,7 @@ class Response extends Emitter {
    * Constructor
    * @param {Request} req
    */
-  constructor (req) {
+  constructor(req) {
     super();
 
     this.app = null;
@@ -27,19 +27,27 @@ class Response extends Emitter {
    * @param {Object} options
    * @returns {Response}
    */
-  cookie (name, val, options) {
+  cookie(name, val, options) {
     // Clone
     options = assign({}, options);
 
-    if ('number' == typeof val) val = val.toString();
-    if ('object' == typeof val) val = 'j:' + JSON.stringify(val);
+    const type = typeof val;
+
+    if (type === 'number') {
+      val = val.toString();
+    }
+    if (type === 'object') {
+      val = `j:${JSON.stringify(val)}`;
+    }
 
     if ('maxAge' in options) {
       options.expires = new Date(Date.now() + options.maxAge);
       options.maxAge /= 1000;
     }
 
-    if (options.path == null) options.path = '/';
+    if (options.path == null) {
+      options.path = '/';
+    }
 
     document.cookie = cookieLib.serialize(name, String(val), options);
 
@@ -51,7 +59,7 @@ class Response extends Emitter {
    * @param {Number} code
    * @returns {Response}
    */
-  status (code) {
+  status(code) {
     this.statusCode = code;
     return this;
   }
@@ -59,14 +67,14 @@ class Response extends Emitter {
   /**
    * Send response
    */
-  send () {
+  send() {
     this.end();
   }
 
   /**
    * End response (last method called in pipeline)
    */
-  end () {
+  end() {
     // Reset state
     this.req && this.req.reset();
     this.status(200);
@@ -77,21 +85,21 @@ class Response extends Emitter {
   /**
    * Partial response (noop)
    */
-  write () { }
+  write() {}
 
   /**
    * Redirect to 'url'
    * @param {Number} statusCode
    * @param {String} url
    */
-  redirect (statusCode, url) {
+  redirect(statusCode, url) {
     this.app.redirectTo(url || statusCode);
   }
 
   /**
    * Reset state
    */
-  reset () {
+  reset() {
     this.cached = false;
     this.finished = false;
     this.locals = {};
@@ -102,7 +110,7 @@ class Response extends Emitter {
   /**
    * Abort response
    */
-  abort () {
+  abort() {
     this.req && this.req.abort();
     this.reset();
     this.emit('close');
@@ -113,7 +121,7 @@ class Response extends Emitter {
  * Instance factory
  * @returns {Response}
  */
-module.exports = function () {
+module.exports = function() {
   return new Response();
 };
 module.exports.Response = Response;

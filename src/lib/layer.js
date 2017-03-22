@@ -10,14 +10,14 @@ class Layer {
    * @param {Function} fn
    * @param {Object} options
    */
-  constructor (path, fn, options) {
+  constructor(path, fn, options) {
     // To be filled by matcher
     this.keys = [];
     this.path = null;
     this.params = null;
     this.fn = fn;
-    this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
-    this.fastmatch = (path == '/' && !options.end);
+    this.name = fn.name ? `<${fn.name}>` : '<anonymous>';
+    this.fastmatch = path === '/' && !options.end;
     this.regexp = matcher(path, this.keys, options);
   }
 
@@ -26,7 +26,7 @@ class Layer {
    * @param {String} path
    * @returns {Boolean}
    */
-  match (path) {
+  match(path) {
     if (this.fastmatch) {
       this.params = {};
       this.path = '';
@@ -67,16 +67,18 @@ class Layer {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @returns {null}
+   * @returns {void}
    */
-  handleError (err, req, res, next) {
+  handleError(err, req, res, next) {
     // Only call if it handles errors
-    if (this.fn.length !== 4) return next(err);
+    if (this.fn.length !== 4) {
+      return void next(err);
+    }
 
     try {
       this.fn(err, req, res, next);
-    } catch (err) {
-      next(err);
+    } catch (error) {
+      return void next(error);
     }
   }
 
@@ -85,16 +87,18 @@ class Layer {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @returns {null}
+   * @returns {void}
    */
-  handleRequest (req, res, next) {
+  handleRequest(req, res, next) {
     // Skip if error handler
-    if (this.fn.length > 3) return next();
+    if (this.fn.length > 3) {
+      return void next();
+    }
 
     try {
       this.fn(req, res, next);
-    } catch (err) {
-      next(err);
+    } catch (error) {
+      return void next(error);
     }
   }
 }
@@ -106,6 +110,6 @@ class Layer {
  * @param {Object} options
  * @returns {Layer}
  */
-module.exports = function (path, fn, options) {
+module.exports = function(path, fn, options) {
   return new Layer(path, fn, options);
 };
