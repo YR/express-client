@@ -835,12 +835,12 @@ $m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : 
 /*≠≠ node_modules/object-assign/index.js ≠≠*/
 
 
-/*== node_modules/path-to-regexp/node_modules/isarray/index.js ==*/
+/*== node_modules/isarray/index.js ==*/
 $m['isarray'] = { exports: {} };
 $m['isarray'].exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
-/*≠≠ node_modules/path-to-regexp/node_modules/isarray/index.js ≠≠*/
+/*≠≠ node_modules/isarray/index.js ≠≠*/
 
 
 /*== node_modules/@yr/url-utils/index.js ==*/
@@ -1585,7 +1585,7 @@ $m['debug/src/debug'] = { exports: {} };
  * Expose `debug()` as the module.
  */
 
-$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug['default'] = debugsrcdebug__createDebug;
+$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug.default = debugsrcdebug__createDebug;
 $m['debug/src/debug'].exports.coerce = debugsrcdebug__coerce;
 $m['debug/src/debug'].exports.disable = debugsrcdebug__disable;
 $m['debug/src/debug'].exports.enable = debugsrcdebug__enable;
@@ -1717,9 +1717,6 @@ function debugsrcdebug__createDebug(namespace) {
 
 function debugsrcdebug__enable(namespaces) {
   $m['debug/src/debug'].exports.save(namespaces);
-
-  $m['debug/src/debug'].exports.names = [];
-  $m['debug/src/debug'].exports.skips = [];
 
   var split = (namespaces || '').split(/[\s,]+/);
   var len = split.length;
@@ -1917,17 +1914,14 @@ function debug__save(namespaces) {
  */
 
 function debug__load() {
-  var r;
   try {
-    r = $m['debug'].exports.storage.debug;
+    return $m['debug'].exports.storage.debug;
   } catch (e) {}
 
   // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (!r && typeof process !== 'undefined' && 'env' in process) {
-    r = process.env.DEBUG;
+  if (typeof process !== 'undefined' && 'env' in process) {
+    return process.env.DEBUG;
   }
-
-  return r;
 }
 
 /**
@@ -2411,9 +2405,9 @@ function querystring__parserForArrayFormat(opts) {
 	switch (opts.arrayFormat) {
 		case 'index':
 			return function (key, value, accumulator) {
-				result = /\[(\d*)\]$/.exec(key);
+				result = /\[(\d*)]$/.exec(key);
 
-				key = key.replace(/\[\d*\]$/, '');
+				key = key.replace(/\[\d*]$/, '');
 
 				if (!result) {
 					accumulator[key] = value;
@@ -2429,9 +2423,9 @@ function querystring__parserForArrayFormat(opts) {
 
 		case 'bracket':
 			return function (key, value, accumulator) {
-				result = /(\[\])$/.exec(key);
+				result = /(\[])$/.exec(key);
 
-				key = key.replace(/\[\]$/, '');
+				key = key.replace(/\[]$/, '');
 
 				if (!result || accumulator[key] === undefined) {
 					accumulator[key] = value;
@@ -2711,9 +2705,9 @@ var srclibhistory__History = function () {
           window.addEventListener('click', _this.onClick, false);
           window.addEventListener('popstate', _this.onPopstate, false);
           _this.running = true;
-        }, 500);
+        }, 200);
 
-        // Update so that popstate will trigger for this route
+        // Update so that popstate will trigger for current route
         window.history.replaceState({}, document.title);
 
         srclibhistory__debug('listening with history API');
@@ -2734,7 +2728,7 @@ var srclibhistory__History = function () {
 
   srclibhistory__History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
-    if (url !== srclibhistory__urlUtils.getCurrent()) {
+    if (this.running && url !== srclibhistory__urlUtils.getCurrent()) {
       if (this.running) {
         // Will return empty if malformed
         url = srclibhistory__urlUtils.encode(url);
@@ -2772,13 +2766,17 @@ var srclibhistory__History = function () {
 
 
   srclibhistory__History.prototype.reload = function reload() {
-    var ctx = this.getCurrentContext();
+    if (this.running) {
+      var ctx = this.getCurrentContext();
 
-    // Undo pipeline modifications
-    ctx.req.reset();
-    ctx.res.reset();
-    ctx.req.reloaded = true;
-    this.fn(ctx.req, ctx.res);
+      if (ctx) {
+        // Undo pipeline modifications
+        ctx.req.reset();
+        ctx.res.reset();
+        ctx.req.reloaded = true;
+        this.fn(ctx.req, ctx.res);
+      }
+    }
   };
 
   /**
@@ -2838,7 +2836,7 @@ var srclibhistory__History = function () {
       res.reset();
       // Set flag for use downstream
       req.cached = res.cached = true;
-      req.refreshed = false;
+      req.reloaded = false;
       srclibhistory__debug('context retrieved from cache: %s', url);
     } else {
       req = this.request(url, srclibhistory__bootstrap);
@@ -3095,22 +3093,24 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
     fns.slice(offset).forEach(function (fn) {
       if (fn instanceof srclibapplication__Application) {
-        var app = fn;
-        var handler = app.handle;
+        (function () {
+          var app = fn;
+          var handler = app.handle;
 
-        app.mountpath = path;
-        app.parent = _this2;
-        fn = function mounted_app(req, res, next) {
-          // Change app reference to mounted
-          var orig = req.app;
+          app.mountpath = path;
+          app.parent = _this2;
+          fn = function mounted_app(req, res, next) {
+            // Change app reference to mounted
+            var orig = req.app;
 
-          req.app = res.app = app;
-          handler(req, res, function (err) {
-            // Restore app reference when done
-            req.app = res.app = orig;
-            next(err);
-          });
-        };
+            req.app = res.app = app;
+            handler(req, res, function (err) {
+              // Restore app reference when done
+              req.app = res.app = orig;
+              next(err);
+            });
+          };
+        })();
       }
 
       srclibapplication__debug('adding application middleware layer with path %s', path);

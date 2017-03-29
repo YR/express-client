@@ -46,7 +46,7 @@ class History {
             window.addEventListener('popstate', this.onPopstate, false);
             this.running = true;
           },
-          500
+          200
         );
 
         // Update so that popstate will trigger for current route
@@ -68,7 +68,7 @@ class History {
    */
   navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
-    if (url !== urlUtils.getCurrent()) {
+    if (this.running && url !== urlUtils.getCurrent()) {
       if (this.running) {
         // Will return empty if malformed
         url = urlUtils.encode(url);
@@ -102,13 +102,17 @@ class History {
    * Force a re-handle of current context
    */
   reload() {
-    const ctx = this.getCurrentContext();
+    if (this.running) {
+      const ctx = this.getCurrentContext();
 
-    // Undo pipeline modifications
-    ctx.req.reset();
-    ctx.res.reset();
-    ctx.req.reloaded = true;
-    this.fn(ctx.req, ctx.res);
+      if (ctx) {
+        // Undo pipeline modifications
+        ctx.req.reset();
+        ctx.res.reset();
+        ctx.req.reloaded = true;
+        this.fn(ctx.req, ctx.res);
+      }
+    }
   }
 
   /**
