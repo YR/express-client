@@ -49,7 +49,7 @@ class History {
           500
         );
 
-        // Update so that popstate will trigger for this route
+        // Update so that popstate will trigger for current route
         window.history.replaceState({}, document.title);
 
         debug('listening with history API');
@@ -161,7 +161,7 @@ class History {
       res.reset();
       // Set flag for use downstream
       req.cached = (res.cached = true);
-      req.refreshed = false;
+      req.reloaded = false;
       debug('context retrieved from cache: %s', url);
     } else {
       req = this.request(url, bootstrap);
