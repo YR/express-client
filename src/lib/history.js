@@ -33,28 +33,20 @@ class History {
    * @returns {History}
    */
   listen() {
-    // Handle current history state (triggers notification)
-    const ctx = this.handle();
+    // Test History API availability
+    if (hasHistory()) {
+      window.addEventListener('click', this.onClick, false);
+      window.addEventListener('popstate', this.onPopstate, false);
+      this.running = true;
 
-    if (!this.running && ctx) {
-      // Test History API availability
-      if (hasHistory()) {
-        // Delay to prevent premature trigger when navigating back from nothing
-        setTimeout(
-          () => {
-            window.addEventListener('click', this.onClick, false);
-            window.addEventListener('popstate', this.onPopstate, false);
-            this.running = true;
-          },
-          200
-        );
+      // Update so that popstate will trigger for current route
+      window.history.replaceState({}, document.title);
 
-        // Update so that popstate will trigger for current route
-        window.history.replaceState({}, document.title);
-
-        debug('listening with history API');
-      }
+      debug('listening with history API');
     }
+
+    // Handle current history state (triggers notification)
+    this.handle();
 
     return this;
   }

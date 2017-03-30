@@ -2692,27 +2692,20 @@ var srclibhistory__History = function () {
 
 
   srclibhistory__History.prototype.listen = function listen() {
-    var _this = this;
+    // Test History API availability
+    if (srclibhistory__hasHistory()) {
+      window.addEventListener('click', this.onClick, false);
+      window.addEventListener('popstate', this.onPopstate, false);
+      this.running = true;
+
+      // Update so that popstate will trigger for current route
+      window.history.replaceState({}, document.title);
+
+      srclibhistory__debug('listening with history API');
+    }
 
     // Handle current history state (triggers notification)
-    var ctx = this.handle();
-
-    if (!this.running && ctx) {
-      // Test History API availability
-      if (srclibhistory__hasHistory()) {
-        // Delay to prevent premature trigger when navigating back from nothing
-        setTimeout(function () {
-          window.addEventListener('click', _this.onClick, false);
-          window.addEventListener('popstate', _this.onPopstate, false);
-          _this.running = true;
-        }, 200);
-
-        // Update so that popstate will trigger for current route
-        window.history.replaceState({}, document.title);
-
-        srclibhistory__debug('listening with history API');
-      }
-    }
+    this.handle();
 
     return this;
   };
