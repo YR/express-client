@@ -89,11 +89,11 @@ class Response extends Emitter {
 
   /**
    * Redirect to 'url'
-   * @param {Number} statusCode
+   * @param {Number} [statusCode]
    * @param {String} url
    */
   redirect(statusCode, url) {
-    this.app.redirectTo(url || statusCode);
+    this.app.redirectTo(statusCode, url);
   }
 
   /**

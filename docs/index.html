@@ -19460,13 +19460,13 @@ var srclibresponse__Response = function (_srclibresponse__Emit) {
 
   /**
    * Redirect to 'url'
-   * @param {Number} statusCode
+   * @param {Number} [statusCode]
    * @param {String} url
    */
 
 
   srclibresponse__Response.prototype.redirect = function redirect(statusCode, url) {
-    this.app.redirectTo(url || statusCode);
+    this.app.redirectTo(statusCode, url);
   };
 
   /**
@@ -20340,11 +20340,13 @@ var srclibapplication__Application = function (_srclibapplication__E) {
     if (this.parent) {
       return void this.parent.redirectTo(status, url);
     }
+
+    // TODO: parse url and check for absolute/relative
     if (!url) {
       url = status;
       status = 404;
     }
-    // Force server to handle
+    // Force browser to handle
     if (status >= 400) {
       this.history.redirectTo(url);
       // Handle internally
