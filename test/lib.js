@@ -3196,14 +3196,27 @@ var srclibapplication__Application = function (_srclibapplication__E) {
   };
 
   /**
-   * Force browser location change
+   * Redirect to new 'url'
+   * @param {Number} [status]
    * @param {String} url
-   * @param {String} title
    */
 
 
-  srclibapplication__Application.prototype.redirectTo = function redirectTo(url) {
-    this[this.parent ? 'parent' : 'history'].redirectTo(url);
+  srclibapplication__Application.prototype.redirectTo = function redirectTo(status, url) {
+    if (this.parent) {
+      return void this.parent.redirectTo(status, url);
+    }
+    if (!url) {
+      url = status;
+      status = 404;
+    }
+    // Force server to handle
+    if (status >= 400) {
+      this.history.redirectTo(url);
+      // Handle internally
+    } else {
+      this.history.navigateTo(url);
+    }
   };
 
   /**

@@ -171,12 +171,27 @@ class Application extends Emitter {
   }
 
   /**
-   * Force browser location change
+   * Redirect to new 'url'
+   * @param {Number} [status]
    * @param {String} url
-   * @param {String} title
    */
-  redirectTo(url) {
-    this[this.parent ? 'parent' : 'history'].redirectTo(url);
+  redirectTo(status, url) {
+    if (this.parent) {
+      return void this.parent.redirectTo(status, url);
+    }
+
+    // TODO: parse url and check for absolute/relative
+    if (!url) {
+      url = status;
+      status = 404;
+    }
+    // Force browser to handle
+    if (status >= 400) {
+      this.history.redirectTo(url);
+    // Handle internally
+    } else {
+      this.history.navigateTo(url);
+    }
   }
 
   /**
