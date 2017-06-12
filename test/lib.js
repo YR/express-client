@@ -614,7 +614,7 @@ var ms__y = ms__d * 365.25;
  *  - `long` verbose formatting [false]
  *
  * @param {String|Number} val
- * @param {Object} options
+ * @param {Object} [options]
  * @throws {Error} throw an error if val is not a non-empty string or a number
  * @return {String|Number}
  * @api public
@@ -641,7 +641,7 @@ $m['ms'].exports = function (val, options) {
 
 function ms__parse(str) {
   str = String(str);
-  if (str.length > 10000) {
+  if (str.length > 100) {
     return;
   }
   var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
@@ -1015,12 +1015,12 @@ $m['@yr/url-utils'].exports.template = function (str, data) {
 
 /*== node_modules/path-to-regexp/index.js ==*/
 $m['path-to-regexp'] = { exports: {} };
-var pathtoregexp__isarray = $m['isarray'].exports;
+var pathtoregexp__isarray = require('isarray'
 
 /**
  * Expose `pathToRegexp`.
  */
-$m['path-to-regexp'].exports = pathtoregexp__pathToRegexp;
+);$m['path-to-regexp'].exports = pathtoregexp__pathToRegexp;
 $m['path-to-regexp'].exports.parse = pathtoregexp__parse;
 $m['path-to-regexp'].exports.compile = pathtoregexp__compile;
 $m['path-to-regexp'].exports.tokensToFunction = pathtoregexp__tokensToFunction;
@@ -1585,7 +1585,7 @@ $m['debug/src/debug'] = { exports: {} };
  * Expose `debug()` as the module.
  */
 
-$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug.default = debugsrcdebug__createDebug;
+$m['debug/src/debug'].exports = $m['debug/src/debug'].exports = debugsrcdebug__createDebug.debug = debugsrcdebug__createDebug['default'] = debugsrcdebug__createDebug;
 $m['debug/src/debug'].exports.coerce = debugsrcdebug__coerce;
 $m['debug/src/debug'].exports.disable = debugsrcdebug__disable;
 $m['debug/src/debug'].exports.enable = debugsrcdebug__enable;
@@ -1718,7 +1718,10 @@ function debugsrcdebug__createDebug(namespace) {
 function debugsrcdebug__enable(namespaces) {
   $m['debug/src/debug'].exports.save(namespaces);
 
-  var split = (namespaces || '').split(/[\s,]+/);
+  $m['debug/src/debug'].exports.names = [];
+  $m['debug/src/debug'].exports.skips = [];
+
+  var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
   var len = split.length;
 
   for (var i = 0; i < len; i++) {
@@ -1814,20 +1817,20 @@ function debug__useColors() {
   // NB: In an Electron preload script, document will be defined but not fully
   // initialized. Since we know we're in Chrome, we'll just detect this case
   // explicitly
-  if (typeof window !== 'undefined' && window && typeof window.process !== 'undefined' && window.process.type === 'renderer') {
+  if (typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
     return true;
   }
 
   // is webkit? http://stackoverflow.com/a/16459606/376773
   // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-  return typeof document !== 'undefined' && document && 'WebkitAppearance' in document.documentElement.style ||
+  return typeof document !== 'undefined' && document.documentElement && document.documentElement.style && document.documentElement.style.WebkitAppearance ||
   // is firebug? http://stackoverflow.com/a/398120/376773
-  typeof window !== 'undefined' && window && window.console && (console.firebug || console.exception && console.table) ||
+  typeof window !== 'undefined' && window.console && (window.console.firebug || window.console.exception && window.console.table) ||
   // is firefox >= v31?
   // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-  typeof navigator !== 'undefined' && navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 ||
+  typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31 ||
   // double check webkit in userAgent just in case we are in a worker
-  typeof navigator !== 'undefined' && navigator && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
+  typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/);
 }
 
 /**
@@ -1856,12 +1859,12 @@ function debug__formatArgs(args) {
   if (!useColors) return;
 
   var c = 'color: ' + this.color;
-  args.splice(1, 0, c, 'color: inherit');
+  args.splice(1, 0, c, 'color: inherit'
 
   // the final "%c" is somewhat tricky, because there could be other
   // arguments passed either before or after the %c, so we need to
   // figure out the correct index to insert the CSS into
-  var index = 0;
+  );var index = 0;
   var lastC = 0;
   args[0].replace(/%[a-zA-Z%]/g, function (match) {
     if ('%%' === match) return;
@@ -1914,14 +1917,17 @@ function debug__save(namespaces) {
  */
 
 function debug__load() {
+  var r;
   try {
-    return $m['debug'].exports.storage.debug;
+    r = $m['debug'].exports.storage.debug;
   } catch (e) {}
 
   // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (typeof process !== 'undefined' && 'env' in process) {
-    return process.env.DEBUG;
+  if (!r && typeof process !== 'undefined' && 'env' in process) {
+    r = process.env.DEBUG;
   }
+
+  return r;
 }
 
 /**
@@ -2405,9 +2411,9 @@ function querystring__parserForArrayFormat(opts) {
 	switch (opts.arrayFormat) {
 		case 'index':
 			return function (key, value, accumulator) {
-				result = /\[(\d*)]$/.exec(key);
+				result = /\[(\d*)\]$/.exec(key);
 
-				key = key.replace(/\[\d*]$/, '');
+				key = key.replace(/\[\d*\]$/, '');
 
 				if (!result) {
 					accumulator[key] = value;
@@ -2423,12 +2429,14 @@ function querystring__parserForArrayFormat(opts) {
 
 		case 'bracket':
 			return function (key, value, accumulator) {
-				result = /(\[])$/.exec(key);
+				result = /(\[\])$/.exec(key);
+				key = key.replace(/\[\]$/, '');
 
-				key = key.replace(/\[]$/, '');
-
-				if (!result || accumulator[key] === undefined) {
+				if (!result) {
 					accumulator[key] = value;
+					return;
+				} else if (accumulator[key] === undefined) {
+					accumulator[key] = [value];
 					return;
 				}
 
@@ -2767,6 +2775,7 @@ var srclibhistory__History = function () {
         ctx.req.reset();
         ctx.res.reset();
         ctx.req.reloaded = true;
+        ctx.res.req = ctx.req;
         this.fn(ctx.req, ctx.res);
       }
     }
@@ -2925,11 +2934,16 @@ var srclibhistory__History = function () {
       return;
     }
 
-    // Blur focus
-    el.blur();
+    // Flagged as unhandled
+    if (el.dataset.unhandled != null) {
+      this.redirectTo(path);
+    } else {
+      // Blur focus
+      el.blur();
 
-    srclibhistory__debug('click event intercepted from %s', el);
-    this.navigateTo(path);
+      srclibhistory__debug('click event intercepted from %s', el);
+      this.navigateTo(path);
+    }
   };
 
   return srclibhistory__History;
@@ -2991,6 +3005,8 @@ var srclibapplication__history = $m['src/lib/history'].exports;
 var srclibapplication__request = $m['src/lib/request'].exports;
 var srclibapplication__response = $m['src/lib/response'].exports;
 var srclibapplication__router = $m['src/lib/router'].exports;
+
+var srclibapplication__NOOP = function srclibapplication__NOOP() {};
 
 var srclibapplication__debug = srclibapplication__debugFactory('express:application');
 
@@ -3086,24 +3102,22 @@ var srclibapplication__Application = function (_srclibapplication__E) {
 
     fns.slice(offset).forEach(function (fn) {
       if (fn instanceof srclibapplication__Application) {
-        (function () {
-          var app = fn;
-          var handler = app.handle;
+        var app = fn;
+        var handler = app.handle;
 
-          app.mountpath = path;
-          app.parent = _this2;
-          fn = function mounted_app(req, res, next) {
-            // Change app reference to mounted
-            var orig = req.app;
+        app.mountpath = path;
+        app.parent = _this2;
+        fn = function mounted_app(req, res, next) {
+          // Change app reference to mounted
+          var orig = req.app;
 
-            req.app = res.app = app;
-            handler(req, res, function (err) {
-              // Restore app reference when done
-              req.app = res.app = orig;
-              next(err);
-            });
-          };
-        })();
+          req.app = res.app = app;
+          handler(req, res, function (err) {
+            // Restore app reference when done
+            req.app = res.app = orig;
+            next(err);
+          });
+        };
       }
 
       srclibapplication__debug('adding application middleware layer with path %s', path);
@@ -3171,7 +3185,8 @@ var srclibapplication__Application = function (_srclibapplication__E) {
       this.emit('link:external', req);
     } else {
       this.emit('connect', req);
-      this._router.handle(req, res, done || function () {});
+      this.emit('request', req, res);
+      this._router.handle(req, res, done || srclibapplication__NOOP);
     }
   };
 
