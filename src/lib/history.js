@@ -102,6 +102,7 @@ class History {
         ctx.req.reset();
         ctx.res.reset();
         ctx.req.reloaded = true;
+        ctx.res.req = ctx.req;
         this.fn(ctx.req, ctx.res);
       }
     }
