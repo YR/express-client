@@ -250,11 +250,16 @@ class History {
       return;
     }
 
-    // Blur focus
-    el.blur();
+    // Flagged as unhandled
+    if (el.dataset.unhandled != null) {
+      this.redirectTo(path);
+    } else {
+      // Blur focus
+      el.blur();
 
-    debug('click event intercepted from %s', el);
-    this.navigateTo(path);
+      debug('click event intercepted from %s', el);
+      this.navigateTo(path);
+    }
   }
 }
 
