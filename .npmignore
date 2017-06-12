@@ -3,4 +3,4 @@
 src
 test
 docs
-yarn.lock
+package-lock.json
