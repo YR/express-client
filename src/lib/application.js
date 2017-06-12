@@ -7,6 +7,8 @@ const request = require('./request');
 const response = require('./response');
 const router = require('./router');
 
+const NOOP = function() {};
+
 const debug = debugFactory('express:application');
 
 class Application extends Emitter {
@@ -95,10 +97,10 @@ class Application extends Emitter {
           // Change app reference to mounted
           const orig = req.app;
 
-          req.app = (res.app = app);
+          req.app = res.app = app;
           handler(req, res, function(err) {
             // Restore app reference when done
-            req.app = (res.app = orig);
+            req.app = res.app = orig;
             next(err);
           });
         };
@@ -155,7 +157,8 @@ class Application extends Emitter {
       this.emit('link:external', req);
     } else {
       this.emit('connect', req);
-      this._router.handle(req, res, done || function() {});
+      this.emit('request', req, res);
+      this._router.handle(req, res, done || NOOP);
     }
   }
 
@@ -188,7 +191,7 @@ class Application extends Emitter {
     // Force browser to handle
     if (status >= 400) {
       this.history.redirectTo(url);
-    // Handle internally
+      // Handle internally
     } else {
       this.history.navigateTo(url);
     }
