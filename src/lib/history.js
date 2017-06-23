@@ -251,7 +251,7 @@ class History {
     }
 
     // Flagged as unhandled
-    if (el.dataset.unhandled != null) {
+    if (el.getAttribute('data-unhandled') != null) {
       this.redirectTo(path);
     } else {
       // Blur focus
