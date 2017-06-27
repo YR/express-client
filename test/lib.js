@@ -835,12 +835,12 @@ $m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : 
 /*≠≠ node_modules/object-assign/index.js ≠≠*/
 
 
-/*== node_modules/isarray/index.js ==*/
+/*== node_modules/path-to-regexp/node_modules/isarray/index.js ==*/
 $m['isarray'] = { exports: {} };
 $m['isarray'].exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
-/*≠≠ node_modules/isarray/index.js ≠≠*/
+/*≠≠ node_modules/path-to-regexp/node_modules/isarray/index.js ≠≠*/
 
 
 /*== node_modules/@yr/url-utils/index.js ==*/
@@ -1015,12 +1015,12 @@ $m['@yr/url-utils'].exports.template = function (str, data) {
 
 /*== node_modules/path-to-regexp/index.js ==*/
 $m['path-to-regexp'] = { exports: {} };
-var pathtoregexp__isarray = require('isarray'
+var pathtoregexp__isarray = $m['isarray'].exports;
 
 /**
  * Expose `pathToRegexp`.
  */
-);$m['path-to-regexp'].exports = pathtoregexp__pathToRegexp;
+$m['path-to-regexp'].exports = pathtoregexp__pathToRegexp;
 $m['path-to-regexp'].exports.parse = pathtoregexp__parse;
 $m['path-to-regexp'].exports.compile = pathtoregexp__compile;
 $m['path-to-regexp'].exports.tokensToFunction = pathtoregexp__tokensToFunction;
@@ -1859,12 +1859,12 @@ function debug__formatArgs(args) {
   if (!useColors) return;
 
   var c = 'color: ' + this.color;
-  args.splice(1, 0, c, 'color: inherit'
+  args.splice(1, 0, c, 'color: inherit');
 
   // the final "%c" is somewhat tricky, because there could be other
   // arguments passed either before or after the %c, so we need to
   // figure out the correct index to insert the CSS into
-  );var index = 0;
+  var index = 0;
   var lastC = 0;
   args[0].replace(/%[a-zA-Z%]/g, function (match) {
     if ('%%' === match) return;
@@ -2935,7 +2935,7 @@ var srclibhistory__History = function () {
     }
 
     // Flagged as unhandled
-    if (el.dataset.unhandled != null) {
+    if (el.getAttribute('data-unhandled') != null) {
       this.redirectTo(path);
     } else {
       // Blur focus
