@@ -1,4 +1,5 @@
 [[![NPM Version](https://img.shields.io/npm/v/@yr/express-client.svg?style=flat)](https://npmjs.org/package/@yr/express-client)
+[![Build Status](https://img.shields.io/travis/YR/express-client.svg?style=flat)](https://travis-ci.org/YR/express-client?branch=master)
 
 An [express.js](http://expressjs.com) framework for browser clients that leverages the browser History API. Enables a subset of express.js functionality for use in browser environments, including middleware, routing, mounting, and request/response.
 
