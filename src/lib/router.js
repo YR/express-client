@@ -1,6 +1,5 @@
 'use strict';
 
-const assign = require('object-assign');
 const Debug = require('debug');
 const layer = require('./layer');
 const urlUtils = require('@yr/url-utils');
@@ -19,7 +18,7 @@ class Router {
    * @param {Object} [options]
    */
   constructor (options) {
-    options = assign({}, DEFAULT_OPTIONS, options);
+    options = Object.assign({}, DEFAULT_OPTIONS, options);
 
     const boundMethod = this.method.bind(this);
 
@@ -137,7 +136,7 @@ class Router {
       // Store params
       if (self.mergeParams) {
         if (!req.params) req.params = {};
-        assign(req.params, lyr.params);
+        Object.assign(req.params, lyr.params);
       } else {
         req.params = lyr.params;
       }

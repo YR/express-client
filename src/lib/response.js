@@ -1,6 +1,5 @@
 'use strict';
 
-const assign = require('object-assign');
 const cookieLib = require('cookie');
 const Emitter = require('eventemitter3');
 
@@ -29,7 +28,7 @@ class Response extends Emitter {
    */
   cookie(name, val, options) {
     // Clone
-    options = assign({}, options);
+    options = Object.assign({}, options);
 
     const type = typeof val;
 

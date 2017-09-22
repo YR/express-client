@@ -1084,99 +1084,6 @@ $m['type-detect'].exports.typeDetect = $m['type-detect'].exports;
 /*≠≠ node_modules/type-detect/index.js ≠≠*/
 
 
-/*== node_modules/object-assign/index.js ==*/
-$m['object-assign'] = { exports: {} };
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-/* eslint-disable no-unused-vars */
-var objectassign__getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var objectassign__hasOwnProperty = Object.prototype.hasOwnProperty;
-var objectassign__propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function objectassign__toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function objectassign__shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc'); // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-$m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = objectassign__toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (objectassign__hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (objectassign__getOwnPropertySymbols) {
-			symbols = objectassign__getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (objectassign__propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-/*≠≠ node_modules/object-assign/index.js ≠≠*/
-
-
 /*== node_modules/chai/lib/chai/utils/transferFlags.js ==*/
 $m['chai/lib/chai/utils/transferFlags'] = { exports: {} };
 /*!
@@ -1777,6 +1684,197 @@ function getfuncname__getFuncName(aFunc) {
 
 $m['get-func-name'].exports = getfuncname__getFuncName;
 /*≠≠ node_modules/get-func-name/index.js ≠≠*/
+
+
+/*== node_modules/decode-uri-component/index.js ==*/
+$m['decode-uri-component'] = { exports: {} };
+var decodeuricomponent__token = '%[a-f0-9]{2}';
+var decodeuricomponent__singleMatcher = new RegExp(decodeuricomponent__token, 'gi');
+var decodeuricomponent__multiMatcher = new RegExp('(' + decodeuricomponent__token + ')+', 'gi');
+
+function decodeuricomponent__decodeComponents(components, split) {
+	try {
+		// Try to decode the entire string first
+		return decodeURIComponent(components.join(''));
+	} catch (err) {
+		// Do nothing
+	}
+
+	if (components.length === 1) {
+		return components;
+	}
+
+	split = split || 1;
+
+	// Split the array in 2 parts
+	var left = components.slice(0, split);
+	var right = components.slice(split);
+
+	return Array.prototype.concat.call([], decodeuricomponent__decodeComponents(left), decodeuricomponent__decodeComponents(right));
+}
+
+function decodeuricomponent__decode(input) {
+	try {
+		return decodeURIComponent(input);
+	} catch (err) {
+		var tokens = input.match(decodeuricomponent__singleMatcher);
+
+		for (var i = 1; i < tokens.length; i++) {
+			input = decodeuricomponent__decodeComponents(tokens, i).join('');
+
+			tokens = input.match(decodeuricomponent__singleMatcher);
+		}
+
+		return input;
+	}
+}
+
+function decodeuricomponent__customDecodeURIComponent(input) {
+	// Keep track of all the replacements and prefill the map with the `BOM`
+	var replaceMap = {
+		'%FE%FF': '\uFFFD\uFFFD',
+		'%FF%FE': '\uFFFD\uFFFD'
+	};
+
+	var match = decodeuricomponent__multiMatcher.exec(input);
+	while (match) {
+		try {
+			// Decode as big chunks as possible
+			replaceMap[match[0]] = decodeURIComponent(match[0]);
+		} catch (err) {
+			var result = decodeuricomponent__decode(match[0]);
+
+			if (result !== match[0]) {
+				replaceMap[match[0]] = result;
+			}
+		}
+
+		match = decodeuricomponent__multiMatcher.exec(input);
+	}
+
+	// Add `%C2` at the end of the map to make sure it does not replace the combinator before everything else
+	replaceMap['%C2'] = '\uFFFD';
+
+	var entries = Object.keys(replaceMap);
+
+	for (var i = 0; i < entries.length; i++) {
+		// Replace all decoded components
+		var key = entries[i];
+		input = input.replace(new RegExp(key, 'g'), replaceMap[key]);
+	}
+
+	return input;
+}
+
+$m['decode-uri-component'].exports = function (encodedURI) {
+	if (typeof encodedURI !== 'string') {
+		throw new TypeError('Expected `encodedURI` to be of type `string`, got `' + typeof encodedURI + '`');
+	}
+
+	try {
+		encodedURI = encodedURI.replace(/\+/g, ' ');
+
+		// Try the built in decoder first
+		return decodeURIComponent(encodedURI);
+	} catch (err) {
+		// Fallback to a more advanced decoder
+		return decodeuricomponent__customDecodeURIComponent(encodedURI);
+	}
+};
+/*≠≠ node_modules/decode-uri-component/index.js ≠≠*/
+
+
+/*== node_modules/object-assign/index.js ==*/
+$m['object-assign'] = { exports: {} };
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+/* eslint-disable no-unused-vars */
+var objectassign__getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var objectassign__hasOwnProperty = Object.prototype.hasOwnProperty;
+var objectassign__propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function objectassign__toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function objectassign__shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc'); // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !== 'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+$m['object-assign'].exports = objectassign__shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = objectassign__toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (objectassign__hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (objectassign__getOwnPropertySymbols) {
+			symbols = objectassign__getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (objectassign__propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+/*≠≠ node_modules/object-assign/index.js ≠≠*/
 
 
 /*== node_modules/strict-uri-encode/index.js ==*/
@@ -9998,7 +10096,6 @@ function debug__localstorage() {
 /*== lib/router.js ==*/
 $m['lib/router'] = { exports: {} };
 
-var librouter__assign = $m['object-assign'].exports;
 var librouter__Debug = $m['debug'].exports;
 var librouter__layer = $m['lib/layer'].exports;
 var librouter__urlUtils = $m['@yr/url-utils'].exports;
@@ -10019,7 +10116,7 @@ var librouter__Router = function () {
   function Router(options) {
     babelHelpers.classCallCheck(this, Router);
 
-    options = librouter__assign({}, librouter__DEFAULT_OPTIONS, options);
+    options = Object.assign({}, librouter__DEFAULT_OPTIONS, options);
 
     var boundMethod = this.method.bind(this);
 
@@ -10151,7 +10248,7 @@ var librouter__Router = function () {
       // Store params
       if (self.mergeParams) {
         if (!req.params) req.params = {};
-        librouter__assign(req.params, lyr.params);
+        Object.assign(req.params, lyr.params);
       } else {
         req.params = lyr.params;
       }
@@ -10262,7 +10359,6 @@ $m['lib/router'].exports = function (options) {
 /*== lib/response.js ==*/
 $m['lib/response'] = { exports: {} };
 
-var libresponse__assign = $m['object-assign'].exports;
 var libresponse__cookieLib = $m['cookie'].exports;
 var libresponse__Emitter = $m['eventemitter3'].exports;
 
@@ -10297,7 +10393,7 @@ var libresponse__Response = function (_Emitter) {
 
   Response.prototype.cookie = function cookie(name, val, options) {
     // Clone
-    options = libresponse__assign({}, options);
+    options = Object.assign({}, options);
 
     var type = typeof val;
 
@@ -10410,6 +10506,7 @@ $m['lib/response'].exports.Response = libresponse__Response;
 $m['query-string'] = { exports: {} };
 var querystring__strictUriEncode = $m['strict-uri-encode'].exports;
 var querystring__objectAssign = $m['object-assign'].exports;
+var querystring__decodeComponent = $m['decode-uri-component'].exports;
 
 function querystring__encoderForArrayFormat(opts) {
 	switch (opts.arrayFormat) {
@@ -10534,9 +10631,9 @@ $m['query-string'].exports.parse = function (str, opts) {
 
 		// missing `=` should be `null`:
 		// http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
-		val = val === undefined ? null : decodeURIComponent(val);
+		val = val === undefined ? null : querystring__decodeComponent(val);
 
-		formatter(decodeURIComponent(key), val, ret);
+		formatter(querystring__decodeComponent(key), val, ret);
 	});
 
 	return Object.keys(ret).sort().reduce(function (result, key) {
