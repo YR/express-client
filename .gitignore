@@ -1,4 +1,6 @@
 node_modules
 npm-debug.log
-index.js
-lib/
+yarn-error.log
+/index.js
+/lib/*
+/test/test.js
