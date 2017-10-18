@@ -236,6 +236,7 @@ class History {
       const data = {};
 
       const attributes = Array.prototype.slice.call(el.attributes);
+
       attributes.forEach(attribute => {
         if (attribute.nodeName.indexOf('data-') === 0) {
           data[attribute.nodeName] = attribute.nodeValue;
