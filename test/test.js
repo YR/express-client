@@ -10794,8 +10794,9 @@ var libhistory__History = function () {
    * @param {Function} request(url)
    * @param {Function} response
    * @param {Function} fn(req, res)
+   * @param {Function} fnExternal(url, data)
    */
-  function History(request, response, fn) {
+  function History(request, response, fn, fnExternal) {
     babelHelpers.classCallCheck(this, History);
 
     this.cache = {};
@@ -10804,6 +10805,7 @@ var libhistory__History = function () {
     this.request = request;
     this.response = response;
     this.fn = fn;
+    this.fnExternal = fnExternal;
     this.onClick = this.onClick.bind(this);
     this.onPopstate = this.onPopstate.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
@@ -11025,7 +11027,16 @@ var libhistory__History = function () {
 
     // Cross origin
     if (!libhistory__sameOrigin(el.href)) {
-      return void this.fn(el.href);
+      var data = {};
+
+      var attributes = Array.prototype.slice.call(el.attributes);
+      attributes.forEach(function (attribute) {
+        if (attribute.nodeName.indexOf('data-') === 0) {
+          data[attribute.nodeName] = attribute.nodeValue;
+        }
+      });
+
+      return void this.fnExternal(el.href, data);
     }
 
     // IE11 prefixes extra slash on absolute links
@@ -11097,10 +11108,11 @@ function libhistory__sameOrigin(url) {
  * @param {Function} request
  * @param {Function} response
  * @param {Function} fn(req, res)
+ * @param {Function} fnExternal(url, data)
  * @returns {History}
  */
-$m['lib/history'].exports = function (request, response, fn) {
-  return new libhistory__History(request, response, fn);
+$m['lib/history'].exports = function (request, response, fn, fnExternal) {
+  return new libhistory__History(request, response, fn, fnExternal);
 };
 /*≠≠ lib/history.js ≠≠*/
 
@@ -11144,6 +11156,7 @@ var libapplication__Application = function (_Emitter) {
     _this.parent = null;
 
     _this.handle = _this.handle.bind(_this);
+    _this.handleExternalLink = _this.handleExternalLink.bind(_this);
     _this.navigateTo = _this.navigateTo.bind(_this);
     _this.redirectTo = _this.redirectTo.bind(_this);
     _this.getCurrentContext = _this.getCurrentContext.bind(_this);
@@ -11164,7 +11177,7 @@ var libapplication__Application = function (_Emitter) {
       return res;
     };
 
-    _this.history = libapplication__history(requestFactory, responseFactory, _this.handle);
+    _this.history = libapplication__history(requestFactory, responseFactory, _this.handle, _this.handleExternalLink);
 
     // Route ALL/POST methods to router
     _this.all = _this._router.all.bind(_this._router);
@@ -11291,6 +11304,17 @@ var libapplication__Application = function (_Emitter) {
       this.emit('request', req, res);
       this._router.handle(req, res, done || libapplication__NOOP);
     }
+  };
+
+  /**
+   * Handle external link
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} done
+   */
+
+  Application.prototype.handleExternalLink = function handleExternalLink(url, data) {
+    this.emit('link:external', url, data);
   };
 
   /**

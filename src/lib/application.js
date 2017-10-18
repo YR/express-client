@@ -32,6 +32,7 @@ class Application extends Emitter {
     this.parent = null;
 
     this.handle = this.handle.bind(this);
+    this.handleExternalLink = this.handleExternalLink.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
     this.redirectTo = this.redirectTo.bind(this);
     this.getCurrentContext = this.getCurrentContext.bind(this);
@@ -52,7 +53,7 @@ class Application extends Emitter {
       return res;
     };
 
-    this.history = history(requestFactory, responseFactory, this.handle);
+    this.history = history(requestFactory, responseFactory, this.handle, this.handleExternalLink);
 
     // Route ALL/POST methods to router
     this.all = this._router.all.bind(this._router);
@@ -160,6 +161,16 @@ class Application extends Emitter {
       this.emit('request', req, res);
       this._router.handle(req, res, done || NOOP);
     }
+  }
+
+  /**
+   * Handle external link
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} done
+   */
+  handleExternalLink(url, data) {
+    this.emit('link:external', url, data);
   }
 
   /**
