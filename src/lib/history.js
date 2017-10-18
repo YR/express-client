@@ -12,14 +12,16 @@ class History {
    * @param {Function} request(url)
    * @param {Function} response
    * @param {Function} fn(req, res)
+   * @param {Function} fnExternal(url, data)
    */
-  constructor(request, response, fn) {
+  constructor(request, response, fn, fnExternal) {
     this.cache = {};
     this.current = '';
     this.running = false;
     this.request = request;
     this.response = response;
     this.fn = fn;
+    this.fnExternal = fnExternal;
     this.onClick = this.onClick.bind(this);
     this.onPopstate = this.onPopstate.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
@@ -157,7 +159,7 @@ class History {
       req.reset();
       res.reset();
       // Set flag for use downstream
-      req.cached = (res.cached = true);
+      req.cached = res.cached = true;
       req.reloaded = false;
       debug('context retrieved from cache: %s', url);
     } else {
@@ -231,7 +233,17 @@ class History {
 
     // Cross origin
     if (!sameOrigin(el.href)) {
-      return void this.fn(el.href);
+      const data = {};
+
+      const attributes = Array.prototype.slice.call(el.attributes);
+
+      attributes.forEach(attribute => {
+        if (attribute.nodeName.indexOf('data-') === 0) {
+          data[attribute.nodeName] = attribute.nodeValue;
+        }
+      });
+
+      return void this.fnExternal(el.href, data);
     }
 
     // IE11 prefixes extra slash on absolute links
@@ -304,8 +316,9 @@ function sameOrigin(url) {
  * @param {Function} request
  * @param {Function} response
  * @param {Function} fn(req, res)
+ * @param {Function} fnExternal(url, data)
  * @returns {History}
  */
-module.exports = function(request, response, fn) {
-  return new History(request, response, fn);
+module.exports = function(request, response, fn, fnExternal) {
+  return new History(request, response, fn, fnExternal);
 };
