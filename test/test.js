@@ -11030,6 +11030,7 @@ var libhistory__History = function () {
       var data = {};
 
       var attributes = Array.prototype.slice.call(el.attributes);
+
       attributes.forEach(function (attribute) {
         if (attribute.nodeName.indexOf('data-') === 0) {
           data[attribute.nodeName] = attribute.nodeValue;
