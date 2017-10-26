@@ -26,7 +26,8 @@ if ('browser' != 'browser') {
   };
 }
 (function (global) {
-  var babelHelpers = global.babelHelpers = {};
+  var babelHelpers = global.babelHelpers;
+  if (!babelHelpers) babelHelpers = global.babelHelpers = {};
 
   babelHelpers.classCallCheck = function (instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -9731,6 +9732,11 @@ $m['debug/src/debug'].exports.enabled = debugsrcdebug__enabled;
 $m['debug/src/debug'].exports.humanize = $m['ms'].exports;
 
 /**
+ * Active `debug` instances.
+ */
+$m['debug/src/debug'].exports.instances = [];
+
+/**
  * The currently active debug mode names, and names to skip.
  */
 
@@ -9744,12 +9750,6 @@ $m['debug/src/debug'].exports.skips = [];
  */
 
 $m['debug/src/debug'].exports.formatters = {};
-
-/**
- * Previous log timestamp.
- */
-
-var debugsrcdebug__prevTime;
 
 /**
  * Select a color.
@@ -9780,6 +9780,8 @@ function debugsrcdebug__selectColor(namespace) {
 
 function debugsrcdebug__createDebug(namespace) {
 
+  var prevTime;
+
   function debug() {
     // disabled?
     if (!debug.enabled) return;
@@ -9788,11 +9790,11 @@ function debugsrcdebug__createDebug(namespace) {
 
     // set `diff` timestamp
     var curr = +new Date();
-    var ms = curr - (debugsrcdebug__prevTime || curr);
+    var ms = curr - (prevTime || curr);
     self.diff = ms;
-    self.prev = debugsrcdebug__prevTime;
+    self.prev = prevTime;
     self.curr = curr;
-    debugsrcdebug__prevTime = curr;
+    prevTime = curr;
 
     // turn the `arguments` into a proper Array
     var args = new Array(arguments.length);
@@ -9836,13 +9838,26 @@ function debugsrcdebug__createDebug(namespace) {
   debug.enabled = $m['debug/src/debug'].exports.enabled(namespace);
   debug.useColors = $m['debug/src/debug'].exports.useColors();
   debug.color = debugsrcdebug__selectColor(namespace);
+  debug.destroy = debugsrcdebug__destroy;
 
   // env-specific initialization logic for debug instances
   if ('function' === typeof $m['debug/src/debug'].exports.init) {
     $m['debug/src/debug'].exports.init(debug);
   }
 
+  $m['debug/src/debug'].exports.instances.push(debug);
+
   return debug;
+}
+
+function debugsrcdebug__destroy() {
+  var index = $m['debug/src/debug'].exports.instances.indexOf(this);
+  if (index !== -1) {
+    $m['debug/src/debug'].exports.instances.splice(index, 1);
+    return true;
+  } else {
+    return false;
+  }
 }
 
 /**
@@ -9859,10 +9874,11 @@ function debugsrcdebug__enable(namespaces) {
   $m['debug/src/debug'].exports.names = [];
   $m['debug/src/debug'].exports.skips = [];
 
+  var i;
   var split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
   var len = split.length;
 
-  for (var i = 0; i < len; i++) {
+  for (i = 0; i < len; i++) {
     if (!split[i]) continue; // ignore empty strings
     namespaces = split[i].replace(/\*/g, '.*?');
     if (namespaces[0] === '-') {
@@ -9870,6 +9886,11 @@ function debugsrcdebug__enable(namespaces) {
     } else {
       $m['debug/src/debug'].exports.names.push(new RegExp('^' + namespaces + '$'));
     }
+  }
+
+  for (i = 0; i < $m['debug/src/debug'].exports.instances.length; i++) {
+    var instance = $m['debug/src/debug'].exports.instances[i];
+    instance.enabled = $m['debug/src/debug'].exports.enabled(instance.namespace);
   }
 }
 
@@ -9892,6 +9913,9 @@ function debugsrcdebug__disable() {
  */
 
 function debugsrcdebug__enabled(name) {
+  if (name[name.length - 1] === '*') {
+    return true;
+  }
   var i, len;
   for (i = 0, len = $m['debug/src/debug'].exports.skips.length; i < len; i++) {
     if ($m['debug/src/debug'].exports.skips[i].test(name)) {
@@ -9941,7 +9965,7 @@ $m['debug'].exports.storage = 'undefined' != typeof chrome && 'undefined' != typ
  * Colors.
  */
 
-$m['debug'].exports.colors = ['lightseagreen', 'forestgreen', 'goldenrod', 'dodgerblue', 'darkorchid', 'crimson'];
+$m['debug'].exports.colors = ['#0000CC', '#0000FF', '#0033CC', '#0033FF', '#0066CC', '#0066FF', '#0099CC', '#0099FF', '#00CC00', '#00CC33', '#00CC66', '#00CC99', '#00CCCC', '#00CCFF', '#3300CC', '#3300FF', '#3333CC', '#3333FF', '#3366CC', '#3366FF', '#3399CC', '#3399FF', '#33CC00', '#33CC33', '#33CC66', '#33CC99', '#33CCCC', '#33CCFF', '#6600CC', '#6600FF', '#6633CC', '#6633FF', '#66CC00', '#66CC33', '#9900CC', '#9900FF', '#9933CC', '#9933FF', '#99CC00', '#99CC33', '#CC0000', '#CC0033', '#CC0066', '#CC0099', '#CC00CC', '#CC00FF', '#CC3300', '#CC3333', '#CC3366', '#CC3399', '#CC33CC', '#CC33FF', '#CC6600', '#CC6633', '#CC9900', '#CC9933', '#CCCC00', '#CCCC33', '#FF0000', '#FF0033', '#FF0066', '#FF0099', '#FF00CC', '#FF00FF', '#FF3300', '#FF3333', '#FF3366', '#FF3399', '#FF33CC', '#FF33FF', '#FF6600', '#FF6633', '#FF9900', '#FF9933', '#FFCC00', '#FFCC33'];
 
 /**
  * Currently only WebKit-based Web Inspectors, Firefox >= v31,
@@ -9957,6 +9981,11 @@ function debug__useColors() {
   // explicitly
   if (typeof window !== 'undefined' && window.process && window.process.type === 'renderer') {
     return true;
+  }
+
+  // Internet Explorer and Edge do not support colors.
+  if (typeof navigator !== 'undefined' && navigator.userAgent && navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)) {
+    return false;
   }
 
   // is webkit? http://stackoverflow.com/a/16459606/376773
@@ -10600,7 +10629,11 @@ function querystring__keysSorter(input) {
 }
 
 $m['query-string'].exports.extract = function (str) {
-	return str.split('?')[1] || '';
+	var queryStart = str.indexOf('?');
+	if (queryStart === -1) {
+		return '';
+	}
+	return str.slice(queryStart + 1);
 };
 
 $m['query-string'].exports.parse = function (str, opts) {
@@ -10616,7 +10649,7 @@ $m['query-string'].exports.parse = function (str, opts) {
 		return ret;
 	}
 
-	str = str.trim().replace(/^(\?|#|&)/, '');
+	str = str.trim().replace(/^[?#&]/, '');
 
 	if (!str) {
 		return ret;
