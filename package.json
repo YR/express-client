@@ -1,7 +1,7 @@
 {
   "name": "@yr/express-client",
   "description": "An express.js framework for the browser",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
     "@yr/url-utils": "2.3.x",
