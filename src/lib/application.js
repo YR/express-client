@@ -153,14 +153,9 @@ class Application extends Emitter {
    * @param {Function} done
    */
   handle(req, res, done) {
-    // Handle external link
-    if (typeof req === 'string') {
-      this.emit('link:external', req);
-    } else {
-      this.emit('connect', req);
-      this.emit('request', req, res);
-      this._router.handle(req, res, done || NOOP);
-    }
+    this.emit('connect', req);
+    this.emit('request', req, res);
+    this._router.handle(req, res, done || NOOP);
   }
 
   /**

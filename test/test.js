@@ -545,7 +545,7 @@ assertionerror__AssertionError.prototype.toJSON = function (stack) {
 /*≠≠ node_modules/assertion-error/index.js ≠≠*/
 
 
-/*== node_modules/debug/node_modules/ms/index.js ==*/
+/*== node_modules/ms/index.js ==*/
 $m['ms'] = { exports: {} };
 /**
  * Helpers.
@@ -690,7 +690,7 @@ function ms__plural(ms, n, name) {
   }
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
-/*≠≠ node_modules/debug/node_modules/ms/index.js ≠≠*/
+/*≠≠ node_modules/ms/index.js ≠≠*/
 
 
 /*== node_modules/chai/lib/chai/utils/getActual.js ==*/
@@ -718,35 +718,51 @@ $m['chai/lib/chai/utils/getActual'].exports = function getActual(obj, args) {
 /*≠≠ node_modules/chai/lib/chai/utils/getActual.js ≠≠*/
 
 
-/*== node_modules/type-detect/index.js ==*/
+/*== node_modules/type-detect/type-detect.js ==*/
 $m['type-detect'] = { exports: {} };
-
+(function (global, factory) {
+	typeof $m['type-detect'].exports === 'object' && typeof $m['type-detect'] !== 'undefined' ? $m['type-detect'].exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.typeDetect = factory());
+}(this, (function () { 
 /* !
  * type-detect
  * Copyright(c) 2013 jake luer <jake@alogicalparadox.com>
  * MIT Licensed
  */
-var typedetect__promiseExists = typeof Promise === 'function';
-var typedetect__globalObject = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : self; // eslint-disable-line
-var typedetect__isDom = 'location' in typedetect__globalObject && 'document' in typedetect__globalObject;
-var typedetect__symbolExists = typeof Symbol !== 'undefined';
-var typedetect__mapExists = typeof Map !== 'undefined';
-var typedetect__setExists = typeof Set !== 'undefined';
-var typedetect__weakMapExists = typeof WeakMap !== 'undefined';
-var typedetect__weakSetExists = typeof WeakSet !== 'undefined';
-var typedetect__dataViewExists = typeof DataView !== 'undefined';
-var typedetect__symbolIteratorExists = typedetect__symbolExists && typeof Symbol.iterator !== 'undefined';
-var typedetect__symbolToStringTagExists = typedetect__symbolExists && typeof Symbol.toStringTag !== 'undefined';
-var typedetect__setEntriesExists = typedetect__setExists && typeof Set.prototype.entries === 'function';
-var typedetect__mapEntriesExists = typedetect__mapExists && typeof Map.prototype.entries === 'function';
-var typedetect__setIteratorPrototype = typedetect__setEntriesExists && Object.getPrototypeOf(new Set().entries());
-var typedetect__mapIteratorPrototype = typedetect__mapEntriesExists && Object.getPrototypeOf(new Map().entries());
-var typedetect__arrayIteratorExists = typedetect__symbolIteratorExists && typeof Array.prototype[Symbol.iterator] === 'function';
-var typedetect__arrayIteratorPrototype = typedetect__arrayIteratorExists && Object.getPrototypeOf([][Symbol.iterator]());
-var typedetect__stringIteratorExists = typedetect__symbolIteratorExists && typeof String.prototype[Symbol.iterator] === 'function';
-var typedetect__stringIteratorPrototype = typedetect__stringIteratorExists && Object.getPrototypeOf(''[Symbol.iterator]());
-var typedetect__toStringLeftSliceLength = 8;
-var typedetect__toStringRightSliceLength = -1;
+var promiseExists = typeof Promise === 'function';
+
+/* eslint-disable no-undef */
+var globalObject = typeof self === 'object' ? self : global; // eslint-disable-line id-blacklist
+
+/*
+ * All of these attributes must be available on the global object for the current environment
+ * to be considered a DOM environment (browser)
+ */
+var isDom = typeof window === 'object' &&
+  'document' in window &&
+  'navigator' in window &&
+  'HTMLElement' in window;
+/* eslint-enable */
+
+var symbolExists = typeof Symbol !== 'undefined';
+var mapExists = typeof Map !== 'undefined';
+var setExists = typeof Set !== 'undefined';
+var weakMapExists = typeof WeakMap !== 'undefined';
+var weakSetExists = typeof WeakSet !== 'undefined';
+var dataViewExists = typeof DataView !== 'undefined';
+var symbolIteratorExists = symbolExists && typeof Symbol.iterator !== 'undefined';
+var symbolToStringTagExists = symbolExists && typeof Symbol.toStringTag !== 'undefined';
+var setEntriesExists = setExists && typeof Set.prototype.entries === 'function';
+var mapEntriesExists = mapExists && typeof Map.prototype.entries === 'function';
+var setIteratorPrototype = setEntriesExists && Object.getPrototypeOf(new Set().entries());
+var mapIteratorPrototype = mapEntriesExists && Object.getPrototypeOf(new Map().entries());
+var arrayIteratorExists = symbolIteratorExists && typeof Array.prototype[Symbol.iterator] === 'function';
+var arrayIteratorPrototype = arrayIteratorExists && Object.getPrototypeOf([][Symbol.iterator]());
+var stringIteratorExists = symbolIteratorExists && typeof String.prototype[Symbol.iterator] === 'function';
+var stringIteratorPrototype = stringIteratorExists && Object.getPrototypeOf(''[Symbol.iterator]());
+var toStringLeftSliceLength = 8;
+var toStringRightSliceLength = -1;
 /**
  * ### typeOf (obj)
  *
@@ -757,7 +773,7 @@ var typedetect__toStringRightSliceLength = -1;
  * @return {String} object type
  * @api public
  */
-$m['type-detect'].exports = function typeDetect(obj) {
+function typeDetect(obj) {
   /* ! Speed optimisation
    * Pre:
    *   string literal     x 3,039,035 ops/sec ±1.62% (78 runs sampled)
@@ -803,7 +819,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    *  - IE 11 Worker === "[object WorkerGlobalScope]"
    *  - IE Edge Worker === "[object WorkerGlobalScope]"
    */
-  if (obj === typedetect__globalObject) {
+  if (obj === globalObject) {
     return 'global';
   }
 
@@ -813,11 +829,14 @@ $m['type-detect'].exports = function typeDetect(obj) {
    * Post:
    *   array literal      x 22,479,650 ops/sec ±0.96% (81 runs sampled)
    */
-  if (Array.isArray(obj) && (typedetect__symbolToStringTagExists === false || !(Symbol.toStringTag in obj))) {
+  if (
+    Array.isArray(obj) &&
+    (symbolToStringTagExists === false || !(Symbol.toStringTag in obj))
+  ) {
     return 'Array';
   }
 
-  if (typedetect__isDom) {
+  if (isDom) {
     /* ! Spec Conformance
      * (https://html.spec.whatwg.org/multipage/browsers.html#location)
      * WhatWG HTML$7.7.3 - The `Location` interface
@@ -825,7 +844,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      *  - IE <=11 === "[object Object]"
      *  - IE Edge <=13 === "[object Object]"
      */
-    if (obj === typedetect__globalObject.location) {
+    if (obj === globalObject.location) {
       return 'Location';
     }
 
@@ -848,7 +867,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      *  - IE 11 === "[object HTMLDocument]"
      *  - IE Edge <=13 === "[object HTMLDocument]"
      */
-    if (obj === typedetect__globalObject.document) {
+    if (obj === globalObject.document) {
       return 'Document';
     }
 
@@ -858,7 +877,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      * Test: `Object.prototype.toString.call(navigator.mimeTypes)``
      *  - IE <=10 === "[object MSMimeTypesCollection]"
      */
-    if (obj === (typedetect__globalObject.navigator || {}).mimeTypes) {
+    if (obj === (globalObject.navigator || {}).mimeTypes) {
       return 'MimeTypeArray';
     }
 
@@ -868,7 +887,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      * Test: `Object.prototype.toString.call(navigator.plugins)``
      *  - IE <=10 === "[object MSPluginsCollection]"
      */
-    if (obj === (typedetect__globalObject.navigator || {}).plugins) {
+    if (obj === (globalObject.navigator || {}).plugins) {
       return 'PluginArray';
     }
 
@@ -878,7 +897,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      * Test: `Object.prototype.toString.call(document.createElement('blockquote'))``
      *  - IE <=10 === "[object HTMLBlockElement]"
      */
-    if (obj instanceof HTMLElement && obj.tagName === 'BLOCKQUOTE') {
+    if (obj instanceof globalObject.HTMLElement && obj.tagName === 'BLOCKQUOTE') {
       return 'HTMLQuoteElement';
     }
 
@@ -894,7 +913,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      *  - Firefox === "[object HTMLTableCellElement]"
      *  - Safari === "[object HTMLTableCellElement]"
      */
-    if (obj instanceof HTMLElement && obj.tagName === 'TD') {
+    if (obj instanceof globalObject.HTMLElement && obj.tagName === 'TD') {
       return 'HTMLTableDataCellElement';
     }
 
@@ -910,7 +929,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
      *  - Firefox === "[object HTMLTableCellElement]"
      *  - Safari === "[object HTMLTableCellElement]"
      */
-    if (obj instanceof HTMLElement && obj.tagName === 'TH') {
+    if (obj instanceof globalObject.HTMLElement && obj.tagName === 'TH') {
       return 'HTMLTableHeaderCellElement';
     }
   }
@@ -937,7 +956,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
   *   Int8Array          x 6,606,078 ops/sec ±1.74% (81 runs sampled)
   *   Uint8ClampedArray  x 6,602,224 ops/sec ±1.77% (83 runs sampled)
   */
-  var stringTag = typedetect__symbolToStringTagExists && obj[Symbol.toStringTag];
+  var stringTag = (symbolToStringTagExists && obj[Symbol.toStringTag]);
   if (typeof stringTag === 'string') {
     return stringTag;
   }
@@ -974,7 +993,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    *  - Firefox 29-Latest === "[object Promise]"
    *  - Safari 7.1-Latest === "[object Promise]"
    */
-  if (typedetect__promiseExists && objPrototype === Promise.prototype) {
+  if (promiseExists && objPrototype === Promise.prototype) {
     return 'Promise';
   }
 
@@ -984,7 +1003,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
   * Post:
   *   set                x 4,545,879 ops/sec ±1.13% (83 runs sampled)
   */
-  if (typedetect__setExists && objPrototype === Set.prototype) {
+  if (setExists && objPrototype === Set.prototype) {
     return 'Set';
   }
 
@@ -994,7 +1013,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
   * Post:
   *   map                x 4,183,945 ops/sec ±6.59% (82 runs sampled)
   */
-  if (typedetect__mapExists && objPrototype === Map.prototype) {
+  if (mapExists && objPrototype === Map.prototype) {
     return 'Map';
   }
 
@@ -1004,7 +1023,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
   * Post:
   *   weakset            x 4,237,510 ops/sec ±2.01% (77 runs sampled)
   */
-  if (typedetect__weakSetExists && objPrototype === WeakSet.prototype) {
+  if (weakSetExists && objPrototype === WeakSet.prototype) {
     return 'WeakSet';
   }
 
@@ -1014,7 +1033,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
   * Post:
   *   weakmap            x 3,881,384 ops/sec ±1.45% (82 runs sampled)
   */
-  if (typedetect__weakMapExists && objPrototype === WeakMap.prototype) {
+  if (weakMapExists && objPrototype === WeakMap.prototype) {
     return 'WeakMap';
   }
 
@@ -1024,7 +1043,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    * Test: `Object.prototype.toString.call(new DataView(new ArrayBuffer(1)))``
    *  - Edge <=13 === "[object Object]"
    */
-  if (typedetect__dataViewExists && objPrototype === DataView.prototype) {
+  if (dataViewExists && objPrototype === DataView.prototype) {
     return 'DataView';
   }
 
@@ -1034,7 +1053,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    * Test: `Object.prototype.toString.call(new Map().entries())``
    *  - Edge <=13 === "[object Object]"
    */
-  if (typedetect__mapExists && objPrototype === typedetect__mapIteratorPrototype) {
+  if (mapExists && objPrototype === mapIteratorPrototype) {
     return 'Map Iterator';
   }
 
@@ -1044,7 +1063,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    * Test: `Object.prototype.toString.call(new Set().entries())``
    *  - Edge <=13 === "[object Object]"
    */
-  if (typedetect__setExists && objPrototype === typedetect__setIteratorPrototype) {
+  if (setExists && objPrototype === setIteratorPrototype) {
     return 'Set Iterator';
   }
 
@@ -1054,7 +1073,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    * Test: `Object.prototype.toString.call([][Symbol.iterator]())``
    *  - Edge <=13 === "[object Object]"
    */
-  if (typedetect__arrayIteratorExists && objPrototype === typedetect__arrayIteratorPrototype) {
+  if (arrayIteratorExists && objPrototype === arrayIteratorPrototype) {
     return 'Array Iterator';
   }
 
@@ -1064,7 +1083,7 @@ $m['type-detect'].exports = function typeDetect(obj) {
    * Test: `Object.prototype.toString.call(''[Symbol.iterator]())``
    *  - Edge <=13 === "[object Object]"
    */
-  if (typedetect__stringIteratorExists && objPrototype === typedetect__stringIteratorPrototype) {
+  if (stringIteratorExists && objPrototype === stringIteratorPrototype) {
     return 'String Iterator';
   }
 
@@ -1078,11 +1097,18 @@ $m['type-detect'].exports = function typeDetect(obj) {
     return 'Object';
   }
 
-  return Object.prototype.toString.call(obj).slice(typedetect__toStringLeftSliceLength, typedetect__toStringRightSliceLength);
-};
+  return Object
+    .prototype
+    .toString
+    .call(obj)
+    .slice(toStringLeftSliceLength, toStringRightSliceLength);
+}
 
-$m['type-detect'].exports.typeDetect = $m['type-detect'].exports;
-/*≠≠ node_modules/type-detect/index.js ≠≠*/
+return typeDetect;
+
+})));
+
+/*≠≠ node_modules/type-detect/type-detect.js ≠≠*/
 
 
 /*== node_modules/chai/lib/chai/utils/transferFlags.js ==*/
@@ -11330,14 +11356,9 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.handle = function handle(req, res, done) {
-    // Handle external link
-    if (typeof req === 'string') {
-      this.emit('link:external', req);
-    } else {
-      this.emit('connect', req);
-      this.emit('request', req, res);
-      this._router.handle(req, res, done || libapplication__NOOP);
-    }
+    this.emit('connect', req);
+    this.emit('request', req, res);
+    this._router.handle(req, res, done || libapplication__NOOP);
   };
 
   /**
