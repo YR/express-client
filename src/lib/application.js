@@ -32,11 +32,10 @@ class Application extends Emitter {
     this.parent = null;
 
     this.handle = this.handle.bind(this);
+    this.handleExternalLink = this.handleExternalLink.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
     this.redirectTo = this.redirectTo.bind(this);
     this.getCurrentContext = this.getCurrentContext.bind(this);
-    this.render = this.render.bind(this);
-    this.rerender = this.rerender.bind(this);
     this.reload = this.reload.bind(this);
 
     // Create request/response factories
@@ -54,7 +53,7 @@ class Application extends Emitter {
       return res;
     };
 
-    this.history = history(requestFactory, responseFactory, this.handle);
+    this.history = history(requestFactory, responseFactory, this.handle, this.handleExternalLink);
 
     // Route ALL/POST methods to router
     this.all = this._router.all.bind(this._router);
@@ -148,11 +147,33 @@ class Application extends Emitter {
   }
 
   /**
+   * Run request/response through router's middleware pipline
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} done
+   */
+  handle(req, res, done) {
+    this.emit('connect', req);
+    this.emit('request', req, res);
+    this._router.handle(req, res, done || NOOP);
+  }
+
+  /**
+   * Handle external link
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} done
+   */
+  handleExternalLink(url, data) {
+    this.emit('link:external', url, data);
+  }
+
+  /**
    * Change/update browser history state
    * @param {String} url
-   * @param {String} [title]
-   * @param {Boolean} [isUpdate]
-   * @param {Boolean} [noScroll]
+   * @param {String} title
+   * @param {Boolean} isUpdate
+   * @param {Boolean} noScroll
    */
   navigateTo(url, title, isUpdate, noScroll) {
     this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
@@ -191,45 +212,10 @@ class Application extends Emitter {
   }
 
   /**
-   * Render application view
-   * @param {Request} req
-   * @param {Response} res
-   */
-  render(req, res) {
-    throw Error('render() method not implemented. Extend the Application prototype with behaviour');
-  }
-
-  /**
-   * Rerender application view
-   * @param {Request} req
-   * @param {Response} res
-   */
-  rerender(req, res) {
-    throw Error('rerender() method not implemented. Extend the Application prototype with behaviour');
-  }
-
-  /**
    * Reload current location
    */
   reload() {
     this[this.parent ? 'parent' : 'history'].reload();
-  }
-
-  /**
-   * Run request/response through router's middleware pipline
-   * @param {String} action
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Function} [done]
-   */
-  handle(action, req, res, done) {
-    if (action === 'external') {
-      this.emit('link:external', req, res);
-    } else {
-      this.emit('connect', req);
-      this.emit('request', req, res);
-      this._router.handle(req, res, done || NOOP, action !== 'handle' ? this[action] : undefined);
-    }
   }
 }
 

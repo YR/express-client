@@ -12,14 +12,16 @@ class History {
    * @param {Function} request(url)
    * @param {Function} response
    * @param {Function} fn(req, res)
+   * @param {Function} fnExternal(url, data)
    */
-  constructor(request, response, fn) {
+  constructor(request, response, fn, fnExternal) {
     this.cache = {};
     this.current = '';
     this.running = false;
     this.request = request;
     this.response = response;
     this.fn = fn;
+    this.fnExternal = fnExternal;
     this.onClick = this.onClick.bind(this);
     this.onPopstate = this.onPopstate.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
@@ -54,14 +56,13 @@ class History {
   /**
    * Create a new or updated history state at 'url' with 'title'
    * @param {String} url
-   * @param {String} [title]
-   * @param {Boolean} [isUpdate]
-   * @param {Boolean} [noScroll]
-   * @param {String} [action]
+   * @param {String} title
+   * @param {Boolean} isUpdate
+   * @param {Boolean} noScroll
    */
-  navigateTo(url, title, isUpdate, noScroll, action) {
+  navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
-    if (url !== urlUtils.getCurrent()) {
+    if (this.running && url !== urlUtils.getCurrent()) {
       if (this.running) {
         // Will return empty if malformed
         url = urlUtils.encode(url);
@@ -75,7 +76,7 @@ class History {
         if (title) {
           document.title = title;
         }
-        this.handle(url, noScroll, action);
+        this.handle(url, noScroll);
       } else {
         this.redirectTo(url);
       }
@@ -104,7 +105,7 @@ class History {
         ctx.res.reset();
         ctx.req.reloaded = true;
         ctx.res.req = ctx.req;
-        this.fn('handle', ctx.req, ctx.res);
+        this.fn(ctx.req, ctx.res);
       }
     }
   }
@@ -133,10 +134,9 @@ class History {
    * Handle history change and notify
    * @param {String} [url]
    * @param {Boolean} [noScroll]
-   * @param {String} [action]
    * @returns {Object}
    */
-  handle(url, noScroll = false, action = 'handle') {
+  handle(url, noScroll) {
     let ctx = {};
     let req, res;
 
@@ -182,7 +182,7 @@ class History {
       window.scrollTo(0, 0);
     }
 
-    this.fn(action, req, res);
+    this.fn(req, res);
 
     // Store reference to current
     // Do after calling fn so previous ctx available with getCurrentContext
@@ -243,7 +243,7 @@ class History {
         }
       });
 
-      return void this.fn('external', el.href, data);
+      return void this.fnExternal(el.href, data);
     }
 
     // IE11 prefixes extra slash on absolute links
@@ -265,16 +265,12 @@ class History {
     // Flagged as unhandled
     if (el.getAttribute('data-unhandled') != null) {
       this.redirectTo(path);
-    } else if (el.getAttribute('data-rendered') != null) {
-      this.navigateTo(path, undefined, false, true, 'render');
-    } else if (el.getAttribute('data-rerendered') != null) {
-      this.navigateTo(path, undefined, false, true, 'rerender');
     } else {
       // Blur focus
       el.blur();
 
       debug('click event intercepted from %s', el);
-      this.navigateTo(path, undefined, false, false, 'handle');
+      this.navigateTo(path);
     }
   }
 }
