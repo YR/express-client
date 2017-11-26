@@ -319,6 +319,6 @@ function sameOrigin(url) {
  * @param {Function} fnExternal(url, data)
  * @returns {History}
  */
-module.exports = function(request, response, fn, fnExternal) {
+module.exports = function historyFactory(request, response, fn, fnExternal) {
   return new History(request, response, fn, fnExternal);
 };

@@ -17,7 +17,7 @@ class Router {
    * Constructor
    * @param {Object} [options]
    */
-  constructor (options) {
+  constructor(options) {
     options = Object.assign({}, DEFAULT_OPTIONS, options);
 
     const boundMethod = this.method.bind(this);
@@ -47,43 +47,43 @@ class Router {
    * @param {String} name
    * @param {Function} fn(req, res, next, value)
    */
-  param (name, fn) {
-    if (!this.params) this.params = {};
+  param(name, fn) {
+    if (!this.params) {
+      this.params = {};
+    }
     this.params[name] = fn;
   }
 
   /**
    * Add one or more 'fn' to middleware pipeline at optional 'path'
    */
-  use (...fns) {
+  use(...fns) {
     let offset = 0;
     let path = '/';
 
-    if ('string' == typeof fns[0]) {
+    if (typeof fns[0] === 'string') {
       offset = 1;
       path = fns[0];
     }
 
-    fns
-      .slice(offset)
-      .forEach((fn) => {
-        if (fn instanceof Router) {
-          fn = fn.handle;
-        }
-        const lyr = layer(path, fn, this.matcherOpts);
+    fns.slice(offset).forEach(fn => {
+      if (fn instanceof Router) {
+        fn = fn.handle;
+      }
+      const lyr = layer(path, fn, this.matcherOpts);
 
-        debug('adding router middleware %s with path %s', lyr.name, path);
-        this.stack.push(lyr);
-      });
+      debug('adding router middleware %s with path %s', lyr.name, path);
+      this.stack.push(lyr);
+    });
   }
 
   /**
    * Register method at 'path'
    * @param {String} path
    */
-  method (path, ...fns) {
-    fns.forEach((fn) => {
-      let lyr = layer(path, fn, this.strictMatcherOpts);
+  method(path, ...fns) {
+    fns.forEach(fn => {
+      const lyr = layer(path, fn, this.strictMatcherOpts);
 
       lyr.route = true;
 
@@ -98,11 +98,11 @@ class Router {
    * @param {Response} res
    * @param {Function} done
    */
-  handle (req, res, done) {
+  handle(req, res, done) {
     const self = this;
     const parentUrl = req.baseUrl || '';
+    const processedParams = {};
     let idx = 0;
-    let processedParams = {};
     let removed = '';
 
     // Update done to restore req props
@@ -114,11 +114,11 @@ class Router {
 
     next();
 
-    function next (err) {
+    function next(err) {
       const lyr = self.stack[idx++];
       const layerErr = err;
 
-      if (removed.length != 0) {
+      if (removed.length !== 0) {
         debug('untrim %s from url %s', removed, req.path);
         req.baseUrl = parentUrl;
         req.path = urlUtils.join(removed, req.path);
@@ -126,25 +126,35 @@ class Router {
       }
 
       // Exit
-      if (!lyr) return done(layerErr);
+      if (!lyr) {
+        return void done(layerErr);
+      }
 
       // Skip if no match or err and route layer
-      if (!lyr.match(req.path) || layerErr && !lyr.fastmatch) return next(layerErr);
+      if (!lyr.match(req.path) || (layerErr && !lyr.fastmatch)) {
+        return void next(layerErr);
+      }
 
       debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
 
       // Store params
       if (self.mergeParams) {
-        if (!req.params) req.params = {};
+        if (!req.params) {
+          req.params = {};
+        }
         Object.assign(req.params, lyr.params);
       } else {
         req.params = lyr.params;
       }
 
       // Process params if necessary
-      self._processParams(processedParams, req.params, Object.keys(lyr.params), req, res, (err) => {
-        if (err) return next(layerErr || err);
-        if (!lyr.route) trim(lyr);
+      self._processParams(processedParams, req.params, Object.keys(lyr.params), req, res, err => {
+        if (err) {
+          return next(layerErr || err);
+        }
+        if (!lyr.route) {
+          trim(lyr);
+        }
         if (layerErr) {
           lyr.handleError(layerErr, req, res, next);
         } else {
@@ -153,12 +163,14 @@ class Router {
       });
     }
 
-    function trim (layer) {
-      if (layer.path.length != 0) {
+    function trim(layer) {
+      if (layer.path.length !== 0) {
         debug('trim %s from url %s', layer.path, req.path);
         removed = layer.path;
         req.path = req.path.substr(removed.length);
-        if (req.path.charAt(0) != '/') req.path = '/' + req.path;
+        if (req.path.charAt(0) !== '/') {
+          req.path = '/' + req.path;
+        }
 
         req.baseUrl = urlUtils.join(parentUrl, removed);
       }
@@ -174,15 +186,19 @@ class Router {
    * @param {Response} res
    * @param {Function} done(err)
    */
-  _processParams (processedParams, params, keys, req, res, done) {
+  _processParams(processedParams, params, keys, req, res, done) {
     const self = this;
     let idx = 0;
 
-    function next (err) {
+    function next(err) {
       // Stop processing on any error
-      if (err) return done(err);
+      if (err) {
+        return void done(err);
+      }
 
-      if (idx >= keys.length) return done();
+      if (idx >= keys.length) {
+        return void done();
+      }
 
       const name = keys[idx++];
       const fn = self.params[name];
@@ -210,16 +226,16 @@ class Router {
  * @param {Object} obj
  * @returns {Function}
  */
-function restore (fn, obj) {
-  let props = new Array(arguments.length - 2);
-  let vals = new Array(arguments.length - 2);
+function restore(fn, obj) {
+  const props = new Array(arguments.length - 2);
+  const vals = new Array(arguments.length - 2);
 
   for (let i = 0; i < props.length; i++) {
     props[i] = arguments[i + 2];
     vals[i] = obj[props[i]];
   }
 
-  return function () {
+  return function() {
     // Restore vals
     for (let i = 0; i < props.length; i++) {
       obj[props[i]] = vals[i];
@@ -234,6 +250,6 @@ function restore (fn, obj) {
  * @param {Object} [options]
  * @returns {Router}
  */
-module.exports = function (options) {
+module.exports = function routerFactory(options) {
   return new Router(options);
 };

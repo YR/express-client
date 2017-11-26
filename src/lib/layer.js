@@ -110,6 +110,6 @@ class Layer {
  * @param {Object} options
  * @returns {Layer}
  */
-module.exports = function(path, fn, options) {
+module.exports = function layerFactory(path, fn, options) {
   return new Layer(path, fn, options);
 };

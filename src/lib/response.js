@@ -120,7 +120,7 @@ class Response extends Emitter {
  * Instance factory
  * @returns {Response}
  */
-module.exports = function() {
+module.exports = function responseFactory() {
   return new Response();
 };
 module.exports.Response = Response;

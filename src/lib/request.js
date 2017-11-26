@@ -35,7 +35,7 @@ class Request extends Emitter {
     this.reloaded = false;
     this.search = qs ? `?${qs}` : '';
     // Ignore hash
-    this.url = (this.originalUrl = url.split('#')[0]);
+    this.url = this.originalUrl = url.split('#')[0];
   }
 
   /**
@@ -66,7 +66,7 @@ class Request extends Emitter {
  * @param {Boolean} bootstrap
  * @returns {Request}
  */
-module.exports = function(url, bootstrap) {
+module.exports = function requestFactory(url, bootstrap) {
   return new Request(url, bootstrap);
 };
 module.exports.Request = Request;

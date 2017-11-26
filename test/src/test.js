@@ -1,7 +1,7 @@
 'use strict';
 
 var Application = require('../../lib/application');
-var expect = require('chai').expect;
+var expect = require('chai/chai.js').expect;
 var express = require('../../index');
 var Request = require('../../lib/request');
 var Response = require('../../lib/response');
