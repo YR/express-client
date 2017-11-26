@@ -2,7 +2,6 @@
 
 const Debug = require('debug');
 const layer = require('./layer');
-const urlUtils = require('@yr/url-utils');
 
 const DEFAULT_OPTIONS = {
   mergeParams: true,
@@ -67,9 +66,6 @@ class Router {
     }
 
     fns.slice(offset).forEach(fn => {
-      if (fn instanceof Router) {
-        fn = fn.handle;
-      }
       const lyr = layer(path, fn, this.matcherOpts);
 
       debug('adding router middleware %s with path %s', lyr.name, path);
@@ -99,17 +95,13 @@ class Router {
    * @param {Function} done
    * @param {Function} [optionalFn]
    */
-  handle(req, res, done) {
+  handle(req, res, done /*, optionalFn */) {
     const self = this;
     // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
     const optionalFn = arguments[3];
     const parentUrl = req.baseUrl || '';
     const processedParams = {};
     let idx = 0;
-    let removed = '';
-
-    // Update done to restore req props
-    done = restore(done, req, 'baseUrl', 'next', 'params');
 
     // Setup next layer
     req.next = next;
@@ -120,13 +112,6 @@ class Router {
     function next(err) {
       const lyr = self.stack[idx++];
       const layerErr = err;
-
-      if (removed.length !== 0) {
-        debug('untrim %s from url %s', removed, req.path);
-        req.baseUrl = parentUrl;
-        req.path = urlUtils.join(removed, req.path);
-        removed = '';
-      }
 
       // Exit, no more layers to match
       if (!lyr) {
@@ -155,28 +140,12 @@ class Router {
         if (err) {
           return next(layerErr || err);
         }
-        if (!lyr.route) {
-          trim(lyr);
-        }
         if (layerErr) {
           lyr.handleError(layerErr, req, res, next);
         } else {
           lyr.handleRequest(req, res, next, optionalFn);
         }
       });
-    }
-
-    function trim(layer) {
-      if (layer.path.length !== 0) {
-        debug('trim %s from url %s', layer.path, req.path);
-        removed = layer.path;
-        req.path = req.path.substr(removed.length);
-        if (req.path.charAt(0) !== '/') {
-          req.path = '/' + req.path;
-        }
-
-        req.baseUrl = urlUtils.join(parentUrl, removed);
-      }
     }
   }
 
@@ -221,31 +190,6 @@ class Router {
       done();
     }
   }
-}
-
-/**
- * Restore 'obj' props
- * @param {Function} fn
- * @param {Object} obj
- * @returns {Function}
- */
-function restore(fn, obj) {
-  const props = new Array(arguments.length - 2);
-  const vals = new Array(arguments.length - 2);
-
-  for (let i = 0; i < props.length; i++) {
-    props[i] = arguments[i + 2];
-    vals[i] = obj[props[i]];
-  }
-
-  return function() {
-    // Restore vals
-    for (let i = 0; i < props.length; i++) {
-      obj[props[i]] = vals[i];
-    }
-
-    return fn.apply(this, arguments);
-  };
 }
 
 /**

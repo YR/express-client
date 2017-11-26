@@ -12794,7 +12794,6 @@ $m['lib/router'] = { exports: {} };
 
 var librouter__Debug = $m['debug'].exports;
 var librouter__layer = $m['lib/layer'].exports;
-var librouter__urlUtils = $m['@yr/url-utils'].exports;
 
 var librouter__DEFAULT_OPTIONS = {
   mergeParams: true,
@@ -12869,9 +12868,6 @@ var librouter__Router = function () {
     }
 
     fns.slice(offset).forEach(function (fn) {
-      if (fn instanceof Router) {
-        fn = fn.handle;
-      }
       var lyr = librouter__layer(path, fn, _this.matcherOpts);
 
       librouter__debug('adding router middleware %s with path %s', lyr.name, path);
@@ -12909,17 +12905,13 @@ var librouter__Router = function () {
    * @param {Function} [optionalFn]
    */
 
-  Router.prototype.handle = function handle(req, res, done) {
+  Router.prototype.handle = function handle(req, res, done /*, optionalFn */) {
     var self = this;
     // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
     var optionalFn = arguments[3];
     var parentUrl = req.baseUrl || '';
     var processedParams = {};
     var idx = 0;
-    var removed = '';
-
-    // Update done to restore req props
-    done = librouter__restore(done, req, 'baseUrl', 'next', 'params');
 
     // Setup next layer
     req.next = next;
@@ -12930,13 +12922,6 @@ var librouter__Router = function () {
     function next(err) {
       var lyr = self.stack[idx++];
       var layerErr = err;
-
-      if (removed.length !== 0) {
-        librouter__debug('untrim %s from url %s', removed, req.path);
-        req.baseUrl = parentUrl;
-        req.path = librouter__urlUtils.join(removed, req.path);
-        removed = '';
-      }
 
       // Exit, no more layers to match
       if (!lyr) {
@@ -12965,28 +12950,12 @@ var librouter__Router = function () {
         if (err) {
           return next(layerErr || err);
         }
-        if (!lyr.route) {
-          trim(lyr);
-        }
         if (layerErr) {
           lyr.handleError(layerErr, req, res, next);
         } else {
           lyr.handleRequest(req, res, next, optionalFn);
         }
       });
-    }
-
-    function trim(layer) {
-      if (layer.path.length !== 0) {
-        librouter__debug('trim %s from url %s', layer.path, req.path);
-        removed = layer.path;
-        req.path = req.path.substr(removed.length);
-        if (req.path.charAt(0) !== '/') {
-          req.path = '/' + req.path;
-        }
-
-        req.baseUrl = librouter__urlUtils.join(parentUrl, removed);
-      }
     }
   };
 
@@ -13037,36 +13006,11 @@ var librouter__Router = function () {
 }();
 
 /**
- * Restore 'obj' props
- * @param {Function} fn
- * @param {Object} obj
- * @returns {Function}
- */
-
-function librouter__restore(fn, obj) {
-  var props = new Array(arguments.length - 2);
-  var vals = new Array(arguments.length - 2);
-
-  for (var i = 0; i < props.length; i++) {
-    props[i] = arguments[i + 2];
-    vals[i] = obj[props[i]];
-  }
-
-  return function () {
-    // Restore vals
-    for (var _i = 0; _i < props.length; _i++) {
-      obj[props[_i]] = vals[_i];
-    }
-
-    return fn.apply(this, arguments);
-  };
-}
-
-/**
  * Instance factory
  * @param {Object} [options]
  * @returns {Router}
  */
+
 $m['lib/router'].exports = function routerFactory(options) {
   return new librouter__Router(options);
 };
@@ -13874,22 +13818,17 @@ var libapplication__Application = function (_Emitter) {
     _this.settings = {
       env: 'development' || 'development'
     };
-    _this.cache = {};
     _this.locals = {};
-    _this.mountpath = '/';
     _this._router = libapplication__router({
       caseSensitive: false,
       strict: false,
       mergeParams: true
     });
-    _this.parent = null;
 
     _this.handle = _this.handle.bind(_this);
     _this.navigateTo = _this.navigateTo.bind(_this);
     _this.redirectTo = _this.redirectTo.bind(_this);
     _this.getCurrentContext = _this.getCurrentContext.bind(_this);
-    _this.render = _this.render.bind(_this);
-    _this.rerender = _this.rerender.bind(_this);
     _this.reload = _this.reload.bind(_this);
 
     // Create request/response factories
@@ -13951,25 +13890,6 @@ var libapplication__Application = function (_Emitter) {
     }
 
     fns.slice(offset).forEach(function (fn) {
-      if (fn instanceof Application) {
-        var app = fn;
-        var handler = app.handle;
-
-        app.mountpath = path;
-        app.parent = _this2;
-        fn = function mounted_app(req, res, next) {
-          // Change app reference to mounted
-          var orig = req.app;
-
-          req.app = res.app = app;
-          handler(req, res, function (err) {
-            // Restore app reference when done
-            req.app = res.app = orig;
-            next(err);
-          });
-        };
-      }
-
       libapplication__debug('adding application middleware layer with path %s', path);
       _this2._router.use(path, fn);
     });
@@ -14013,9 +13933,7 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.listen = function listen() {
-    if (!this.parent) {
-      this.history.listen();
-    }
+    this.history.listen();
   };
 
   /**
@@ -14027,7 +13945,7 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll) {
-    this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
+    this.history.navigateTo(url, title, isUpdate, noScroll);
   };
 
   /**
@@ -14037,10 +13955,6 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.redirectTo = function redirectTo(status, url) {
-    if (this.parent) {
-      return void this.parent.redirectTo(status, url);
-    }
-
     // TODO: parse url and check for absolute/relative
     if (!url) {
       url = status;
@@ -14061,7 +13975,7 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.getCurrentContext = function getCurrentContext() {
-    return this[this.parent ? 'parent' : 'history'].getCurrentContext();
+    return this.history.getCurrentContext();
   };
 
   /**
@@ -14089,7 +14003,7 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.reload = function reload() {
-    this[this.parent ? 'parent' : 'history'].reload();
+    this.history.reload();
   };
 
   /**
@@ -14299,29 +14213,6 @@ describe('express-client', function () {
           testsrctest__expect(err).to.exist;
         });
       });
-      it('should allow mounting of sub routers', function () {
-        var router1 = testsrctest__routerFactory();
-        var router2 = testsrctest__routerFactory();
-        var request = testsrctest__requestFactory('/foo/bar');
-        var response = testsrctest__responseFactory();
-        var count = 0;
-        var fn1 = function fn1(req, res, next) {
-          next();
-        };
-        var fn2 = function fn2(req, res, next) {
-          count++;
-          next();
-        };
-
-        router1.use(fn1);
-        router2.use('/bar', fn2);
-        router2.use('/bar', fn2);
-        router2.use('/bat', fn2);
-        router1.use('/foo', router2);
-        router1.handle(request, response, function (err) {
-          testsrctest__expect(count).to.equal(2);
-        });
-      });
       it('should strictly match VERB routes', function () {
         var router = testsrctest__routerFactory();
         var request = testsrctest__requestFactory('/foo/bar');
@@ -14474,29 +14365,6 @@ describe('express-client', function () {
           testsrctest__expect(count).to.equal(2);
         });
       });
-      it('should allow mounting of sub applications', function () {
-        var app1 = testsrctest__express();
-        var app2 = testsrctest__express();
-        var request = testsrctest__requestFactory('/foo/bar');
-        var response = testsrctest__responseFactory();
-        var count = 0;
-        var fn1 = function fn1(req, res, next) {
-          next();
-        };
-        var fn2 = function fn2(req, res, next) {
-          count++;
-          next();
-        };
-
-        app1.use(fn1);
-        app2.use('/bar', fn2);
-        app2.use('/bar', fn2);
-        app2.use('/bat', fn2);
-        app1.use('/:foo', app2);
-        app1.handle('handle', request, response, function (err) {
-          testsrctest__expect(count).to.equal(2);
-        });
-      });
       it('should allow for optional render action', function () {
         var app = testsrctest__express();
         var request = testsrctest__requestFactory('/foo');
@@ -14566,9 +14434,6 @@ describe('express-client', function () {
       beforeEach(function (done) {
         this.app = testsrctest__express();
         this.app.history.running = true;
-        this.app.cache['dummy'] = {
-          render: function render(view, opt, fn) {}
-        };
         this.app.listen();
         done();
       });

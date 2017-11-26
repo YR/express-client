@@ -21,22 +21,17 @@ class Application extends Emitter {
     this.settings = {
       env: process.env.NODE_ENV || 'development'
     };
-    this.cache = {};
     this.locals = {};
-    this.mountpath = '/';
     this._router = router({
       caseSensitive: false,
       strict: false,
       mergeParams: true
     });
-    this.parent = null;
 
     this.handle = this.handle.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
     this.redirectTo = this.redirectTo.bind(this);
     this.getCurrentContext = this.getCurrentContext.bind(this);
-    this.render = this.render.bind(this);
-    this.rerender = this.rerender.bind(this);
     this.reload = this.reload.bind(this);
 
     // Create request/response factories
@@ -89,25 +84,6 @@ class Application extends Emitter {
     }
 
     fns.slice(offset).forEach(fn => {
-      if (fn instanceof Application) {
-        const app = fn;
-        const handler = app.handle;
-
-        app.mountpath = path;
-        app.parent = this;
-        fn = function mounted_app(req, res, next) {
-          // Change app reference to mounted
-          const orig = req.app;
-
-          req.app = res.app = app;
-          handler(req, res, function(err) {
-            // Restore app reference when done
-            req.app = res.app = orig;
-            next(err);
-          });
-        };
-      }
-
       debug('adding application middleware layer with path %s', path);
       this._router.use(path, fn);
     });
@@ -142,9 +118,7 @@ class Application extends Emitter {
    * Start listening for requests
    */
   listen() {
-    if (!this.parent) {
-      this.history.listen();
-    }
+    this.history.listen();
   }
 
   /**
@@ -155,7 +129,7 @@ class Application extends Emitter {
    * @param {Boolean} [noScroll]
    */
   navigateTo(url, title, isUpdate, noScroll) {
-    this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
+    this.history.navigateTo(url, title, isUpdate, noScroll);
   }
 
   /**
@@ -164,10 +138,6 @@ class Application extends Emitter {
    * @param {String} url
    */
   redirectTo(status, url) {
-    if (this.parent) {
-      return void this.parent.redirectTo(status, url);
-    }
-
     // TODO: parse url and check for absolute/relative
     if (!url) {
       url = status;
@@ -187,7 +157,7 @@ class Application extends Emitter {
    * @returns {Object}
    */
   getCurrentContext() {
-    return this[this.parent ? 'parent' : 'history'].getCurrentContext();
+    return this.history.getCurrentContext();
   }
 
   /**
@@ -212,7 +182,7 @@ class Application extends Emitter {
    * Reload current location
    */
   reload() {
-    this[this.parent ? 'parent' : 'history'].reload();
+    this.history.reload();
   }
 
   /**

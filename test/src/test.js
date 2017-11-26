@@ -135,29 +135,6 @@ describe('express-client', function() {
           expect(err).to.exist;
         });
       });
-      it('should allow mounting of sub routers', function() {
-        var router1 = routerFactory();
-        var router2 = routerFactory();
-        var request = requestFactory('/foo/bar');
-        var response = responseFactory();
-        var count = 0;
-        var fn1 = function(req, res, next) {
-          next();
-        };
-        var fn2 = function(req, res, next) {
-          count++;
-          next();
-        };
-
-        router1.use(fn1);
-        router2.use('/bar', fn2);
-        router2.use('/bar', fn2);
-        router2.use('/bat', fn2);
-        router1.use('/foo', router2);
-        router1.handle(request, response, function(err) {
-          expect(count).to.equal(2);
-        });
-      });
       it('should strictly match VERB routes', function() {
         var router = routerFactory();
         var request = requestFactory('/foo/bar');
@@ -310,29 +287,6 @@ describe('express-client', function() {
           expect(count).to.equal(2);
         });
       });
-      it('should allow mounting of sub applications', function() {
-        var app1 = express();
-        var app2 = express();
-        var request = requestFactory('/foo/bar');
-        var response = responseFactory();
-        var count = 0;
-        var fn1 = function(req, res, next) {
-          next();
-        };
-        var fn2 = function(req, res, next) {
-          count++;
-          next();
-        };
-
-        app1.use(fn1);
-        app2.use('/bar', fn2);
-        app2.use('/bar', fn2);
-        app2.use('/bat', fn2);
-        app1.use('/:foo', app2);
-        app1.handle('handle', request, response, function(err) {
-          expect(count).to.equal(2);
-        });
-      });
       it('should allow for optional render action', function() {
         var app = express();
         var request = requestFactory('/foo');
@@ -402,9 +356,6 @@ describe('express-client', function() {
       beforeEach(function(done) {
         this.app = express();
         this.app.history.running = true;
-        this.app.cache['dummy'] = {
-          render: function(view, opt, fn) {}
-        };
         this.app.listen();
         done();
       });
