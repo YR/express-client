@@ -23,5 +23,6 @@ module.exports = function createApplication() {
 // Expose constructor
 module.exports.Router = Router;
 // Expose prototypes
+module.exports.application = application.Application.prototype;
 module.exports.request = Request.prototype;
 module.exports.response = Response.prototype;

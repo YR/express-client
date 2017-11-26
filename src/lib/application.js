@@ -223,6 +223,7 @@ class Application extends Emitter {
  * Instance factory
  * @returns {Application}
  */
-module.exports = function() {
+module.exports = function applicationFactory() {
   return new Application();
 };
+module.exports.Application = Application;
