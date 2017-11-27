@@ -12273,6 +12273,7 @@ var liblayer__Layer = function () {
     this.name = fn.name ? '<' + fn.name + '>' : '<anonymous>';
     this.fastmatch = path === '/' && !options.end;
     this.regexp = liblayer__matcher(path, this.keys, options);
+    this.isErrorHandler = fn.length === 4;
   }
 
   /**
@@ -12328,7 +12329,7 @@ var liblayer__Layer = function () {
 
   Layer.prototype.handleError = function handleError(err, req, res, next) {
     // Only call if it handles errors
-    if (this.fn.length !== 4) {
+    if (!this.isErrorHandler) {
       return void next(err);
     }
 
@@ -12340,21 +12341,24 @@ var liblayer__Layer = function () {
   };
 
   /**
-   * Handle
+   * Handle with default handler or passed 'fn'
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
+   * @param {Function} [fn]
    * @returns {void}
    */
 
   Layer.prototype.handleRequest = function handleRequest(req, res, next) {
+    var fn = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.fn;
+
     // Skip if error handler
-    if (this.fn.length > 3) {
+    if (this.isErrorHandler) {
       return void next();
     }
 
     try {
-      this.fn(req, res, next);
+      fn(req, res, next);
     } catch (error) {
       return void next(error);
     }
@@ -12371,7 +12375,7 @@ var liblayer__Layer = function () {
  * @returns {Layer}
  */
 
-$m['lib/layer'].exports = function (path, fn, options) {
+$m['lib/layer'].exports = function layerFactory(path, fn, options) {
   return new liblayer__Layer(path, fn, options);
 };
 /*≠≠ lib/layer.js ≠≠*/
@@ -12790,7 +12794,6 @@ $m['lib/router'] = { exports: {} };
 
 var librouter__Debug = $m['debug'].exports;
 var librouter__layer = $m['lib/layer'].exports;
-var librouter__urlUtils = $m['@yr/url-utils'].exports;
 
 var librouter__DEFAULT_OPTIONS = {
   mergeParams: true,
@@ -12839,7 +12842,9 @@ var librouter__Router = function () {
    */
 
   Router.prototype.param = function param(name, fn) {
-    if (!this.params) this.params = {};
+    if (!this.params) {
+      this.params = {};
+    }
     this.params[name] = fn;
   };
 
@@ -12857,15 +12862,12 @@ var librouter__Router = function () {
       fns[_key] = arguments[_key];
     }
 
-    if ('string' == typeof fns[0]) {
+    if (typeof fns[0] === 'string') {
       offset = 1;
       path = fns[0];
     }
 
     fns.slice(offset).forEach(function (fn) {
-      if (fn instanceof Router) {
-        fn = fn.handle;
-      }
       var lyr = librouter__layer(path, fn, _this.matcherOpts);
 
       librouter__debug('adding router middleware %s with path %s', lyr.name, path);
@@ -12900,21 +12902,18 @@ var librouter__Router = function () {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} done
+   * @param {Function} [optionalFn]
    */
 
-  Router.prototype.handle = function handle(req, res, done) {
+  Router.prototype.handle = function handle(req, res, done /*, optionalFn */) {
     var self = this;
-    var parentUrl = req.baseUrl || '';
-    var idx = 0;
+    // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
+    var optionalFn = arguments[3];
     var processedParams = {};
-    var removed = '';
-
-    // Update done to restore req props
-    done = librouter__restore(done, req, 'baseUrl', 'next', 'params');
+    var idx = 0;
 
     // Setup next layer
     req.next = next;
-    req.baseUrl = parentUrl;
 
     next();
 
@@ -12922,24 +12921,23 @@ var librouter__Router = function () {
       var lyr = self.stack[idx++];
       var layerErr = err;
 
-      if (removed.length != 0) {
-        librouter__debug('untrim %s from url %s', removed, req.path);
-        req.baseUrl = parentUrl;
-        req.path = librouter__urlUtils.join(removed, req.path);
-        removed = '';
+      // Exit, no more layers to match
+      if (!lyr) {
+        return void done(layerErr);
       }
 
-      // Exit
-      if (!lyr) return done(layerErr);
-
       // Skip if no match or err and route layer
-      if (!lyr.match(req.path) || layerErr && !lyr.fastmatch) return next(layerErr);
+      if (!lyr.match(req.path) || layerErr && !lyr.fastmatch) {
+        return void next(layerErr);
+      }
 
       librouter__debug('%s matched layer %s with path %s', req.path, lyr.name, lyr.path);
 
       // Store params
       if (self.mergeParams) {
-        if (!req.params) req.params = {};
+        if (!req.params) {
+          req.params = {};
+        }
         Object.assign(req.params, lyr.params);
       } else {
         req.params = lyr.params;
@@ -12947,25 +12945,15 @@ var librouter__Router = function () {
 
       // Process params if necessary
       self._processParams(processedParams, req.params, Object.keys(lyr.params), req, res, function (err) {
-        if (err) return next(layerErr || err);
-        if (!lyr.route) trim(lyr);
+        if (err) {
+          return next(layerErr || err);
+        }
         if (layerErr) {
           lyr.handleError(layerErr, req, res, next);
         } else {
-          lyr.handleRequest(req, res, next);
+          lyr.handleRequest(req, res, next, optionalFn);
         }
       });
-    }
-
-    function trim(layer) {
-      if (layer.path.length != 0) {
-        librouter__debug('trim %s from url %s', layer.path, req.path);
-        removed = layer.path;
-        req.path = req.path.substr(removed.length);
-        if (req.path.charAt(0) != '/') req.path = '/' + req.path;
-
-        req.baseUrl = librouter__urlUtils.join(parentUrl, removed);
-      }
     }
   };
 
@@ -12985,9 +12973,13 @@ var librouter__Router = function () {
 
     function next(err) {
       // Stop processing on any error
-      if (err) return done(err);
+      if (err) {
+        return void done(err);
+      }
 
-      if (idx >= keys.length) return done();
+      if (idx >= keys.length) {
+        return void done();
+      }
 
       var name = keys[idx++];
       var fn = self.params[name];
@@ -13012,37 +13004,12 @@ var librouter__Router = function () {
 }();
 
 /**
- * Restore 'obj' props
- * @param {Function} fn
- * @param {Object} obj
- * @returns {Function}
- */
-
-function librouter__restore(fn, obj) {
-  var props = new Array(arguments.length - 2);
-  var vals = new Array(arguments.length - 2);
-
-  for (var i = 0; i < props.length; i++) {
-    props[i] = arguments[i + 2];
-    vals[i] = obj[props[i]];
-  }
-
-  return function () {
-    // Restore vals
-    for (var _i = 0; _i < props.length; _i++) {
-      obj[props[_i]] = vals[_i];
-    }
-
-    return fn.apply(this, arguments);
-  };
-}
-
-/**
  * Instance factory
  * @param {Object} [options]
  * @returns {Router}
  */
-$m['lib/router'].exports = function (options) {
+
+$m['lib/router'].exports = function routerFactory(options) {
   return new librouter__Router(options);
 };
 /*≠≠ lib/router.js ≠≠*/
@@ -13158,6 +13125,29 @@ var libresponse__Response = function (_Emitter) {
   };
 
   /**
+   * Render application view and send results to client
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
+   */
+
+  Response.prototype.render = function render(name, options, done) {
+    var _this2 = this;
+
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    this.app.render(name, Object.assign({}, this.locals, options), done || function (err, html) {
+      if (err) {
+        return _this2.req.next(err);
+      }
+      _this2.send(html);
+    });
+  };
+
+  /**
    * Reset state
    */
 
@@ -13187,7 +13177,7 @@ var libresponse__Response = function (_Emitter) {
  * @returns {Response}
  */
 
-$m['lib/response'].exports = function () {
+$m['lib/response'].exports = function responseFactory() {
   return new libresponse__Response();
 };
 $m['lib/response'].exports.Response = libresponse__Response;
@@ -13468,7 +13458,7 @@ var librequest__Request = function (_Emitter) {
  * @returns {Request}
  */
 
-$m['lib/request'].exports = function (url, bootstrap) {
+$m['lib/request'].exports = function requestFactory(url, bootstrap) {
   return new librequest__Request(url, bootstrap);
 };
 $m['lib/request'].exports.Request = librequest__Request;
@@ -13490,9 +13480,8 @@ var libhistory__History = function () {
    * @param {Function} request(url)
    * @param {Function} response
    * @param {Function} fn(req, res)
-   * @param {Function} fnExternal(url, data)
    */
-  function History(request, response, fn, fnExternal) {
+  function History(request, response, fn) {
     babelHelpers.classCallCheck(this, History);
 
     this.cache = {};
@@ -13501,7 +13490,6 @@ var libhistory__History = function () {
     this.request = request;
     this.response = response;
     this.fn = fn;
-    this.fnExternal = fnExternal;
     this.onClick = this.onClick.bind(this);
     this.onPopstate = this.onPopstate.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
@@ -13537,14 +13525,16 @@ var libhistory__History = function () {
   /**
    * Create a new or updated history state at 'url' with 'title'
    * @param {String} url
-   * @param {String} title
-   * @param {Boolean} isUpdate
-   * @param {Boolean} noScroll
+   * @param {String} [title]
+   * @param {Boolean} [isUpdate]
+   * @param {Boolean} [noScroll]
+   * @param {String} [action]
+   * @param {String} [name]
    */
 
-  History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll) {
+  History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll, action, name) {
     // Only navigate if not same as current
-    if (this.running && url !== libhistory__urlUtils.getCurrent()) {
+    if (url !== libhistory__urlUtils.getCurrent()) {
       if (this.running) {
         // Will return empty if malformed
         url = libhistory__urlUtils.encode(url);
@@ -13558,7 +13548,7 @@ var libhistory__History = function () {
         if (title) {
           document.title = title;
         }
-        this.handle(url, noScroll);
+        this.handle(url, noScroll, action, name);
       } else {
         this.redirectTo(url);
       }
@@ -13620,10 +13610,16 @@ var libhistory__History = function () {
    * Handle history change and notify
    * @param {String} [url]
    * @param {Boolean} [noScroll]
+   * @param {String} [action]
+   * @param {String} [name]
    * @returns {Object}
    */
 
-  History.prototype.handle = function handle(url, noScroll) {
+  History.prototype.handle = function handle(url) {
+    var noScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var action = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'handle';
+    var name = arguments[3];
+
     var ctx = {};
     var req = void 0,
         res = void 0;
@@ -13670,7 +13666,7 @@ var libhistory__History = function () {
       window.scrollTo(0, 0);
     }
 
-    this.fn(req, res);
+    this.fn(req, res, undefined, action, name);
 
     // Store reference to current
     // Do after calling fn so previous ctx available with getCurrentContext
@@ -13728,12 +13724,12 @@ var libhistory__History = function () {
       var attributes = Array.prototype.slice.call(el.attributes);
 
       attributes.forEach(function (attribute) {
-        if (attribute.nodeName.indexOf('data-') === 0) {
-          data[attribute.nodeName] = attribute.nodeValue;
+        if (attribute.nodeName.indexOf('data-app-') === 0) {
+          data[attribute.nodeName.slice(9)] = attribute.nodeValue;
         }
       });
 
-      return void this.fnExternal(el.href, data);
+      return void this.fn(el.href, data, undefined, 'external');
     }
 
     // IE11 prefixes extra slash on absolute links
@@ -13752,15 +13748,19 @@ var libhistory__History = function () {
       return;
     }
 
-    // Flagged as unhandled
-    if (el.getAttribute('data-unhandled') != null) {
+    if (el.getAttribute('data-app-unhandle') != null) {
       this.redirectTo(path);
+    } else if (el.getAttribute('data-app-render') != null) {
+      // Allow optional 'name' to be set
+      this.navigateTo(path, undefined, false, true, 'render', el.getAttribute('data-app-render'));
+    } else if (el.getAttribute('data-app-rerender') != null) {
+      this.navigateTo(path, undefined, false, true, 'rerender');
     } else {
       // Blur focus
       el.blur();
 
       libhistory__debug('click event intercepted from %s', el);
-      this.navigateTo(path);
+      this.navigateTo(path, undefined, false, false, 'handle');
     }
   };
 
@@ -13808,7 +13808,7 @@ function libhistory__sameOrigin(url) {
  * @param {Function} fnExternal(url, data)
  * @returns {History}
  */
-$m['lib/history'].exports = function (request, response, fn, fnExternal) {
+$m['lib/history'].exports = function historyFactory(request, response, fn, fnExternal) {
   return new libhistory__History(request, response, fn, fnExternal);
 };
 /*≠≠ lib/history.js ≠≠*/
@@ -13839,21 +13839,19 @@ var libapplication__Application = function (_Emitter) {
 
     var _this = babelHelpers.possibleConstructorReturn(this, _Emitter.call(this));
 
+    _this.cache = {};
+    _this.engines = {};
+    _this.locals = {};
     _this.settings = {
       env: 'development' || 'development'
     };
-    _this.cache = {};
-    _this.locals = {};
-    _this.mountpath = '/';
     _this._router = libapplication__router({
       caseSensitive: false,
       strict: false,
       mergeParams: true
     });
-    _this.parent = null;
 
     _this.handle = _this.handle.bind(_this);
-    _this.handleExternalLink = _this.handleExternalLink.bind(_this);
     _this.navigateTo = _this.navigateTo.bind(_this);
     _this.redirectTo = _this.redirectTo.bind(_this);
     _this.getCurrentContext = _this.getCurrentContext.bind(_this);
@@ -13874,7 +13872,7 @@ var libapplication__Application = function (_Emitter) {
       return res;
     };
 
-    _this.history = libapplication__history(requestFactory, responseFactory, _this.handle, _this.handleExternalLink);
+    _this.history = libapplication__history(requestFactory, responseFactory, _this.handle);
 
     // Route ALL/POST methods to router
     _this.all = _this._router.all.bind(_this._router);
@@ -13918,25 +13916,6 @@ var libapplication__Application = function (_Emitter) {
     }
 
     fns.slice(offset).forEach(function (fn) {
-      if (fn instanceof Application) {
-        var app = fn;
-        var handler = app.handle;
-
-        app.mountpath = path;
-        app.parent = _this2;
-        fn = function mounted_app(req, res, next) {
-          // Change app reference to mounted
-          var orig = req.app;
-
-          req.app = res.app = app;
-          handler(req, res, function (err) {
-            // Restore app reference when done
-            req.app = res.app = orig;
-            next(err);
-          });
-        };
-      }
-
       libapplication__debug('adding application middleware layer with path %s', path);
       _this2._router.use(path, fn);
     });
@@ -13980,45 +13959,19 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.listen = function listen() {
-    if (!this.parent) {
-      this.history.listen();
-    }
-  };
-
-  /**
-   * Run request/response through router's middleware pipline
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Function} done
-   */
-
-  Application.prototype.handle = function handle(req, res, done) {
-    this.emit('connect', req);
-    this.emit('request', req, res);
-    this._router.handle(req, res, done || libapplication__NOOP);
-  };
-
-  /**
-   * Handle external link
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Function} done
-   */
-
-  Application.prototype.handleExternalLink = function handleExternalLink(url, data) {
-    this.emit('link:external', url, data);
+    this.history.listen();
   };
 
   /**
    * Change/update browser history state
    * @param {String} url
-   * @param {String} title
-   * @param {Boolean} isUpdate
-   * @param {Boolean} noScroll
+   * @param {String} [title]
+   * @param {Boolean} [isUpdate]
+   * @param {Boolean} [noScroll]
    */
 
   Application.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll) {
-    this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
+    this.history.navigateTo(url, title, isUpdate, noScroll);
   };
 
   /**
@@ -14028,10 +13981,6 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.redirectTo = function redirectTo(status, url) {
-    if (this.parent) {
-      return void this.parent.redirectTo(status, url);
-    }
-
     // TODO: parse url and check for absolute/relative
     if (!url) {
       url = status;
@@ -14052,7 +14001,44 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.getCurrentContext = function getCurrentContext() {
-    return this[this.parent ? 'parent' : 'history'].getCurrentContext();
+    return this.history.getCurrentContext();
+  };
+
+  /**
+   * Render application view
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
+   */
+
+  Application.prototype.render = function render(name, options, done) {
+    var opts = {};
+    var view = this.cache[name];
+
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    Object.assign(opts, this.locals, options);
+
+    if (!view) {
+      throw Error('no view for ' + name + '. View renderers need to be manually cached with app.cache[name] = {render(options, done)}');
+    }
+
+    try {
+      view.render(options, done);
+    } catch (err) {
+      done(err);
+    }
+  };
+
+  /**
+   * Rerender application view
+   */
+
+  Application.prototype.rerender = function rerender() {
+    throw Error('rerender() method not implemented. Extend the Application prototype with behaviour');
   };
 
   /**
@@ -14060,7 +14046,41 @@ var libapplication__Application = function (_Emitter) {
    */
 
   Application.prototype.reload = function reload() {
-    this[this.parent ? 'parent' : 'history'].reload();
+    this.history.reload();
+  };
+
+  /**
+   * Run request/response through router's middleware pipline
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} [done]
+   * @param {String} [action]
+   * @param {String} [name]
+   */
+
+  Application.prototype.handle = function handle(req, res) {
+    var done = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : libapplication__NOOP;
+
+    var _this3 = this;
+
+    var action = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'handle';
+    var name = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'default';
+
+    if (action === 'external') {
+      this.emit('link:external', req, res);
+    } else {
+      this.emit('connect', req);
+      this.emit('request', req, res);
+      this._router.handle(req, res, done,
+      // Skip handling if action is 'render' or 'rerender'
+      action !== 'handle' ? function (req, res) {
+        if (action === 'render') {
+          res.render(name);
+        } else {
+          _this3.rerender();
+        }
+      } : undefined);
+    }
   };
 
   return Application;
@@ -14071,9 +14091,10 @@ var libapplication__Application = function (_Emitter) {
  * @returns {Application}
  */
 
-$m['lib/application'].exports = function () {
+$m['lib/application'].exports = function applicationFactory() {
   return new libapplication__Application();
 };
+$m['lib/application'].exports.Application = libapplication__Application;
 /*≠≠ lib/application.js ≠≠*/
 
 
@@ -14107,6 +14128,7 @@ $m['@yr/express-client'].exports = function createApplication() {
 // Expose constructor
 $m['@yr/express-client'].exports.Router = yrexpressclient__Router;
 // Expose prototypes
+$m['@yr/express-client'].exports.application = yrexpressclient__application.Application.prototype;
 $m['@yr/express-client'].exports.request = yrexpressclient__Request.prototype;
 $m['@yr/express-client'].exports.response = yrexpressclient__Response.prototype;
 /*≠≠ index.js ≠≠*/
@@ -14115,16 +14137,15 @@ $m['@yr/express-client'].exports.response = yrexpressclient__Response.prototype;
 /*== test/src/test.js ==*/
 $m['test/src/test'] = { exports: {} };
 
-var testsrctest__Application = $m['lib/application'].exports;
 var testsrctest__expect = $m['chai/chai'].exports.expect;
 var testsrctest__express = $m['@yr/express-client'].exports;
-var testsrctest__Request = $m['lib/request'].exports;
-var testsrctest__Response = $m['lib/response'].exports;
-var testsrctest__Router = $m['lib/router'].exports;
+var testsrctest__requestFactory = $m['lib/request'].exports;
+var testsrctest__responseFactory = $m['lib/response'].exports;
+var testsrctest__routerFactory = $m['lib/router'].exports;
 
 describe('express-client', function () {
   describe('application factory', function () {
-    it('should store the app instance on the Request/Response instance', function () {
+    it('should store the app instance on the request/response instance', function () {
       var app = testsrctest__express();
       var req = app.history.request();
 
@@ -14132,17 +14153,17 @@ describe('express-client', function () {
     });
   });
 
-  describe('Router', function () {
+  describe('router', function () {
     describe('use()', function () {
       it('should register a simple middleware function', function () {
-        var router = testsrctest__Router();
+        var router = testsrctest__routerFactory();
         var fn = function fn(req, res, next) {};
 
         router.use(fn);
         testsrctest__expect(router.stack[0]).to.have.property('fn', fn);
       });
       it('should register a simple middleware function at a specified path', function () {
-        var router = testsrctest__Router();
+        var router = testsrctest__routerFactory();
         var fn = function fn(req, res, next) {};
         var path = '/foo';
 
@@ -14151,7 +14172,7 @@ describe('express-client', function () {
         testsrctest__expect(router.stack[0].regexp.exec(path)).to.exist;
       });
       it('should register multiple middleware functions at a specified path', function () {
-        var router = testsrctest__Router();
+        var router = testsrctest__routerFactory();
         var fn1 = function fn1(req, res, next) {};
         var fn2 = function fn2(req, res, next) {};
         var path = '/foo';
@@ -14165,10 +14186,10 @@ describe('express-client', function () {
     });
 
     describe('handle()', function () {
-      it('should cylcle through added middleware', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/');
-        var response = testsrctest__Response();
+      it('should cycle through added middleware', function () {
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14181,9 +14202,9 @@ describe('express-client', function () {
         });
       });
       it('should always match root mounted middleware', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/foo');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/foo');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14196,9 +14217,9 @@ describe('express-client', function () {
         });
       });
       it('should only trigger middleware matching the current path', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/foo');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/foo');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14212,9 +14233,9 @@ describe('express-client', function () {
         });
       });
       it('should allow middleware to be mounted under a specific path', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/foo/bar');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/foo/bar');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14229,9 +14250,9 @@ describe('express-client', function () {
         });
       });
       it('should allow middleware to handle errors', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/');
+        var response = testsrctest__responseFactory();
         var count = 0;
 
         router.use(function (req, res, next) {
@@ -14251,33 +14272,10 @@ describe('express-client', function () {
           testsrctest__expect(err).to.exist;
         });
       });
-      it('should allow mounting of sub routers', function () {
-        var router1 = testsrctest__Router();
-        var router2 = testsrctest__Router();
-        var request = testsrctest__Request('/foo/bar');
-        var response = testsrctest__Response();
-        var count = 0;
-        var fn1 = function fn1(req, res, next) {
-          next();
-        };
-        var fn2 = function fn2(req, res, next) {
-          count++;
-          next();
-        };
-
-        router1.use(fn1);
-        router2.use('/bar', fn2);
-        router2.use('/bar', fn2);
-        router2.use('/bat', fn2);
-        router1.use('/foo', router2);
-        router1.handle(request, response, function (err) {
-          testsrctest__expect(count).to.equal(2);
-        });
-      });
       it('should strictly match VERB routes', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/foo/bar');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/foo/bar');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14292,9 +14290,9 @@ describe('express-client', function () {
         });
       });
       it('should match everything with wildcard * route', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/foo/bar');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/foo/bar');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14310,9 +14308,9 @@ describe('express-client', function () {
 
     describe('param()', function () {
       it('should register simple param processing', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/bar');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/bar');
+        var response = testsrctest__responseFactory();
         var param = '';
 
         router.param('foo', function (req, res, next, foo) {
@@ -14329,9 +14327,9 @@ describe('express-client', function () {
         });
       });
       it('should not process a param more than once', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/bar');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/bar');
+        var response = testsrctest__responseFactory();
         var fn = function fn(req, res, next) {
           next();
         };
@@ -14348,9 +14346,9 @@ describe('express-client', function () {
         });
       });
       it('should handle error in param processing', function () {
-        var router = testsrctest__Router();
-        var request = testsrctest__Request('/bar');
-        var response = testsrctest__Response();
+        var router = testsrctest__routerFactory();
+        var request = testsrctest__requestFactory('/bar');
+        var response = testsrctest__responseFactory();
 
         router.param('foo', function (req, res, next, foo) {
           next(new Error('foo'));
@@ -14411,10 +14409,10 @@ describe('express-client', function () {
     });
 
     describe('handle()', function () {
-      it('should cylcle through added middleware', function () {
+      it('should cycle through added middleware', function () {
         var app = testsrctest__express();
-        var request = testsrctest__Request('/');
-        var response = testsrctest__Response();
+        var request = testsrctest__requestFactory('/');
+        var response = testsrctest__responseFactory();
         var count = 0;
         var fn = function fn(req, res, next) {
           count++;
@@ -14426,43 +14424,84 @@ describe('express-client', function () {
           testsrctest__expect(count).to.equal(2);
         });
       });
-      it('should allow mounting of sub applications', function () {
-        var app1 = testsrctest__express();
-        var app2 = testsrctest__express();
-        var request = testsrctest__Request('/foo/bar');
-        var response = testsrctest__Response();
+      it('should allow for optional render action', function () {
+        var app = testsrctest__express();
+        var request = testsrctest__requestFactory('/foo');
+        var response = testsrctest__responseFactory();
         var count = 0;
+        var rendered = false;
+        var handled = false;
         var fn1 = function fn1(req, res, next) {
-          next();
-        };
-        var fn2 = function fn2(req, res, next) {
           count++;
           next();
         };
+        var fn2 = function fn2(req, res, next) {
+          handled = true;
+        };
+        response.app = app;
+        app.cache['foo'] = {
+          render: function render(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
 
-        app1.use(fn1);
-        app2.use('/bar', fn2);
-        app2.use('/bar', fn2);
-        app2.use('/bat', fn2);
-        app1.use('/:foo', app2);
-        app1.handle(request, response, function (err) {
+        app.use(fn1, fn1);
+        app.use('/foo', fn2);
+        app.handle(request, response, function (err) {
           testsrctest__expect(count).to.equal(2);
+          testsrctest__expect(rendered).to.equal(true);
+          testsrctest__expect(handled).to.equal(false);
+        }, 'render', 'foo');
+      });
+      it('should allow for optional rerender action', function () {
+        var app = testsrctest__express();
+        var request = testsrctest__requestFactory('/foo');
+        var response = testsrctest__responseFactory();
+        var count = 0;
+        var rerendered = false;
+        var handled = false;
+        var fn1 = function fn1(req, res, next) {
+          count++;
+          next();
+        };
+        var fn2 = function fn2(req, res, next) {
+          handled = true;
+        };
+        app.rerender = function () {
+          rerendered = true;
+        };
+        app.use(fn1, fn1);
+        app.use('/foo', fn2);
+        app.handle(request, response, function (err) {
+          testsrctest__expect(count).to.equal(2);
+          testsrctest__expect(rerendered).to.equal(true);
+          testsrctest__expect(handled).to.equal(false);
+        }, 'rerender');
+      });
+      it('should notify on external link', function () {
+        var app = testsrctest__express();
+        var count = 0;
+        app.on('link:external', function (url, data) {
+          count++;
+          testsrctest__expect(url).to.equal('/');
         });
+        app.handle('/', {}, function (err) {
+          testsrctest__expect(count).to.equal(1);
+        }, 'external');
       });
     });
+
     describe('reload()', function () {
       beforeEach(function (done) {
         this.app = testsrctest__express();
         this.app.history.running = true;
-        this.app.cache['dummy'] = {
-          render: function render(view, opt, fn) {}
-        };
         this.app.listen();
         done();
       });
 
       it('should reload app using current context', function () {
-        this.app.handle(testsrctest__Request('/url'), testsrctest__Response());
+        this.app.handle(testsrctest__requestFactory('/url'), testsrctest__responseFactory());
         var oldCtx = this.app.getCurrentContext();
 
         this.app.reload();
@@ -14470,9 +14509,9 @@ describe('express-client', function () {
 
         testsrctest__expect(oldCtx).to.be.equal(newCtx);
       });
-      it.skip('should reload app and reset request state', function () {
-        var request = testsrctest__Request('/bar');
-        var response = testsrctest__Response();
+      it('should reload app and reset request state', function () {
+        var request = testsrctest__requestFactory('/bar');
+        var response = testsrctest__responseFactory();
         var count = 0;
 
         this.app.param('foo', function (req, res, next, foo) {
@@ -14497,6 +14536,24 @@ describe('express-client', function () {
         testsrctest__expect(count).to.equal(2);
       });
     });
+
+    describe('render()', function () {
+      it('should render a view', function (done) {
+        var app = testsrctest__express();
+        var rendered = false;
+        app.cache['foo'] = {
+          render: function render(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
+        app.render('foo', function (err, html) {
+          testsrctest__expect(html).to.equal(true);
+          testsrctest__expect(rendered).to.equal(true);
+          done();
+        });
+      });
+    });
   });
 
   describe('History', function () {
@@ -14504,7 +14561,7 @@ describe('express-client', function () {
       var historyApp;
 
       beforeEach(function (done) {
-        historyApp = testsrctest__Application();
+        historyApp = testsrctest__express();
         historyApp.history.running = true;
         done();
       });
@@ -14533,16 +14590,35 @@ describe('express-client', function () {
     });
   });
 
-  describe('Response', function () {
+  describe('response', function () {
+    describe('render()', function () {
+      it('should render a view', function (done) {
+        var app = testsrctest__express();
+        var response = testsrctest__responseFactory('/');
+        var rendered = false;
+        response.app = app;
+        app.cache['foo'] = {
+          render: function render(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
+        response.render('foo', function (err, html) {
+          testsrctest__expect(html).to.equal(true);
+          testsrctest__expect(rendered).to.equal(true);
+          done();
+        });
+      });
+    });
     describe.skip('cookie()', function () {
       it('should set single cookie', function () {
-        var response = testsrctest__Response();
+        var response = testsrctest__responseFactory();
 
         response.cookie('foo', 'bar');
         testsrctest__expect(document.cookie).to.eql('foo=bar');
       });
       it('should set multiple cookies', function () {
-        var response = testsrctest__Response();
+        var response = testsrctest__responseFactory();
 
         response.cookie('foo', 'bar', { maxAge: 1000 });
         response.cookie('boo', 'bat');
@@ -14551,14 +14627,14 @@ describe('express-client', function () {
     });
   });
 
-  describe('Request', function () {
+  describe('request', function () {
     describe.skip('cookies()', function () {
       beforeEach(function () {
         document.cookie = 'foo=bar;boo=bat';
       });
 
       it('should get cookies', function () {
-        var request = testsrctest__Request();
+        var request = testsrctest__requestFactory();
 
         testsrctest__expect(request.cookies).to.have.property('foo', 'bar');
         testsrctest__expect(request.cookies).to.have.property('boo', 'bat');
@@ -14567,24 +14643,24 @@ describe('express-client', function () {
 
     describe('parse', function () {
       it('should parse query params', function () {
-        var request = testsrctest__Request('http://www.yr.no/en/search?q=foo');
+        var request = testsrctest__requestFactory('http://www.yr.no/en/search?q=foo');
 
         testsrctest__expect(request.query).to.eql({ q: 'foo' });
         testsrctest__expect(request.querystring).to.eql('q=foo');
         testsrctest__expect(request.search).to.eql('?q=foo');
       });
       it('should parse simple hash fragments', function () {
-        var request = testsrctest__Request('http://www.yr.no/en#page');
+        var request = testsrctest__requestFactory('http://www.yr.no/en#page');
 
         testsrctest__expect(request.hash).to.eql({ page: null });
       });
       it('should parse complex hash fragments', function () {
-        var request = testsrctest__Request('http://www.yr.no/en#fav=123,456&visit=789');
+        var request = testsrctest__requestFactory('http://www.yr.no/en#fav=123,456&visit=789');
 
         testsrctest__expect(request.hash).to.eql({ fav: '123,456', visit: '789' });
       });
       it('should parse both query params and hash fragments', function () {
-        var request = testsrctest__Request('http://www.yr.no/en/search?q=foo#fav=123,456&visit=789');
+        var request = testsrctest__requestFactory('http://www.yr.no/en/search?q=foo#fav=123,456&visit=789');
 
         testsrctest__expect(request.query).to.eql({ q: 'foo' });
         testsrctest__expect(request.hash).to.eql({ fav: '123,456', visit: '789' });

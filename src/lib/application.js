@@ -18,21 +18,19 @@ class Application extends Emitter {
   constructor() {
     super();
 
+    this.cache = {};
+    this.engines = {};
+    this.locals = {};
     this.settings = {
       env: process.env.NODE_ENV || 'development'
     };
-    this.cache = {};
-    this.locals = {};
-    this.mountpath = '/';
     this._router = router({
       caseSensitive: false,
       strict: false,
       mergeParams: true
     });
-    this.parent = null;
 
     this.handle = this.handle.bind(this);
-    this.handleExternalLink = this.handleExternalLink.bind(this);
     this.navigateTo = this.navigateTo.bind(this);
     this.redirectTo = this.redirectTo.bind(this);
     this.getCurrentContext = this.getCurrentContext.bind(this);
@@ -53,7 +51,7 @@ class Application extends Emitter {
       return res;
     };
 
-    this.history = history(requestFactory, responseFactory, this.handle, this.handleExternalLink);
+    this.history = history(requestFactory, responseFactory, this.handle);
 
     // Route ALL/POST methods to router
     this.all = this._router.all.bind(this._router);
@@ -88,25 +86,6 @@ class Application extends Emitter {
     }
 
     fns.slice(offset).forEach(fn => {
-      if (fn instanceof Application) {
-        const app = fn;
-        const handler = app.handle;
-
-        app.mountpath = path;
-        app.parent = this;
-        fn = function mounted_app(req, res, next) {
-          // Change app reference to mounted
-          const orig = req.app;
-
-          req.app = res.app = app;
-          handler(req, res, function(err) {
-            // Restore app reference when done
-            req.app = res.app = orig;
-            next(err);
-          });
-        };
-      }
-
       debug('adding application middleware layer with path %s', path);
       this._router.use(path, fn);
     });
@@ -141,42 +120,18 @@ class Application extends Emitter {
    * Start listening for requests
    */
   listen() {
-    if (!this.parent) {
-      this.history.listen();
-    }
-  }
-
-  /**
-   * Run request/response through router's middleware pipline
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Function} done
-   */
-  handle(req, res, done) {
-    this.emit('connect', req);
-    this.emit('request', req, res);
-    this._router.handle(req, res, done || NOOP);
-  }
-
-  /**
-   * Handle external link
-   * @param {Request} req
-   * @param {Response} res
-   * @param {Function} done
-   */
-  handleExternalLink(url, data) {
-    this.emit('link:external', url, data);
+    this.history.listen();
   }
 
   /**
    * Change/update browser history state
    * @param {String} url
-   * @param {String} title
-   * @param {Boolean} isUpdate
-   * @param {Boolean} noScroll
+   * @param {String} [title]
+   * @param {Boolean} [isUpdate]
+   * @param {Boolean} [noScroll]
    */
   navigateTo(url, title, isUpdate, noScroll) {
-    this[this.parent ? 'parent' : 'history'].navigateTo(url, title, isUpdate, noScroll);
+    this.history.navigateTo(url, title, isUpdate, noScroll);
   }
 
   /**
@@ -185,10 +140,6 @@ class Application extends Emitter {
    * @param {String} url
    */
   redirectTo(status, url) {
-    if (this.parent) {
-      return void this.parent.redirectTo(status, url);
-    }
-
     // TODO: parse url and check for absolute/relative
     if (!url) {
       url = status;
@@ -208,14 +159,83 @@ class Application extends Emitter {
    * @returns {Object}
    */
   getCurrentContext() {
-    return this[this.parent ? 'parent' : 'history'].getCurrentContext();
+    return this.history.getCurrentContext();
+  }
+
+  /**
+   * Render application view
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
+   */
+  render(name, options, done) {
+    const opts = {};
+    const view = this.cache[name];
+
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    Object.assign(opts, this.locals, options);
+
+    if (!view) {
+      throw Error(
+        `no view for ${name}. View renderers need to be manually cached with app.cache[name] = {render(options, done)}`
+      );
+    }
+
+    try {
+      view.render(options, done);
+    } catch (err) {
+      done(err);
+    }
+  }
+
+  /**
+   * Rerender application view
+   */
+  rerender() {
+    throw Error('rerender() method not implemented. Extend the Application prototype with behaviour');
   }
 
   /**
    * Reload current location
    */
   reload() {
-    this[this.parent ? 'parent' : 'history'].reload();
+    this.history.reload();
+  }
+
+  /**
+   * Run request/response through router's middleware pipline
+   * @param {Request} req
+   * @param {Response} res
+   * @param {Function} [done]
+   * @param {String} [action]
+   * @param {String} [name]
+   */
+  handle(req, res, done = NOOP, action = 'handle', name = 'default') {
+    if (action === 'external') {
+      this.emit('link:external', req, res);
+    } else {
+      this.emit('connect', req);
+      this.emit('request', req, res);
+      this._router.handle(
+        req,
+        res,
+        done,
+        // Skip handling if action is 'render' or 'rerender'
+        action !== 'handle'
+          ? (req, res) => {
+              if (action === 'render') {
+                res.render(name);
+              } else {
+                this.rerender();
+              }
+            }
+          : undefined
+      );
+    }
   }
 }
 

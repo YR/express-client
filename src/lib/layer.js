@@ -19,6 +19,7 @@ class Layer {
     this.name = fn.name ? `<${fn.name}>` : '<anonymous>';
     this.fastmatch = path === '/' && !options.end;
     this.regexp = matcher(path, this.keys, options);
+    this.isErrorHandler = fn.length === 4;
   }
 
   /**
@@ -71,7 +72,7 @@ class Layer {
    */
   handleError(err, req, res, next) {
     // Only call if it handles errors
-    if (this.fn.length !== 4) {
+    if (!this.isErrorHandler) {
       return void next(err);
     }
 
@@ -83,20 +84,21 @@ class Layer {
   }
 
   /**
-   * Handle
+   * Handle with default handler or passed 'fn'
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
+   * @param {Function} [fn]
    * @returns {void}
    */
-  handleRequest(req, res, next) {
+  handleRequest(req, res, next, fn = this.fn) {
     // Skip if error handler
-    if (this.fn.length > 3) {
+    if (this.isErrorHandler) {
       return void next();
     }
 
     try {
-      this.fn(req, res, next);
+      fn(req, res, next);
     } catch (error) {
       return void next(error);
     }
