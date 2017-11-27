@@ -13529,9 +13529,10 @@ var libhistory__History = function () {
    * @param {Boolean} [isUpdate]
    * @param {Boolean} [noScroll]
    * @param {String} [action]
+   * @param {String} [name]
    */
 
-  History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll, action) {
+  History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll, action, name) {
     // Only navigate if not same as current
     if (url !== libhistory__urlUtils.getCurrent()) {
       if (this.running) {
@@ -13547,7 +13548,7 @@ var libhistory__History = function () {
         if (title) {
           document.title = title;
         }
-        this.handle(url, noScroll, action);
+        this.handle(url, noScroll, action, name);
       } else {
         this.redirectTo(url);
       }
@@ -13578,7 +13579,7 @@ var libhistory__History = function () {
         ctx.res.reset();
         ctx.req.reloaded = true;
         ctx.res.req = ctx.req;
-        this.fn('handle', ctx.req, ctx.res);
+        this.fn(ctx.req, ctx.res);
       }
     }
   };
@@ -13610,12 +13611,14 @@ var libhistory__History = function () {
    * @param {String} [url]
    * @param {Boolean} [noScroll]
    * @param {String} [action]
+   * @param {String} [name]
    * @returns {Object}
    */
 
   History.prototype.handle = function handle(url) {
     var noScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var action = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'handle';
+    var name = arguments[3];
 
     var ctx = {};
     var req = void 0,
@@ -13663,7 +13666,7 @@ var libhistory__History = function () {
       window.scrollTo(0, 0);
     }
 
-    this.fn(action, req, res);
+    this.fn(req, res, undefined, action, name);
 
     // Store reference to current
     // Do after calling fn so previous ctx available with getCurrentContext
@@ -13721,12 +13724,12 @@ var libhistory__History = function () {
       var attributes = Array.prototype.slice.call(el.attributes);
 
       attributes.forEach(function (attribute) {
-        if (attribute.nodeName.indexOf('data-') === 0) {
-          data[attribute.nodeName] = attribute.nodeValue;
+        if (attribute.nodeName.indexOf('data-app-') === 0) {
+          data[attribute.nodeName.slice(9)] = attribute.nodeValue;
         }
       });
 
-      return void this.fn('external', el.href, data);
+      return void this.fn(el.href, data, undefined, 'external');
     }
 
     // IE11 prefixes extra slash on absolute links
@@ -13745,12 +13748,12 @@ var libhistory__History = function () {
       return;
     }
 
-    // Flagged as unhandled
-    if (el.getAttribute('data-unhandled') != null) {
+    if (el.getAttribute('data-app-unhandle') != null) {
       this.redirectTo(path);
-    } else if (el.getAttribute('data-rendered') != null) {
-      this.navigateTo(path, undefined, false, true, 'render');
-    } else if (el.getAttribute('data-rerendered') != null) {
+    } else if (el.getAttribute('data-app-render') != null) {
+      // Allow optional 'name' to be set
+      this.navigateTo(path, undefined, false, true, 'render', el.getAttribute('data-app-render'));
+    } else if (el.getAttribute('data-app-rerender') != null) {
       this.navigateTo(path, undefined, false, true, 'rerender');
     } else {
       // Blur focus
@@ -14020,7 +14023,7 @@ var libapplication__Application = function (_Emitter) {
     Object.assign(opts, this.locals, options);
 
     if (!view) {
-      throw Error('no view for ' + name + '. View renderers need to be manually cached with app.cache[name] = renderer');
+      throw Error('no view for ' + name + '. View renderers need to be manually cached with app.cache[name] = {render(options, done)}');
     }
 
     try {
@@ -14032,11 +14035,9 @@ var libapplication__Application = function (_Emitter) {
 
   /**
    * Rerender application view
-   * @param {Request} req
-   * @param {Response} res
    */
 
-  Application.prototype.rerender = function rerender(req, res) {
+  Application.prototype.rerender = function rerender() {
     throw Error('rerender() method not implemented. Extend the Application prototype with behaviour');
   };
 
@@ -14050,19 +14051,35 @@ var libapplication__Application = function (_Emitter) {
 
   /**
    * Run request/response through router's middleware pipline
-   * @param {String} action
    * @param {Request} req
    * @param {Response} res
    * @param {Function} [done]
+   * @param {String} [action]
+   * @param {String} [name]
    */
 
-  Application.prototype.handle = function handle(action, req, res, done) {
+  Application.prototype.handle = function handle(req, res) {
+    var done = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : libapplication__NOOP;
+
+    var _this3 = this;
+
+    var action = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'handle';
+    var name = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'default';
+
     if (action === 'external') {
       this.emit('link:external', req, res);
     } else {
       this.emit('connect', req);
       this.emit('request', req, res);
-      this._router.handle(req, res, done || libapplication__NOOP, action !== 'handle' ? this[action] : undefined);
+      this._router.handle(req, res, done,
+      // Skip handling if action is 'render' or 'rerender'
+      action !== 'handle' ? function (req, res) {
+        if (action === 'render') {
+          res.render(name);
+        } else {
+          _this3.rerender();
+        }
+      } : undefined);
     }
   };
 
@@ -14403,7 +14420,7 @@ describe('express-client', function () {
         };
 
         app.use(fn, fn);
-        app.handle('handle', request, response, function (err) {
+        app.handle(request, response, function (err) {
           testsrctest__expect(count).to.equal(2);
         });
       });
@@ -14421,17 +14438,21 @@ describe('express-client', function () {
         var fn2 = function fn2(req, res, next) {
           handled = true;
         };
-        app.render = function (req, res) {
-          rendered = true;
+        response.app = app;
+        app.cache['foo'] = {
+          render: function render(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
         };
 
         app.use(fn1, fn1);
         app.use('/foo', fn2);
-        app.handle('render', request, response, function (err) {
+        app.handle(request, response, function (err) {
           testsrctest__expect(count).to.equal(2);
           testsrctest__expect(rendered).to.equal(true);
           testsrctest__expect(handled).to.equal(false);
-        });
+        }, 'render', 'foo');
       });
       it('should allow for optional rerender action', function () {
         var app = testsrctest__express();
@@ -14447,16 +14468,16 @@ describe('express-client', function () {
         var fn2 = function fn2(req, res, next) {
           handled = true;
         };
-        app.rerender = function (req, res) {
+        app.rerender = function () {
           rerendered = true;
         };
         app.use(fn1, fn1);
         app.use('/foo', fn2);
-        app.handle('rerender', request, response, function (err) {
+        app.handle(request, response, function (err) {
           testsrctest__expect(count).to.equal(2);
           testsrctest__expect(rerendered).to.equal(true);
           testsrctest__expect(handled).to.equal(false);
-        });
+        }, 'rerender');
       });
       it('should notify on external link', function () {
         var app = testsrctest__express();
@@ -14465,9 +14486,9 @@ describe('express-client', function () {
           count++;
           testsrctest__expect(url).to.equal('/');
         });
-        app.handle('external', '/', {}, function (err) {
+        app.handle('/', {}, function (err) {
           testsrctest__expect(count).to.equal(1);
-        });
+        }, 'external');
       });
     });
 
@@ -14480,7 +14501,7 @@ describe('express-client', function () {
       });
 
       it('should reload app using current context', function () {
-        this.app.handle('handle', testsrctest__requestFactory('/url'), testsrctest__responseFactory());
+        this.app.handle(testsrctest__requestFactory('/url'), testsrctest__responseFactory());
         var oldCtx = this.app.getCurrentContext();
 
         this.app.reload();
@@ -14507,7 +14528,7 @@ describe('express-client', function () {
           next();
         });
 
-        this.app.handle('handle', request, response);
+        this.app.handle(request, response);
         this.app.reload();
 
         testsrctest__expect(response.statusCode).to.equal(200);

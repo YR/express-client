@@ -58,8 +58,9 @@ class History {
    * @param {Boolean} [isUpdate]
    * @param {Boolean} [noScroll]
    * @param {String} [action]
+   * @param {String} [name]
    */
-  navigateTo(url, title, isUpdate, noScroll, action) {
+  navigateTo(url, title, isUpdate, noScroll, action, name) {
     // Only navigate if not same as current
     if (url !== urlUtils.getCurrent()) {
       if (this.running) {
@@ -75,7 +76,7 @@ class History {
         if (title) {
           document.title = title;
         }
-        this.handle(url, noScroll, action);
+        this.handle(url, noScroll, action, name);
       } else {
         this.redirectTo(url);
       }
@@ -104,7 +105,7 @@ class History {
         ctx.res.reset();
         ctx.req.reloaded = true;
         ctx.res.req = ctx.req;
-        this.fn('handle', ctx.req, ctx.res);
+        this.fn(ctx.req, ctx.res);
       }
     }
   }
@@ -134,9 +135,10 @@ class History {
    * @param {String} [url]
    * @param {Boolean} [noScroll]
    * @param {String} [action]
+   * @param {String} [name]
    * @returns {Object}
    */
-  handle(url, noScroll = false, action = 'handle') {
+  handle(url, noScroll = false, action = 'handle', name) {
     let ctx = {};
     let req, res;
 
@@ -182,7 +184,7 @@ class History {
       window.scrollTo(0, 0);
     }
 
-    this.fn(action, req, res);
+    this.fn(req, res, undefined, action, name);
 
     // Store reference to current
     // Do after calling fn so previous ctx available with getCurrentContext
@@ -238,12 +240,12 @@ class History {
       const attributes = Array.prototype.slice.call(el.attributes);
 
       attributes.forEach(attribute => {
-        if (attribute.nodeName.indexOf('data-') === 0) {
-          data[attribute.nodeName] = attribute.nodeValue;
+        if (attribute.nodeName.indexOf('data-app-') === 0) {
+          data[attribute.nodeName.slice(9)] = attribute.nodeValue;
         }
       });
 
-      return void this.fn('external', el.href, data);
+      return void this.fn(el.href, data, undefined, 'external');
     }
 
     // IE11 prefixes extra slash on absolute links
@@ -262,12 +264,12 @@ class History {
       return;
     }
 
-    // Flagged as unhandled
-    if (el.getAttribute('data-unhandled') != null) {
+    if (el.getAttribute('data-app-unhandle') != null) {
       this.redirectTo(path);
-    } else if (el.getAttribute('data-rendered') != null) {
-      this.navigateTo(path, undefined, false, true, 'render');
-    } else if (el.getAttribute('data-rerendered') != null) {
+    } else if (el.getAttribute('data-app-render') != null) {
+      // Allow optional 'name' to be set
+      this.navigateTo(path, undefined, false, true, 'render', el.getAttribute('data-app-render'));
+    } else if (el.getAttribute('data-app-rerender') != null) {
       this.navigateTo(path, undefined, false, true, 'rerender');
     } else {
       // Blur focus

@@ -194,10 +194,8 @@ class Application extends Emitter {
 
   /**
    * Rerender application view
-   * @param {Request} req
-   * @param {Response} res
    */
-  rerender(req, res) {
+  rerender() {
     throw Error('rerender() method not implemented. Extend the Application prototype with behaviour');
   }
 
@@ -210,18 +208,33 @@ class Application extends Emitter {
 
   /**
    * Run request/response through router's middleware pipline
-   * @param {String} action
    * @param {Request} req
    * @param {Response} res
    * @param {Function} [done]
+   * @param {String} [action]
+   * @param {String} [name]
    */
-  handle(action, req, res, done) {
+  handle(req, res, done = NOOP, action = 'handle', name = 'default') {
     if (action === 'external') {
       this.emit('link:external', req, res);
     } else {
       this.emit('connect', req);
       this.emit('request', req, res);
-      this._router.handle(req, res, done || NOOP, action !== 'handle' ? this[action] : undefined);
+      this._router.handle(
+        req,
+        res,
+        done,
+        // Skip handling if action is 'render' or 'rerender'
+        action !== 'handle'
+          ? (req, res) => {
+              if (action === 'render') {
+                res.render(name);
+              } else {
+                this.rerender();
+              }
+            }
+          : undefined
+      );
     }
   }
 }

@@ -283,7 +283,7 @@ describe('express-client', function() {
         };
 
         app.use(fn, fn);
-        app.handle('handle', request, response, function(err) {
+        app.handle(request, response, function(err) {
           expect(count).to.equal(2);
         });
       });
@@ -301,17 +301,27 @@ describe('express-client', function() {
         var fn2 = function(req, res, next) {
           handled = true;
         };
-        app.render = function(req, res) {
-          rendered = true;
+        response.app = app;
+        app.cache['foo'] = {
+          render: function(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
         };
 
         app.use(fn1, fn1);
         app.use('/foo', fn2);
-        app.handle('render', request, response, function(err) {
-          expect(count).to.equal(2);
-          expect(rendered).to.equal(true);
-          expect(handled).to.equal(false);
-        });
+        app.handle(
+          request,
+          response,
+          function(err) {
+            expect(count).to.equal(2);
+            expect(rendered).to.equal(true);
+            expect(handled).to.equal(false);
+          },
+          'render',
+          'foo'
+        );
       });
       it('should allow for optional rerender action', function() {
         var app = express();
@@ -327,16 +337,21 @@ describe('express-client', function() {
         var fn2 = function(req, res, next) {
           handled = true;
         };
-        app.rerender = function(req, res) {
+        app.rerender = function() {
           rerendered = true;
         };
         app.use(fn1, fn1);
         app.use('/foo', fn2);
-        app.handle('rerender', request, response, function(err) {
-          expect(count).to.equal(2);
-          expect(rerendered).to.equal(true);
-          expect(handled).to.equal(false);
-        });
+        app.handle(
+          request,
+          response,
+          function(err) {
+            expect(count).to.equal(2);
+            expect(rerendered).to.equal(true);
+            expect(handled).to.equal(false);
+          },
+          'rerender'
+        );
       });
       it('should notify on external link', function() {
         var app = express();
@@ -345,9 +360,14 @@ describe('express-client', function() {
           count++;
           expect(url).to.equal('/');
         });
-        app.handle('external', '/', {}, function(err) {
-          expect(count).to.equal(1);
-        });
+        app.handle(
+          '/',
+          {},
+          function(err) {
+            expect(count).to.equal(1);
+          },
+          'external'
+        );
       });
     });
 
@@ -360,7 +380,7 @@ describe('express-client', function() {
       });
 
       it('should reload app using current context', function() {
-        this.app.handle('handle', requestFactory('/url'), responseFactory());
+        this.app.handle(requestFactory('/url'), responseFactory());
         var oldCtx = this.app.getCurrentContext();
 
         this.app.reload();
@@ -387,7 +407,7 @@ describe('express-client', function() {
           next();
         });
 
-        this.app.handle('handle', request, response);
+        this.app.handle(request, response);
         this.app.reload();
 
         expect(response.statusCode).to.equal(200);
