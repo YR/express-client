@@ -96,6 +96,31 @@ class Response extends Emitter {
   }
 
   /**
+   * Render application view and send results to client
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
+   */
+  render(name, options, done) {
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    this.app.render(
+      name,
+      Object.assign({}, this.locals, options),
+      done ||
+        ((err, html) => {
+          if (err) {
+            return this.req.next(err);
+          }
+          this.send(html);
+        })
+    );
+  }
+
+  /**
    * Reset state
    */
   reset() {

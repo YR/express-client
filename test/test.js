@@ -12909,13 +12909,11 @@ var librouter__Router = function () {
     var self = this;
     // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
     var optionalFn = arguments[3];
-    var parentUrl = req.baseUrl || '';
     var processedParams = {};
     var idx = 0;
 
     // Setup next layer
     req.next = next;
-    req.baseUrl = parentUrl;
 
     next();
 
@@ -13124,6 +13122,29 @@ var libresponse__Response = function (_Emitter) {
 
   Response.prototype.redirect = function redirect(statusCode, url) {
     this.app.redirectTo(statusCode, url);
+  };
+
+  /**
+   * Render application view and send results to client
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
+   */
+
+  Response.prototype.render = function render(name, options, done) {
+    var _this2 = this;
+
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    this.app.render(name, Object.assign({}, this.locals, options), done || function (err, html) {
+      if (err) {
+        return _this2.req.next(err);
+      }
+      _this2.send(html);
+    });
   };
 
   /**
@@ -13815,10 +13836,12 @@ var libapplication__Application = function (_Emitter) {
 
     var _this = babelHelpers.possibleConstructorReturn(this, _Emitter.call(this));
 
+    _this.cache = {};
+    _this.engines = {};
+    _this.locals = {};
     _this.settings = {
       env: 'development' || 'development'
     };
-    _this.locals = {};
     _this._router = libapplication__router({
       caseSensitive: false,
       strict: false,
@@ -13980,12 +14003,31 @@ var libapplication__Application = function (_Emitter) {
 
   /**
    * Render application view
-   * @param {Request} req
-   * @param {Response} res
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
    */
 
-  Application.prototype.render = function render(req, res) {
-    throw Error('render() method not implemented. Extend the Application prototype with behaviour');
+  Application.prototype.render = function render(name, options, done) {
+    var opts = {};
+    var view = this.cache[name];
+
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    Object.assign(opts, this.locals, options);
+
+    if (!view) {
+      throw Error('no view for ' + name + '. View renderers need to be manually cached with app.cache[name] = renderer');
+    }
+
+    try {
+      view.render(options, done);
+    } catch (err) {
+      done(err);
+    }
   };
 
   /**
@@ -14408,7 +14450,6 @@ describe('express-client', function () {
         app.rerender = function (req, res) {
           rerendered = true;
         };
-
         app.use(fn1, fn1);
         app.use('/foo', fn2);
         app.handle('rerender', request, response, function (err) {
@@ -14424,12 +14465,12 @@ describe('express-client', function () {
           count++;
           testsrctest__expect(url).to.equal('/');
         });
-
         app.handle('external', '/', {}, function (err) {
           testsrctest__expect(count).to.equal(1);
         });
       });
     });
+
     describe('reload()', function () {
       beforeEach(function (done) {
         this.app = testsrctest__express();
@@ -14474,6 +14515,24 @@ describe('express-client', function () {
         testsrctest__expect(count).to.equal(2);
       });
     });
+
+    describe('render()', function () {
+      it('should render a view', function (done) {
+        var app = testsrctest__express();
+        var rendered = false;
+        app.cache['foo'] = {
+          render: function render(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
+        app.render('foo', function (err, html) {
+          testsrctest__expect(html).to.equal(true);
+          testsrctest__expect(rendered).to.equal(true);
+          done();
+        });
+      });
+    });
   });
 
   describe('History', function () {
@@ -14511,6 +14570,25 @@ describe('express-client', function () {
   });
 
   describe('response', function () {
+    describe('render()', function () {
+      it('should render a view', function (done) {
+        var app = testsrctest__express();
+        var response = testsrctest__responseFactory('/');
+        var rendered = false;
+        response.app = app;
+        app.cache['foo'] = {
+          render: function render(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
+        response.render('foo', function (err, html) {
+          testsrctest__expect(html).to.equal(true);
+          testsrctest__expect(rendered).to.equal(true);
+          done();
+        });
+      });
+    });
     describe.skip('cookie()', function () {
       it('should set single cookie', function () {
         var response = testsrctest__responseFactory();

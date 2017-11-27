@@ -99,13 +99,11 @@ class Router {
     const self = this;
     // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
     const optionalFn = arguments[3];
-    const parentUrl = req.baseUrl || '';
     const processedParams = {};
     let idx = 0;
 
     // Setup next layer
     req.next = next;
-    req.baseUrl = parentUrl;
 
     next();
 

@@ -18,10 +18,12 @@ class Application extends Emitter {
   constructor() {
     super();
 
+    this.cache = {};
+    this.engines = {};
+    this.locals = {};
     this.settings = {
       env: process.env.NODE_ENV || 'development'
     };
-    this.locals = {};
     this._router = router({
       caseSensitive: false,
       strict: false,
@@ -162,11 +164,32 @@ class Application extends Emitter {
 
   /**
    * Render application view
-   * @param {Request} req
-   * @param {Response} res
+   * @param {String} name
+   * @param {Object|Function} options or done
+   * @param {Function} [done]
    */
-  render(req, res) {
-    throw Error('render() method not implemented. Extend the Application prototype with behaviour');
+  render(name, options, done) {
+    const opts = {};
+    const view = this.cache[name];
+
+    if (typeof options === 'function') {
+      done = options;
+      options = {};
+    }
+
+    Object.assign(opts, this.locals, options);
+
+    if (!view) {
+      throw Error(
+        `no view for ${name}. View renderers need to be manually cached with app.cache[name] = {render(options, done)}`
+      );
+    }
+
+    try {
+      view.render(options, done);
+    } catch (err) {
+      done(err);
+    }
   }
 
   /**

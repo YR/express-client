@@ -330,7 +330,6 @@ describe('express-client', function() {
         app.rerender = function(req, res) {
           rerendered = true;
         };
-
         app.use(fn1, fn1);
         app.use('/foo', fn2);
         app.handle('rerender', request, response, function(err) {
@@ -346,12 +345,12 @@ describe('express-client', function() {
           count++;
           expect(url).to.equal('/');
         });
-
         app.handle('external', '/', {}, function(err) {
           expect(count).to.equal(1);
         });
       });
     });
+
     describe('reload()', function() {
       beforeEach(function(done) {
         this.app = express();
@@ -396,6 +395,24 @@ describe('express-client', function() {
         expect(count).to.equal(2);
       });
     });
+
+    describe('render()', function() {
+      it('should render a view', function(done) {
+        var app = express();
+        var rendered = false;
+        app.cache['foo'] = {
+          render: function(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
+        app.render('foo', function(err, html) {
+          expect(html).to.equal(true);
+          expect(rendered).to.equal(true);
+          done();
+        });
+      });
+    });
   });
 
   describe('History', function() {
@@ -433,6 +450,25 @@ describe('express-client', function() {
   });
 
   describe('response', function() {
+    describe('render()', function() {
+      it('should render a view', function(done) {
+        var app = express();
+        var response = responseFactory('/');
+        var rendered = false;
+        response.app = app;
+        app.cache['foo'] = {
+          render: function(options, done) {
+            rendered = true;
+            done(null, rendered);
+          }
+        };
+        response.render('foo', function(err, html) {
+          expect(html).to.equal(true);
+          expect(rendered).to.equal(true);
+          done();
+        });
+      });
+    });
     describe.skip('cookie()', function() {
       it('should set single cookie', function() {
         var response = responseFactory();
