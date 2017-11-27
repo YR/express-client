@@ -10,7 +10,14 @@ subset of express.js functionality for use in browser environments, including mi
 const express = require('express-client');
 const app = express();
 
-// Handle root path
+// Set up home view renderer
+app.cache['home'] = {
+  render(options, done) {
+    // Render home view
+  }
+};
+
+// Handle home path
 app.get('/', function(req, res, next) {
   res.render('home');
 });
@@ -196,15 +203,9 @@ See `application.redirect(url)`
 
 #### render(view, [options], [callback(err)])
 
-Complete response by rendering `view` with (optional) `options` data:
+Complete response by rendering view with (optional) `options` data:
 
 ```js
-app.set('view', function(name, options) {
-  this.path = name;
-  this.render = function renderer(locals, callback) {
-    if (name == 'home') React.render(homeComponent(locals), elHome);
-  };
-});
 app.get('/', function(req, res, next) {
   res.render('home', { title: 'home' });
 });
