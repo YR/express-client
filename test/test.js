@@ -12345,20 +12345,17 @@ var liblayer__Layer = function () {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @param {Function} [fn]
    * @returns {void}
    */
 
   Layer.prototype.handleRequest = function handleRequest(req, res, next) {
-    var fn = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.fn;
-
     // Skip if error handler
     if (this.isErrorHandler) {
       return void next();
     }
 
     try {
-      fn(req, res, next);
+      this.fn(req, res, next);
     } catch (error) {
       return void next(error);
     }
@@ -12902,13 +12899,10 @@ var librouter__Router = function () {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} done
-   * @param {Function} [optionalFn]
    */
 
-  Router.prototype.handle = function handle(req, res, done /*, optionalFn */) {
+  Router.prototype.handle = function handle(req, res, done) {
     var self = this;
-    // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
-    var optionalFn = arguments[3];
     var processedParams = {};
     var idx = 0;
 
@@ -12951,7 +12945,7 @@ var librouter__Router = function () {
         if (layerErr) {
           lyr.handleError(layerErr, req, res, next);
         } else {
-          lyr.handleRequest(req, res, next, optionalFn);
+          lyr.handleRequest(req, res, next);
         }
       });
     }
@@ -13528,11 +13522,9 @@ var libhistory__History = function () {
    * @param {String} [title]
    * @param {Boolean} [isUpdate]
    * @param {Boolean} [noScroll]
-   * @param {String} [action]
-   * @param {String} [name]
    */
 
-  History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll, action, name) {
+  History.prototype.navigateTo = function navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
     if (url !== libhistory__urlUtils.getCurrent()) {
       if (this.running) {
@@ -13548,7 +13540,7 @@ var libhistory__History = function () {
         if (title) {
           document.title = title;
         }
-        this.handle(url, noScroll, action, name);
+        this.handle(url, noScroll);
       } else {
         this.redirectTo(url);
       }
@@ -13610,15 +13602,11 @@ var libhistory__History = function () {
    * Handle history change and notify
    * @param {String} [url]
    * @param {Boolean} [noScroll]
-   * @param {String} [action]
-   * @param {String} [name]
    * @returns {Object}
    */
 
   History.prototype.handle = function handle(url) {
     var noScroll = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var action = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'handle';
-    var name = arguments[3];
 
     var ctx = {};
     var req = void 0,
@@ -13666,7 +13654,7 @@ var libhistory__History = function () {
       window.scrollTo(0, 0);
     }
 
-    this.fn(req, res, undefined, action, name);
+    this.fn(req, res);
 
     // Store reference to current
     // Do after calling fn so previous ctx available with getCurrentContext
@@ -13750,17 +13738,12 @@ var libhistory__History = function () {
 
     if (el.getAttribute('data-app-unhandle') != null) {
       this.redirectTo(path);
-    } else if (el.getAttribute('data-app-render') != null) {
-      // Allow optional 'name' to be set
-      this.navigateTo(path, undefined, false, true, 'render', el.getAttribute('data-app-render'));
-    } else if (el.getAttribute('data-app-rerender') != null) {
-      this.navigateTo(path, undefined, false, true, 'rerender');
     } else {
       // Blur focus
       el.blur();
 
       libhistory__debug('click event intercepted from %s', el);
-      this.navigateTo(path, undefined, false, false, 'handle');
+      this.navigateTo(path, undefined, false, false);
     }
   };
 
@@ -14055,31 +14038,18 @@ var libapplication__Application = function (_Emitter) {
    * @param {Response} res
    * @param {Function} [done]
    * @param {String} [action]
-   * @param {String} [name]
    */
 
   Application.prototype.handle = function handle(req, res) {
     var done = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : libapplication__NOOP;
-
-    var _this3 = this;
-
-    var action = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'handle';
-    var name = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'default';
+    var action = arguments[3];
 
     if (action === 'external') {
       this.emit('link:external', req, res);
     } else {
       this.emit('connect', req);
       this.emit('request', req, res);
-      this._router.handle(req, res, done,
-      // Skip handling if action is 'render' or 'rerender'
-      action !== 'handle' ? function (req, res) {
-        if (action === 'render') {
-          res.render(name);
-        } else {
-          _this3.rerender();
-        }
-      } : undefined);
+      this._router.handle(req, res, done);
     }
   };
 
@@ -14423,61 +14393,6 @@ describe('express-client', function () {
         app.handle(request, response, function (err) {
           testsrctest__expect(count).to.equal(2);
         });
-      });
-      it('should allow for optional render action', function () {
-        var app = testsrctest__express();
-        var request = testsrctest__requestFactory('/foo');
-        var response = testsrctest__responseFactory();
-        var count = 0;
-        var rendered = false;
-        var handled = false;
-        var fn1 = function fn1(req, res, next) {
-          count++;
-          next();
-        };
-        var fn2 = function fn2(req, res, next) {
-          handled = true;
-        };
-        response.app = app;
-        app.cache['foo'] = {
-          render: function render(options, done) {
-            rendered = true;
-            done(null, rendered);
-          }
-        };
-
-        app.use(fn1, fn1);
-        app.use('/foo', fn2);
-        app.handle(request, response, function (err) {
-          testsrctest__expect(count).to.equal(2);
-          testsrctest__expect(rendered).to.equal(true);
-          testsrctest__expect(handled).to.equal(false);
-        }, 'render', 'foo');
-      });
-      it('should allow for optional rerender action', function () {
-        var app = testsrctest__express();
-        var request = testsrctest__requestFactory('/foo');
-        var response = testsrctest__responseFactory();
-        var count = 0;
-        var rerendered = false;
-        var handled = false;
-        var fn1 = function fn1(req, res, next) {
-          count++;
-          next();
-        };
-        var fn2 = function fn2(req, res, next) {
-          handled = true;
-        };
-        app.rerender = function () {
-          rerendered = true;
-        };
-        app.use(fn1, fn1);
-        app.use('/foo', fn2);
-        app.handle(request, response, function (err) {
-          testsrctest__expect(count).to.equal(2);
-          testsrctest__expect(rerendered).to.equal(true);
-          testsrctest__expect(handled).to.equal(false);
-        }, 'rerender');
       });
       it('should notify on external link', function () {
         var app = testsrctest__express();

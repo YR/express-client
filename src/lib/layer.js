@@ -88,17 +88,16 @@ class Layer {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} next
-   * @param {Function} [fn]
    * @returns {void}
    */
-  handleRequest(req, res, next, fn = this.fn) {
+  handleRequest(req, res, next) {
     // Skip if error handler
     if (this.isErrorHandler) {
       return void next();
     }
 
     try {
-      fn(req, res, next);
+      this.fn(req, res, next);
     } catch (error) {
       return void next(error);
     }

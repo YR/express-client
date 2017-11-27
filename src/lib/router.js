@@ -93,12 +93,9 @@ class Router {
    * @param {Request} req
    * @param {Response} res
    * @param {Function} done
-   * @param {Function} [optionalFn]
    */
-  handle(req, res, done /*, optionalFn */) {
+  handle(req, res, done) {
     const self = this;
-    // Function.length is used to detect error handlers, so need to implicitly handle optionalFn
-    const optionalFn = arguments[3];
     const processedParams = {};
     let idx = 0;
 
@@ -141,7 +138,7 @@ class Router {
         if (layerErr) {
           lyr.handleError(layerErr, req, res, next);
         } else {
-          lyr.handleRequest(req, res, next, optionalFn);
+          lyr.handleRequest(req, res, next);
         }
       });
     }

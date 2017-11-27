@@ -57,10 +57,8 @@ class History {
    * @param {String} [title]
    * @param {Boolean} [isUpdate]
    * @param {Boolean} [noScroll]
-   * @param {String} [action]
-   * @param {String} [name]
    */
-  navigateTo(url, title, isUpdate, noScroll, action, name) {
+  navigateTo(url, title, isUpdate, noScroll) {
     // Only navigate if not same as current
     if (url !== urlUtils.getCurrent()) {
       if (this.running) {
@@ -76,7 +74,7 @@ class History {
         if (title) {
           document.title = title;
         }
-        this.handle(url, noScroll, action, name);
+        this.handle(url, noScroll);
       } else {
         this.redirectTo(url);
       }
@@ -134,11 +132,9 @@ class History {
    * Handle history change and notify
    * @param {String} [url]
    * @param {Boolean} [noScroll]
-   * @param {String} [action]
-   * @param {String} [name]
    * @returns {Object}
    */
-  handle(url, noScroll = false, action = 'handle', name) {
+  handle(url, noScroll = false) {
     let ctx = {};
     let req, res;
 
@@ -184,7 +180,7 @@ class History {
       window.scrollTo(0, 0);
     }
 
-    this.fn(req, res, undefined, action, name);
+    this.fn(req, res);
 
     // Store reference to current
     // Do after calling fn so previous ctx available with getCurrentContext
@@ -266,17 +262,12 @@ class History {
 
     if (el.getAttribute('data-app-unhandle') != null) {
       this.redirectTo(path);
-    } else if (el.getAttribute('data-app-render') != null) {
-      // Allow optional 'name' to be set
-      this.navigateTo(path, undefined, false, true, 'render', el.getAttribute('data-app-render'));
-    } else if (el.getAttribute('data-app-rerender') != null) {
-      this.navigateTo(path, undefined, false, true, 'rerender');
     } else {
       // Blur focus
       el.blur();
 
       debug('click event intercepted from %s', el);
-      this.navigateTo(path, undefined, false, false, 'handle');
+      this.navigateTo(path, undefined, false, false);
     }
   }
 }
