@@ -123,7 +123,6 @@ class History {
     if (this.running) {
       window.removeEventListener('click', this.onClick, false);
       window.removeEventListener('popstate', this.onPopstate, false);
-      this.cache = null;
       this.running = false;
     }
   }
