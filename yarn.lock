@@ -2,15 +2,15 @@
 # yarn lockfile v1
 
 
-"@yr/runtime@2.0.x":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@yr/runtime/-/runtime-2.0.0.tgz#500e2d49fa0d9dac57293b6a183dd5a353a371c3"
+"@yr/runtime@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@yr/runtime/-/runtime-3.0.0.tgz#522cdd8bdf561f3e69880e01dd3c2b810924b2ab"
 
-"@yr/url-utils@2.3.x":
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/@yr/url-utils/-/url-utils-2.3.2.tgz#9c5ebcbe33cad634a8a17509feb7ba3977e55d5f"
+"@yr/url-utils@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@yr/url-utils/-/url-utils-3.0.0.tgz#b7d179459d8758485906f17abc3b3c4f4be774d1"
   dependencies:
-    "@yr/runtime" "2.0.x"
+    "@yr/runtime" "3.0.0"
 
 abbrev@1:
   version "1.1.1"

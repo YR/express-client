@@ -258,23 +258,21 @@ function cookie__tryDecode(str, decode) {
 /*≠≠ node_modules/cookie/index.js ≠≠*/
 
 
-/*== node_modules/@yr/runtime/index.js ==*/
+/*== node_modules/@yr/runtime/dist/index.js ==*/
 $m['@yr/runtime'] = { exports: {} };
+"use strict";
 
+Object.defineProperty($m['@yr/runtime'].exports, "__esModule", { value: true });
 /**
  * Determine if the current runtime is server or browser
  * https://github.com/yr/runtime
  * @copyright Yr
  * @license MIT
  */
-
-var yrruntime__isServer = typeof process !== 'undefined' && {}.toString.call(process) === '[object process]';
-var yrruntime__isBrowser = typeof window !== 'undefined';
-
-$m['@yr/runtime'].exports.isServer = yrruntime__isServer;
-$m['@yr/runtime'].exports.isBrowser = !yrruntime__isServer && yrruntime__isBrowser;
-$m['@yr/runtime'].exports.isWorker = !yrruntime__isServer && !yrruntime__isBrowser;
-/*≠≠ node_modules/@yr/runtime/index.js ≠≠*/
+$m['@yr/runtime'].exports.isServer = typeof process !== "undefined" && {}.toString.call(process) === "[object process]";
+$m['@yr/runtime'].exports.isBrowser = typeof window !== "undefined";
+$m['@yr/runtime'].exports.isWorker = !$m['@yr/runtime'].exports.isServer && !$m['@yr/runtime'].exports.isBrowser;
+/*≠≠ node_modules/@yr/runtime/dist/index.js ≠≠*/
 
 
 /*== node_modules/isarray/index.js ==*/
@@ -11679,9 +11677,9 @@ module.exports.typeDetect = module.exports;
 /*≠≠ node_modules/chai/chai.js ≠≠*/
 
 
-/*== node_modules/@yr/url-utils/index.js ==*/
+/*== node_modules/@yr/url-utils/dist/index.js ==*/
 $m['@yr/url-utils'] = { exports: {} };
-
+"use strict";
 /**
  * URL/path utilities
  * https://github.com/yr/url-utils
@@ -11689,52 +11687,47 @@ $m['@yr/url-utils'] = { exports: {} };
  * @license MIT
  */
 
-var yrurlutils__isServer = $m['@yr/runtime'].exports.isServer;
-
+Object.defineProperty($m['@yr/url-utils'].exports, "__esModule", { value: true });
+var yrurlutils__runtime_1 = $m['@yr/runtime'].exports;
 var yrurlutils__RE_TEMPLATE = /\{([0-9a-zA-Z]+)\}/g;
 var yrurlutils__RE_URL = /([^:])(\/{2,})/g;
-
 /**
  * Join url segments
  * Handles strings or arrays of strings
  * @returns {String}
  */
-$m['@yr/url-utils'].exports.join = function () {
-  var leading = '';
-  var path = [];
-
-  function add(seg) {
-    if (seg) {
-      // Handle leading slash
-      if (seg.charAt(0) == '/') {
-        // Keep if first segment
-        if (!path.length) leading = '/';
-        seg = seg.slice(1);
-      }
-      if (seg.length) path.push($m['@yr/url-utils'].exports.sanitize(seg));
+function yrurlutils__join() {
+    var segments = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        segments[_i] = arguments[_i];
     }
-  }
-
-  for (var _len = arguments.length, segments = Array(_len), _key = 0; _key < _len; _key++) {
-    segments[_key] = arguments[_key];
-  }
-
-  if (segments.length) {
-    segments.forEach(function (segment) {
-      // Handle array
-      if (Array.isArray(segment)) {
-        segment.forEach(add);
-      } else {
-        add(segment);
-      }
-    });
-
-    return leading + path.join('/');
-  }
-
-  return '';
-};
-
+    var leading = '';
+    var path = [];
+    function add(seg) {
+        if (seg != null) {
+            // Handle leading slash
+            if (seg.charAt(0) == '/') {
+                // Keep if first segment
+                if (!path.length) leading = '/';
+                seg = seg.slice(1);
+            }
+            if (seg.length) path.push(yrurlutils__sanitize(seg));
+        }
+    }
+    if (segments.length) {
+        segments.forEach(function (segment) {
+            // Handle array
+            if (Array.isArray(segment)) {
+                segment.forEach(add);
+            } else {
+                add(segment);
+            }
+        });
+        return leading + path.join('/');
+    }
+    return '';
+}
+$m['@yr/url-utils'].exports.join = yrurlutils__join;
 /**
  * Add query parameters to url in alphabetical order
  * Handles undefined query parameters
@@ -11742,111 +11735,97 @@ $m['@yr/url-utils'].exports.join = function () {
  * @param {Object} query
  * @returns {String}
  */
-$m['@yr/url-utils'].exports.query = function (url, query) {
-  var delimit = '?';
-  var sorted = [];
-
-  function append(q) {
-    if (url.charAt(url.length - 1) != delimit) url += '&';
-    url += q + '=' + query[q];
-  }
-
-  if (url && query) {
-    url = $m['@yr/url-utils'].exports.sanitize(url);
-    sorted = Object.keys(query).sort();
-    if (!sorted.length) return '';
-    // Add delimiter
-    url += delimit;
-    // Append queries
-    sorted.forEach(function (q) {
-      if (query[q] != null) append(q);
-    });
-
-    return $m['@yr/url-utils'].exports.encode(url);
-  }
-
-  return '';
-};
-
+function yrurlutils__query(url, query) {
+    var delimit = '?';
+    var sorted = [];
+    function append(q) {
+        if (url.charAt(url.length - 1) != delimit) url += '&';
+        url += q + '=' + query[q];
+    }
+    if (url && query) {
+        url = yrurlutils__sanitize(url);
+        sorted = Object.keys(query).sort();
+        if (!sorted.length) return '';
+        // Add delimiter
+        url += delimit;
+        // Append queries
+        sorted.forEach(function (q) {
+            if (query[q] != null) append(q);
+        });
+        return yrurlutils__encode(url);
+    }
+    return '';
+}
+$m['@yr/url-utils'].exports.query = yrurlutils__query;
 /**
  * Remove trailing '/' from 'url'
  * @param {String} url
  * @returns {String}
  */
-$m['@yr/url-utils'].exports.sanitize = function (url) {
-  if (url && url != '/') {
-    url = url.replace(yrurlutils__RE_URL, '$1/');
-    if (url.charAt(url.length - 1) == '/') url = url.slice(0, -1);
-  }
-
-  return url || '';
-};
-
+function yrurlutils__sanitize(url) {
+    if (url && url != '/') {
+        url = url.replace(yrurlutils__RE_URL, '$1/');
+        if (url.charAt(url.length - 1) == '/') url = url.slice(0, -1);
+    }
+    return url || '';
+}
+$m['@yr/url-utils'].exports.sanitize = yrurlutils__sanitize;
 /**
  * Decode 'url'
- * @param {String} url
- * @returns {String}
+
  */
-$m['@yr/url-utils'].exports.decode = function (url) {
-  if ('string' == typeof url) {
-    try {
-      url = decodeURI(url);
-    } catch (err) {
-      url = '';
+function yrurlutils__decode(url) {
+    if (typeof url === 'string') {
+        try {
+            url = decodeURI(url);
+        } catch (err) {
+            url = '';
+        }
     }
-  }
-
-  return url;
-};
-
+    return url;
+}
+$m['@yr/url-utils'].exports.decode = yrurlutils__decode;
 /**
  * Encode 'url'
- * @param {String} url
- * @returns {String}
  */
-$m['@yr/url-utils'].exports.encode = function (url) {
-  if ('string' == typeof url) {
-    try {
-      // Try to decode first in-case url is encoded
-      try {
-        url = decodeURI(url);
-      } catch (err) {
-        // Do nothing
-      }
-      url = encodeURI(url);
-    } catch (err) {
-      url = '';
+function yrurlutils__encode(url) {
+    if (typeof url === 'string') {
+        try {
+            // Try to decode first in-case url is encoded
+            try {
+                url = decodeURI(url);
+            } catch (err) {
+                // Do nothing
+            }
+            url = encodeURI(url);
+        } catch (err) {
+            url = '';
+        }
     }
-  }
-
-  return url;
-};
-
+    return url;
+}
+$m['@yr/url-utils'].exports.encode = yrurlutils__encode;
 /**
  * Retrieve current browser path
- * @returns {String}
  */
-$m['@yr/url-utils'].exports.getCurrent = function () {
-  return !yrurlutils__isServer ? $m['@yr/url-utils'].exports.encode(window.location.pathname + window.location.search + window.location.hash) : '';
-};
-
+function yrurlutils__getCurrent() {
+    return !yrurlutils__runtime_1.isServer ? yrurlutils__encode(window.location.pathname + window.location.search + window.location.hash) : '';
+}
+$m['@yr/url-utils'].exports.getCurrent = yrurlutils__getCurrent;
 /**
  * Substitute 'data' values in 'str' template
- * @param {String} str
- * @param {Object} data
- * @param {Object} [options]
- * @returns {String}
  */
-$m['@yr/url-utils'].exports.template = function (str, data) {
-  var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
-  str = String(str).replace(yrurlutils__RE_TEMPLATE, function (match, prop, idx) {
-    return data && data[prop] != null ? data[prop] : options.loose ? match : '';
-  });
-
-  return $m['@yr/url-utils'].exports.sanitize(str);
-};
-/*≠≠ node_modules/@yr/url-utils/index.js ≠≠*/
+function yrurlutils__template(str, data, options) {
+    if (options === void 0) {
+        options = {};
+    }
+    str = String(str).replace(yrurlutils__RE_TEMPLATE, function (match, prop) {
+        return data && data[prop] != null ? data[prop] : options.loose ? match : '';
+    });
+    return yrurlutils__sanitize(str);
+}
+$m['@yr/url-utils'].exports.template = yrurlutils__template;
+/*≠≠ node_modules/@yr/url-utils/dist/index.js ≠≠*/
 
 
 /*== node_modules/path-to-regexp/index.js ==*/
@@ -13623,7 +13602,6 @@ var libhistory__History = function () {
     if (this.running) {
       window.removeEventListener('click', this.onClick, false);
       window.removeEventListener('popstate', this.onPopstate, false);
-      this.cache = null;
       this.running = false;
     }
   };

@@ -4,7 +4,7 @@
   "version": "4.1.2",
   "author": "Alexander Pope <alexander.pope@nrk.no>",
   "dependencies": {
-    "@yr/url-utils": "2.3.x",
+    "@yr/url-utils": "^3.0.0",
     "cookie": "0.3.x",
     "debug": "3.x.x",
     "eventemitter3": "3.0.x",
