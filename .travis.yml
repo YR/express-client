@@ -9,3 +9,6 @@ cache:
   directories:
     - ~/.yarn
     - ~/.nvm
+sudo: required # https://github.com/travis-ci/travis-ci/issues/8836#issuecomment-348227535
+addons:
+  chrome: stable
